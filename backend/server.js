@@ -6,7 +6,7 @@ const PORT = 4000;
 const app = express();
 
 app.use(
-  "/static",
+  "/app",
   express.static(path.join(__dirname, "..", "frontend", "build"))
 );
 
