@@ -11,6 +11,8 @@ const apiRouter = require("./api/router");
 const PORT = 4000;
 const server = express();
 
+server.use(log.middleware);
+
 // Routes:
 // - /           The welcome page
 // - /api        API routes (only for authorized people)
@@ -19,6 +21,7 @@ const server = express();
 // - /auth       routes for the authorization process
 // - /_monitor   just the monitor page
 server.get("/", (req, res) => {
+  log.info("Enter /");
   res.status(200).send("Yay");
 });
 server.get("/api", apiRouter);
