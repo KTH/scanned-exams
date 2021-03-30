@@ -1,25 +1,27 @@
-const express = require("express")
+const express = require("express");
 
-const router = express.Router()
+const router = express.Router();
 
 // This variable holds an ID if the assignment is created
-let assignment = null
+let assignment = null;
 
 router.get("/", (req, res) => {
   res.send({
-    assignment
-  })
-})
+    assignment,
+  });
+});
 
 router.post("/create-assignment", (req, res) => {
-  assignment = 233
+  assignment = 233;
   res.send({
-    message: "Assignment created successfully"
-  })
-})
+    message: "Assignment created successfully",
+  });
+});
 
 router.post("/upload", (req, res) => {
   res.send({
-    message: "Exam uploading started"
-  })
-})
+    message: "Exam uploading started",
+  });
+});
+
+module.exports = router;

@@ -1,6 +1,12 @@
+const log = require("skog");
+
+log.init.pino({
+  app: "scannade-tentor",
+});
+
 const express = require("express");
 const path = require("path");
-const apiRouter = require("./api/router")
+const apiRouter = require("./api/router");
 
 const PORT = 4000;
 const server = express();
@@ -15,15 +21,15 @@ const server = express();
 server.get("/", (req, res) => {
   res.status(200).send("Yay");
 });
-server.get("/api", apiRouter)
+server.get("/api", apiRouter);
 server.use(
   "/app",
   express.static(path.join(__dirname, "..", "frontend", "build"))
 );
 server.get("/_monitor", (req, res) => {
-  res.send("APPLICATION_STATUS: OK")
-})
+  res.send("APPLICATION_STATUS: OK");
+});
 
 server.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
+  log.info(`App listening on port ${PORT}`);
 });

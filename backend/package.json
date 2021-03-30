@@ -18,6 +18,11 @@
   },
   "homepage": "https://github.com/KTH/scannade-tentor#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "pino": "^6.11.2",
+    "skog": "^2.1.0"
+  },
+  "devDependencies": {
+    "prettier": "^2.2.1"
   }
 }
