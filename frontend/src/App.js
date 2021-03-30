@@ -1,5 +1,18 @@
+import { useState } from "react";
+import CreateAssignment from "./components/CreateAssignment";
+import UploadScannedExams from "./components/UploadScannedExams";
 function App() {
-  return <h1>Hello, world!</h1>;
+  const [created, setCreated] = useState(false);
+  const onCreate = () => {
+    // Api call...
+    setCreated(true);
+  };
+
+  if (created) {
+    return <UploadScannedExams />;
+  }
+
+  return <CreateAssignment onCreate={onCreate} />;
 }
 
 export default App;
