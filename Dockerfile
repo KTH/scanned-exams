@@ -27,7 +27,6 @@ RUN npm ci --production --unsafe-perm
 
 FROM kthse/kth-nodejs:12.0.0 AS production
 WORKDIR /usr/src/app
-COPY --from=frontend /usr/src/app/frontend/node_modules frontend/node_modules
 COPY --from=backend /usr/src/app/backend/node_modules backend/node_modules
 COPY . .
 
