@@ -24,12 +24,12 @@ server.get("/scanned-exams", (req, res) => {
   log.info("Enter /");
   res.status(200).send("Yay");
 });
-server.get("/scanned-exams/api", apiRouter);
+// server.get("/scanned-exams/api", apiRouter);
 server.use(
   "/scanned-exams/app",
   express.static(path.join(__dirname, "..", "frontend", "build"))
 );
-server.get("/_monitor", (req, res) => {
+server.get("/scanned-exams/_monitor", (req, res) => {
   res.send("APPLICATION_STATUS: OK");
 });
 
