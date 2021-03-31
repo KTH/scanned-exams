@@ -4,9 +4,8 @@ const path = require("path");
 const PORT = 4000;
 
 const app = express();
-
 app.use(
-  "/app",
+  "/scanned-exams/app",
   express.static(path.join(__dirname, "..", "frontend", "build"))
 );
 
