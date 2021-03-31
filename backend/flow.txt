@@ -1,0 +1,75 @@
+Flow:
+
+1. User enters the application from Canvas.
+2. User completes the oauth process.
+   We get from Canvas:
+   - Access Token
+   - User Identity
+   - Course ID
+3. Create a map with the entry:
+   key: Access Token
+   value: { courseId, userId }
+
+ENDPOINT /api/
+- Given the Access Token
+- Get the course Id from the map
+- Fetch a list of all assignments in Canvas inside that course Id
+- Get the asignment that has the "integration data" = {courseCode, examCode, examDate}
+- If the assignment exists return:
+
+{
+  assignment: {
+    id: 121223,
+    name: "Name of the assignment",
+    published: true,
+    link: "https://....."
+  },
+  state:
+    | "idle"           // No one has ever imported scanned exams with this app
+    | "preparing"      // (fetching a list from the TentaAPI, checking that the assignment is available in Canvas)
+    | "downloading"    // downloading every PDF from the TentaAPI
+    | "publishing"     // publishing the Canvas assignment
+    | "uploading"      // uploading every PDF to Canvas
+    | "unpublishing"   // unpublishing the Canvas assignment
+    | "success"        // there was a previous attempt that went correctly
+    | "error"          // the last attempt didn't go well
+  progress: {
+    totalExams: 120,
+    downloadedExams: 12,
+    uploadedExams: 0
+  },
+  error: {
+    message: "Something went wrong"
+  }
+}
+
+ENDPOINT POST /api/create-assignment
+- Given the Access Token
+- Get the course Id.
+- Fetch a list of all assingments in Canvas inside that course Id
+- Get the asignment that has the "integration data" = {courseCode, examCode, examDate}
+- If the assignment exists, don't do anything else.
+- Otherwise create the assignment:
+  - Get from Ladok the "integration data" from the course SIS ID.
+  - Create the assignment
+
+return: {
+  assignment: {
+    id: 121223,
+    name,
+    published
+  }
+}
+
+ENDPOINT POST /upload
+- Given the Access Token
+- Get the course ID
+- Canvas.getValidAssignment(courseId) -> Assignment ID, courseCode, examCode, examDate
+- TentaApi.listExams({courseCode, examCode, examDate}) -> Array<{ examId, studentId }>
+- Create a temp directory (exams/courseCode/examCode/examDate)
+- Loop for each <examId, studentId>
+  - TentaApi.downloadExam(examId, ${directory}/${studentId}.pdf)
+- if the exam is not published, publish it
+- Loop for each <studentId>
+  - Canvas.upload(assignmentId, ${directory}/${studentId}.pdf)
+- if the exam WAS not published, unpublish it
