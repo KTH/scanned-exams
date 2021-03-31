@@ -7,6 +7,7 @@ log.init.pino({
 const express = require("express");
 const path = require("path");
 const apiRouter = require("./api/router");
+const monitor = require("./monitor");
 
 const PORT = 4000;
 const server = express();
@@ -29,9 +30,7 @@ server.use(
   "/scanned-exams/app",
   express.static(path.join(__dirname, "..", "frontend", "build"))
 );
-server.get("/scanned-exams/_monitor", (req, res) => {
-  res.send("APPLICATION_STATUS: OK");
-});
+server.get("/scanned-exams/_monitor", monitor);
 
 server.listen(PORT, () => {
   log.info(`App listening on port ${PORT}`);
