@@ -15,6 +15,11 @@ const sessions = new Map();
 if (process.env.NODE_ENV === "development") {
   sessions.set(process.env.CANVAS_API_ADMIN_TOKEN, {
     courseId: 30247,
+    examination: {
+      courseCode: "AA0000",
+      examCode: "TEN1",
+      examDate: "2100-01-01",
+    },
   });
 }
 
@@ -53,10 +58,42 @@ router.get("/", async (req, res) => {
   });
 });
 
-router.post("/create-assignment", (req, res) => {
-  assignment = 233;
+async function createAssignment(accessToken) {
+  const session = sessions.get(accessToken);
+
+  if (!session) {
+    // TODO: send a 401
+    return null;
+  }
+
+  return canvas
+    .requestUrl(`courses/${session.courseId}/assignments`, "POST", {
+      assignment: {
+        name: "Scanned exams",
+        description:
+          "This canvas assignment is meant to be used for scanned exams",
+        submission_types: ["online_upload"],
+        allowed_extensions: ["pdf"],
+        integration_data: session.examination,
+        published: false,
+        grading_type: "letter_grade",
+        // TODO: grading_standard_id: 1,
+      },
+    })
+    .then((r) => r.body);
+}
+
+router.post("/create-assignment", async (req, res) => {
+  const accessToken = getAccessToken(req);
+  let assignment = await getValidAssignment(accessToken);
+
+  if (!assignment) {
+    assignment = await createAssignment(accessToken);
+  }
+
   res.send({
     message: "Assignment created successfully",
+    assignment,
   });
 });
 
