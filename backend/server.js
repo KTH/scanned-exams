@@ -38,7 +38,7 @@ server.get("/scanned-exams", (req, res) => {
   log.info("Enter /");
   res.status(200).send("Yay");
 });
-// server.get("/scanned-exams/api", apiRouter);
+server.use("/scanned-exams/api", apiRouter);
 server.use(
   "/scanned-exams/app",
   express.static(path.join(__dirname, "..", "frontend", "build"))
