@@ -1,6 +1,6 @@
 const express = require("express");
 const Canvas = require("@kth/canvas-api");
-const log = require("skog");
+const sessions = require("./sessions");
 
 const router = express.Router();
 const canvas = new Canvas(
@@ -8,42 +8,9 @@ const canvas = new Canvas(
   process.env.CANVAS_API_ADMIN_TOKEN
 );
 
-// A Map to store session information
-// Keys for this Map are Canvas API tokens
-const sessions = new Map();
-
-if (process.env.NODE_ENV === "development") {
-  sessions.set(process.env.CANVAS_API_ADMIN_TOKEN, {
-    courseId: 30247,
-    examination: {
-      courseCode: "AA0000",
-      examCode: "TEN1",
-      examDate: "2100-01-01",
-    },
-  });
-}
-
-function getAccessToken(req) {
-  const auth = req.get("authorization");
-  if (auth && auth.startsWith("Bearer")) {
-    return auth.slice(6).trim();
-  }
-
-  return null;
-}
-
-async function getValidAssignment(accessToken) {
-  const session = sessions.get(accessToken);
-
-  if (!session) {
-    // TODO: Send a "401" (not authorized) error
-    log.info("Wrong access token");
-    return null;
-  }
-  log.info(`Getting info for course ${session.courseId}`);
-
+async function getValidAssignment({ courseId }) {
   const assignments = await canvas
-    .list(`courses/${session.courseId}/assignments`)
+    .list(`courses/${courseId}/assignments`)
     .toArray();
 
   // TODO: Filter more strictly?
@@ -51,24 +18,22 @@ async function getValidAssignment(accessToken) {
 }
 
 router.get("/assignment", async (req, res) => {
-  const accessToken = getAccessToken(req);
-  const assignment = await getValidAssignment(accessToken);
+  const session = sessions.getSession(req, res);
+
+  if (!session) {
+    return;
+  }
+
+  const assignment = await getValidAssignment(session.courseId);
 
   res.send({
     assignment,
   });
 });
 
-async function createAssignment(accessToken) {
-  const session = sessions.get(accessToken);
-
-  if (!session) {
-    // TODO: send a 401
-    return null;
-  }
-
+async function createAssignment({ courseId, examination }) {
   return canvas
-    .requestUrl(`courses/${session.courseId}/assignments`, "POST", {
+    .requestUrl(`courses/${courseId}/assignments`, "POST", {
       assignment: {
         name: "Scanned exams",
         description:
@@ -76,7 +41,7 @@ async function createAssignment(accessToken) {
         submission_types: ["online_upload"],
         allowed_extensions: ["pdf"],
         // TODO: add more data to be able to filter out better?
-        integration_data: session.examination,
+        integration_data: examination,
         published: false,
         grading_type: "letter_grade",
         // TODO: grading_standard_id: 1,
@@ -86,11 +51,16 @@ async function createAssignment(accessToken) {
 }
 
 router.post("/assignment", async (req, res) => {
-  const accessToken = getAccessToken(req);
-  let assignment = await getValidAssignment(accessToken);
+  const session = sessions.getSession(req, res);
+
+  if (!session) {
+    return;
+  }
+
+  let assignment = await getValidAssignment(session);
 
   if (!assignment) {
-    assignment = await createAssignment(accessToken);
+    assignment = await createAssignment(session);
   }
 
   res.send({
