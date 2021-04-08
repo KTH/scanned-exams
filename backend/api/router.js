@@ -46,10 +46,11 @@ async function getValidAssignment(accessToken) {
     .list(`courses/${session.courseId}/assignments`)
     .toArray();
 
+  // TODO: Filter more strictly?
   return assignments.find((a) => a.integration_data.courseCode) ?? null;
 }
 
-router.get("/", async (req, res) => {
+router.get("/assignment", async (req, res) => {
   const accessToken = getAccessToken(req);
   const assignment = await getValidAssignment(accessToken);
 
@@ -74,6 +75,7 @@ async function createAssignment(accessToken) {
           "This canvas assignment is meant to be used for scanned exams",
         submission_types: ["online_upload"],
         allowed_extensions: ["pdf"],
+        // TODO: add more data to be able to filter out better?
         integration_data: session.examination,
         published: false,
         grading_type: "letter_grade",
@@ -83,7 +85,7 @@ async function createAssignment(accessToken) {
     .then((r) => r.body);
 }
 
-router.post("/create-assignment", async (req, res) => {
+router.post("/assignment", async (req, res) => {
   const accessToken = getAccessToken(req);
   let assignment = await getValidAssignment(accessToken);
 
