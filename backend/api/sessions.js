@@ -17,6 +17,8 @@ if (process.env.NODE_ENV === "development") {
       examCode: "TEN1",
       examDate: "2100-01-01",
     },
+    state: "idle",
+    error: null,
   });
 }
 

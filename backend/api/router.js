@@ -1,6 +1,13 @@
 const express = require("express");
+const fs = require("fs/promises");
+const os = require("os");
+const path = require("path");
+const log = require("skog");
 const sessions = require("./sessions");
 const canvas = require("./canvasApiClient");
+const tentaApi = require("./tentaApiClient");
+const transferExams = require("./transferExams.js");
+
 const router = express.Router();
 
 router.get("/assignment", async (req, res) => {
@@ -38,11 +45,24 @@ router.post("/assignment", async (req, res) => {
 router.post("/exams", (req, res) => {
   const session = sessions.getSession(req, res);
 
-  res.send({
-    message: "Exam uploading started",
-  });
+  if (session) {
+    transferExams(session);
+
+    res.send({
+      message: "Exam uploading started",
+    });
+  }
 });
 
-router.get("/exams", (req, res) => {});
+router.get("/exams", (req, res) => {
+  const session = sessions.getSession(req, res);
+
+  if (session) {
+    res.send({
+      state: session.state,
+      error: session.error,
+    });
+  }
+});
 
 module.exports = router;
