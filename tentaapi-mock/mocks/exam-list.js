@@ -4,20 +4,65 @@
  */
 module.exports = function getExamList({ courseCode, examCode, examDate }) {
   if (
-    courseCode !== "KD2310" ||
-    examCode !== "TEN2" ||
-    examDate !== "2021-03-03"
+    courseCode !== "XY0101" ||
+    examCode !== "ZZZ1" ||
+    examDate !== "2100-01-01"
   )
     return;
 
   return {
     documentSearchResults: [
       {
-        id: 0,
+        id: 006,
         documentIndiceses: [
           {
             index: "s_uid",
-            value: "u1sdsss",
+            value: "u1b7rfvx",
+          },
+        ],
+      },
+      {
+        id: 023,
+        documentIndiceses: [
+          {
+            index: "s_uid",
+            value: "u1famwov",
+          },
+        ],
+      },
+      {
+        id: 056,
+        documentIndiceses: [
+          {
+            index: "s_uid",
+            value: "u1znmoik",
+          },
+        ],
+      },
+      {
+        id: 126,
+        documentIndiceses: [
+          {
+            index: "s_uid",
+            value: "u101u10w",
+          },
+        ],
+      },
+      {
+        id: 721,
+        documentIndiceses: [
+          {
+            index: "s_uid",
+            value: "u1wgwz0g",
+          },
+        ],
+      },
+      {
+        id: 892,
+        documentIndiceses: [
+          {
+            index: "s_uid",
+            value: "u1e2hvkx",
           },
         ],
       },
