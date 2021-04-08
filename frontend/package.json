@@ -2,6 +2,9 @@
   "name": "scanned-exams-frontend",
   "version": "0.1.0",
   "private": true,
+  "description": "Frontend side of the Scanned Exams service",
+  "author": "KTH Royal Institute of Technology <vc.developers@kth.se> (https:kth.se)",
+  "license": "MIT",
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/react": "^11.2.6",

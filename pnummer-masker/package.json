@@ -1,14 +1,15 @@
 {
   "name": "pnummer-masker",
   "version": "1.0.0",
-  "description": "",
+  "description": "Program that covers 'personnummer' (Swedish social security number) presents in PDF files",
   "main": "index.js",
+  "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "KTH Royal Institute of Technology <vc.developers@kth.se> (https:kth.se)",
+  "license": "MIT",
   "dependencies": {
     "gm": "^1.23.1",
     "pdfkit": "^0.12.0",

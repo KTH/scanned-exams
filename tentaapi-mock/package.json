@@ -8,8 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "KTH Royal Institute of Technology <vc.developers@kth.se> (https:kth.se)",
+  "license": "MIT",
   "dependencies": {
     "express": "^4.17.1",
     "pino": "^6.11.2",

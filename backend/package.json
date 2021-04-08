@@ -1,7 +1,7 @@
 {
   "name": "scanned-exams-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend of the Scanned Exams service. Application integrated into the Canvas LMS that download paper exams from the 'Tenta API' and uploads them into Canvas",
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js | pino-pretty",
@@ -12,8 +12,8 @@
     "url": "git+https://github.com/KTH/scannade-tentor.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "KTH Royal Institute of Technology <vc.developers@kth.se> (https:kth.se)",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/KTH/scannade-tentor/issues"
   },
