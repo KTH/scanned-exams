@@ -6,37 +6,33 @@ const router = express.Router();
 router.get("/assignment", async (req, res) => {
   const session = sessions.getSession(req, res);
 
-  if (!session) {
-    return;
+  if (session) {
+    const assignment = await canvas.getValidAssignment(session.courseId);
+
+    res.send({
+      assignment,
+    });
   }
-
-  const assignment = await canvas.getValidAssignment(session.courseId);
-
-  res.send({
-    assignment,
-  });
 });
 
 router.post("/assignment", async (req, res) => {
   const session = sessions.getSession(req, res);
 
-  if (!session) {
-    return;
+  if (session) {
+    let assignment = await canvas.getValidAssignment(session.courseId);
+
+    if (!assignment) {
+      assignment = await canvas.createAssignment(
+        session.courseId,
+        session.examination
+      );
+    }
+
+    res.send({
+      message: "Assignment created successfully",
+      assignment,
+    });
   }
-
-  let assignment = await canvas.getValidAssignment(session.courseId);
-
-  if (!assignment) {
-    assignment = await canvas.createAssignment(
-      session.courseId,
-      session.examination
-    );
-  }
-
-  res.send({
-    message: "Assignment created successfully",
-    assignment,
-  });
 });
 
 router.post("/exams", (req, res) => {
