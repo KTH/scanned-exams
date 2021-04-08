@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/KTH/scannade-tentor#readme",
   "dependencies": {
+    "@kth/canvas-api": "^3.0.2",
+    "@kth/reqvars": "^2.0.1",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "got": "^11.8.2",
     "pino": "^6.11.2",
