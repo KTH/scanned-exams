@@ -4,6 +4,7 @@ import UploadScannedExams from "./components/UploadScannedExams";
 import { createAssignment, getAssignment } from "./utils";
 function App() {
   const [created, setCreated] = useState(false);
+  const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     const init = async () => {
@@ -12,16 +13,24 @@ function App() {
       if (data.assignment) {
         setCreated(true);
       }
+      setLoading(false);
     };
     init();
-  }, [setCreated]);
+  }, [setCreated, setLoading]);
 
   const onCreate = async () => {
+    setLoading(true);
     const res = await createAssignment();
-    if (res.ok) {
+    const data = await res.json();
+    if (data.assignment) {
       setCreated(true);
     }
+    setLoading(false);
   };
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
 
   if (created) {
     return <UploadScannedExams />;
