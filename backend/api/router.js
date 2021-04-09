@@ -1,11 +1,6 @@
 const express = require("express");
-const fs = require("fs/promises");
-const os = require("os");
-const path = require("path");
-const log = require("skog");
 const sessions = require("./sessions");
 const canvas = require("./canvasApiClient");
-const tentaApi = require("./tentaApiClient");
 const transferExams = require("./transferExams.js");
 
 const router = express.Router();

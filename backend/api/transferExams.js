@@ -1,3 +1,10 @@
+const log = require("skog");
+const tentaApi = require("./tentaApiClient");
+const canvas = require("./canvasApiClient");
+const fs = require("fs/promises");
+const os = require("os");
+const path = require("path");
+
 module.exports = async function transferExams(session) {
   if (session.state !== "idle") {
     return;
@@ -10,10 +17,11 @@ module.exports = async function transferExams(session) {
 
     session.state = "downloading";
     const dirName = await fs.mkdtemp(os.tmpdir());
+    log.info(`Created directory ${dirName}`);
 
-    for (const { userId, examId } of list) {
+    for (const { userId, fileId } of list) {
       await tentaApi.downloadExam(
-        examId,
+        fileId,
         path.resolve(dirName, `${userId}.pdf`)
       );
     }

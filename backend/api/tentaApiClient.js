@@ -39,13 +39,13 @@ async function examList({ courseCode, examDate, examCode }) {
   const list = [];
 
   for (const result of body.documentSearchResults) {
-    const keyValue = result.documentIndeceses.find(
+    const keyValue = result.documentIndiceses.find(
       (di) => di.index === "s_uid"
     );
 
     if (keyValue && keyValue.value) {
       list.push({
-        fileId: result.fileId,
+        fileId: result.id,
         userId: keyValue.value,
       });
     }
@@ -56,6 +56,7 @@ async function examList({ courseCode, examDate, examCode }) {
 
 /** Download the exam with ID "fileId" to the given "filePath" */
 async function downloadExam(fileId, filePath) {
+  log.info(`Downloading file ${fileId}...`);
   const { body } = await client(`windream/file/${fileId}/true`, {
     responseType: "json",
   });

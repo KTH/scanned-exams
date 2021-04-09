@@ -13,8 +13,8 @@ if (process.env.NODE_ENV === "development") {
   sessions.set(process.env.CANVAS_API_ADMIN_TOKEN, {
     courseId: 30247,
     examination: {
-      courseCode: "AA0000",
-      examCode: "TEN1",
+      courseCode: "XY0101",
+      examCode: "ZZZ1",
       examDate: "2100-01-01",
     },
     state: "idle",
