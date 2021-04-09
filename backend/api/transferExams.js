@@ -4,6 +4,7 @@ const canvas = require("./canvasApiClient");
 const fs = require("fs/promises");
 const os = require("os");
 const path = require("path");
+const maskFile = require("./maskFile");
 
 module.exports = async function transferExams(session) {
   if (session.state !== "idle") {
@@ -17,16 +18,29 @@ module.exports = async function transferExams(session) {
 
     session.state = "downloading";
     const dirName = await fs.mkdtemp(os.tmpdir());
+    const unmaskedDir = path.resolve(dirName, "unmasked");
+    const maskedDir = path.resolve(dirName, "masked");
+
     log.info(`Created directory ${dirName}`);
+    fs.mkdir(unmaskedDir, { recursive: true });
 
     for (const { userId, fileId } of list) {
       await tentaApi.downloadExam(
         fileId,
-        path.resolve(dirName, `${userId}.pdf`)
+        path.resolve(unmaskedDir, `${userId}.pdf`)
       );
     }
+    log.info("Finished downloading exams");
 
-    // TODO: mask personnummer
+    session.state = "postdownloading";
+    log.info("Starting pnr-masking");
+
+    for (const { userId } of list) {
+      await maskFile(
+        path.resolve(unmaskedDir, `${userId}.pdf`),
+        path.resolve(maskedDir, `${userId}.pdf`)
+      );
+    }
 
     session.state = "success";
   } catch (err) {
