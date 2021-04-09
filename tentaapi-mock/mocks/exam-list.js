@@ -13,7 +13,7 @@ module.exports = function getExamList({ courseCode, examCode, examDate }) {
   return {
     documentSearchResults: [
       {
-        id: 006,
+        id: 6,
         documentIndiceses: [
           {
             index: "s_uid",
@@ -22,7 +22,7 @@ module.exports = function getExamList({ courseCode, examCode, examDate }) {
         ],
       },
       {
-        id: 023,
+        id: 23,
         documentIndiceses: [
           {
             index: "s_uid",
@@ -31,7 +31,7 @@ module.exports = function getExamList({ courseCode, examCode, examDate }) {
         ],
       },
       {
-        id: 056,
+        id: 56,
         documentIndiceses: [
           {
             index: "s_uid",
