@@ -33,7 +33,33 @@ async function createAssignment(courseId, examination) {
     .then((r) => r.body);
 }
 
+async function publishAssignment(courseId, assignmentId) {
+  return canvas.requestUrl(
+    `courses/${courseId}/assignments/${assignmentId}`,
+    "PUT",
+    {
+      assignment: {
+        published: true,
+      },
+    }
+  );
+}
+
+async function unPublishAssignment(courseId, assignmentId) {
+  return canvas.requestUrl(
+    `courses/${courseId}/assignments/${assignmentId}`,
+    "PUT",
+    {
+      assignment: {
+        published: false,
+      },
+    }
+  );
+}
+
 module.exports = {
   getValidAssignment,
   createAssignment,
+  publishAssignment,
+  unPublishAssignment,
 };

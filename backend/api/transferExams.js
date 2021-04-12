@@ -23,6 +23,7 @@ module.exports = async function transferExams(session) {
 
     log.info(`Created directory ${dirName}`);
     fs.mkdir(unmaskedDir, { recursive: true });
+    fs.mkdir(maskedDir, { recursive: true });
 
     for (const { userId, fileId } of list) {
       await tentaApi.downloadExam(
@@ -40,6 +41,26 @@ module.exports = async function transferExams(session) {
         path.resolve(unmaskedDir, `${userId}.pdf`),
         path.resolve(maskedDir, `${userId}.pdf`)
       );
+    }
+    session.state = "preuploading";
+    log.info("Checking if assignment is published");
+    const assignment = await canvas.getValidAssignment(session.courseId);
+
+    if (assignment) {
+      // TODO: check that assignment.integration_data == session.examination
+      const alreadyPublished = assignment.published;
+
+      if (!alreadyPublished) {
+        log.info("Assignment was not published. Publishing now");
+        await canvas.publishAssignment(session.courseId, assignment.id);
+      }
+
+      // TODO: upload exams to the published assignment
+
+      if (!alreadyPublished) {
+        log.info("Assignment was not published. Unpublishing now");
+        await canvas.unPublishAssignment(session.courseId, assignment.id);
+      }
     }
 
     session.state = "success";
