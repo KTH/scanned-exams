@@ -55,11 +55,17 @@ module.exports = async function transferExams(session) {
         await canvas.publishAssignment(session.courseId, assignment.id);
       }
 
-      // TODO: upload exams to the published assignment
+      session.state = "uploading";
 
-      if (!alreadyPublished) {
-        log.info("Assignment was not published. Unpublishing now");
-        await canvas.unPublishAssignment(session.courseId, assignment.id);
+      // TODO: upload exams to the published assignment
+      for (const { userId } of list) {
+        log.info(`Uploading exam for ${userId}`);
+        await canvas.uploadExam(
+          path.resolve(maskedDir, `${userId}.pdf`),
+          session.courseId,
+          assignment.id,
+          userId
+        );
       }
     }
 

@@ -1,4 +1,7 @@
 const Canvas = require("@kth/canvas-api");
+const FormData = require("formdata-node").default;
+const fs = require("fs");
+const got = require("got");
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,
@@ -57,9 +60,56 @@ async function unPublishAssignment(courseId, assignmentId) {
   );
 }
 
+async function sendFile({ upload_url, upload_params }, filePath) {
+  const form = new FormData();
+
+  for (const key in upload_params) {
+    if (upload_params[key]) {
+      form.append(key, upload_params[key]);
+    }
+  }
+
+  form.append("attachment", fs.createReadStream(filePath));
+
+  return got.post({
+    url: upload_url,
+    body: form.stream,
+    headers: form.headers,
+    responseType: "json",
+  });
+}
+
+async function uploadExam(filePath, courseId, assignmentId, userId) {
+  const { body: user } = await canvas.get(`users/sis_user_id:${userId}`);
+
+  // TODO: will return a 400 if the course is unpublished
+  const { body: slot } = await canvas.requestUrl(
+    `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}/files`,
+    "POST",
+    {
+      name: `${userId}.pdf`,
+    }
+  );
+
+  const { body: uploadedFile } = await sendFile(slot, filePath);
+
+  await canvas.requestUrl(
+    `courses/${courseId}/assignments/${assignmentId}/submissions/`,
+    "POST",
+    {
+      submission: {
+        submission_type: "online_upload",
+        user_id: user.id,
+        file_ids: [uploadedFile.id],
+      },
+    }
+  );
+}
+
 module.exports = {
   getValidAssignment,
   createAssignment,
   publishAssignment,
   unPublishAssignment,
+  uploadExam,
 };
