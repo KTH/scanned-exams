@@ -1,13 +1,14 @@
 import React from "react";
+import { Container, CTAButton } from "./styled";
 
 function CreateAssignment({ onCreate }) {
   return (
-    <div>
-      <h1>Create assignment</h1>
-      <button onClick={onCreate} type="submit">
+    <Container>
+      <h2>Create assignment</h2>
+      <CTAButton next onClick={onCreate} type="submit">
         Create
-      </button>
-    </div>
+      </CTAButton>
+    </Container>
   );
 }
 
