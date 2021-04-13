@@ -3,30 +3,41 @@ import CreateAssignment from "./components/CreateAssignment";
 import Layout from "./components/Layout";
 import UploadScannedExams from "./components/UploadScannedExams";
 import { createAssignment, getAssignment } from "./utils";
+
 function App() {
   const [created, setCreated] = useState(false);
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     const init = async () => {
-      const res = await getAssignment();
-      const data = await res.json();
-      if (data.assignment) {
-        setCreated(true);
+      try {
+        const res = await getAssignment();
+        const data = await res.json();
+        if (data.assignment) {
+          setCreated(true);
+        }
+        setLoading(false);
+      } catch (err) {
+        console.log(err);
       }
-      setLoading(false);
     };
     init();
   }, [setCreated, setLoading]);
 
   const onCreate = useCallback(async () => {
-    setLoading(true);
-    const res = await createAssignment();
-    const data = await res.json();
-    if (data.assignment) {
-      setCreated(true);
+    try {
+      setLoading(true);
+      const res = await createAssignment();
+      const data = await res.json();
+      if (data.assignment) {
+        setCreated(true);
+      } else {
+        throw new Error("Unable to create ");
+      }
+      setLoading(false);
+    } catch (err) {
+      console.log(err);
     }
-    setLoading(false);
   }, []);
 
   const View = useMemo(() => {
