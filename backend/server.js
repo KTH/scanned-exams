@@ -26,6 +26,7 @@ const PORT = 4000;
 const server = express();
 
 server.use(log.middleware);
+server.use(express.urlencoded());
 
 // Routes:
 // - /           The welcome page
@@ -34,6 +35,13 @@ server.use(log.middleware);
 //               like CSS files)
 // - /auth       routes for the authorization process
 // - /_monitor   just the monitor page
+server.post("/scanned-exams", (req, res) => {
+  log.info("Enter /");
+  res.status(200).send({
+    courseId: req.body.custom_courseid,
+    domain: req.body.custom_domain,
+  });
+});
 server.get("/scanned-exams", (req, res) => {
   log.info("Enter /");
   res.status(200).send("Yay");
@@ -44,6 +52,7 @@ server.use(
   express.static(path.join(__dirname, "..", "frontend", "build"))
 );
 server.get("/scanned-exams/_monitor", monitor);
+module.exports = server;
 
 server.listen(PORT, () => {
   log.info(`App listening on port ${PORT}`);
