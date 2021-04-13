@@ -59,3 +59,29 @@ export const CTAButton = styled(Button)`
   border-color: #007fae;
   min-height: 2.75rem;
 `;
+
+const Alert = styled.div`
+  width: 100%;
+  margin: 0 0 50px;
+  font-size: 1rem;
+  border: none;
+  padding: 30px 30px 30px 70px;
+  min-height: 0;
+  color: #000;
+  overflow: auto;
+  margin: 1rem 0;
+`;
+
+export const DangerAlert = styled(Alert)`
+  &::before {
+    font-size: 1.8rem;
+    position: absolute;
+    width: 1em;
+    top: 25px;
+    left: 30px;
+    border-radius: 0.15rem;
+    content: url(data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgODYgODYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNNDMgODZjMjMuNzQ4IDAgNDMtMTkuMjUyIDQzLTQzUzY2Ljc0OCAwIDQzIDAgMCAxOS4yNTIgMCA0M3MxOS4yNTIgNDMgNDMgNDN6IiBmaWxsPSIjRTAxRjI4Ii8+PHBhdGggZD0iTTQxLjUxIDUyLjI1NGwtMS41My0yMS42Mzh2LTkuMDVoNi4yMXY5LjA1bC0xLjQ1IDIxLjYzOGgtMy4yM3pNNDAuMjAxIDYyLjM5di01LjcwOGg1Ljc2NXY1LjcwOEg0MC4yeiIgc3Ryb2tlPSIjRkZGIiBmaWxsPSIjRkZGIi8+PC9nPjwvc3ZnPg==);
+  }
+  position: relative;
+  background-color: #f5e6e6;
+`;
