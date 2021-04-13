@@ -7,15 +7,15 @@ const getFile = require("./mocks/file");
 log.init.pino();
 server.use(express.json());
 
-server.get("/Ladok/activity/:ladokId", (req, res) => {
+server.get("/api/v2.0/Ladok/activity/:ladokId", (req, res) => {
   res.send(getActivity(req.params.ladokId));
 });
 
-server.post("/windream/search/documents/false", (req, res) => {
+server.post("/api/v2.0/windream/search/documents/false", (req, res) => {
   const body = req.body;
-  const courseCode = body.sarchIndiceses.find((i) => i.index === "c_code");
-  const examCode = body.sarchIndiceses.find((i) => i.index === "e_code");
-  const examDate = body.sarchIndiceses.find((i) => i.index === "e_date");
+  const courseCode = body.searchIndiceses.find((i) => i.index === "c_code");
+  const examCode = body.searchIndiceses.find((i) => i.index === "e_code");
+  const examDate = body.searchIndiceses.find((i) => i.index === "e_date");
 
   if (courseCode && examCode && examDate) {
     res.send(
@@ -29,7 +29,7 @@ server.post("/windream/search/documents/false", (req, res) => {
   res.send({});
 });
 
-server.get("/windream/file/:fileId/true", (req, res) => {
+server.get("/api/v2.0/windream/file/:fileId/true", (req, res) => {
   res.send(getFile(req.params.fileId));
 });
 
