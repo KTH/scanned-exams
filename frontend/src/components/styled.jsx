@@ -31,6 +31,7 @@ const NextIcon = css`
 `;
 
 const Button = styled.button`
+  position: relative;
   display: inline-block;
   cursor: pointer;
   font-weight: 700;
@@ -51,6 +52,14 @@ const Button = styled.button`
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   ${(props) => props.next && NextIcon}
+  input[type=file] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    opacity: 0;
+  }
 `;
 
 export const CTAButton = styled(Button)`
