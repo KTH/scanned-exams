@@ -26,11 +26,12 @@ ENDPOINT /api/
   },
   state:
     | "idle"           // No one has ever imported scanned exams with this app
-    | "preparing"      // (fetching a list from the TentaAPI, checking that the assignment is available in Canvas)
+    | "predownloading"       // (fetching a list from the TentaAPI, checking that the assignment is available in Canvas)
     | "downloading"    // downloading every PDF from the TentaAPI
-    | "publishing"     // publishing the Canvas assignment
+    | "postdownloading"        // masking personnummer from the exams
+    | "preuploading"     // publishing the Canvas assignment
     | "uploading"      // uploading every PDF to Canvas
-    | "unpublishing"   // unpublishing the Canvas assignment
+    | "postuploading"   // unpublishing the Canvas assignment
     | "success"        // there was a previous attempt that went correctly
     | "error"          // the last attempt didn't go well
   progress: {
