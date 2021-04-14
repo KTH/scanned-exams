@@ -2,7 +2,7 @@ require("dotenv").config();
 const log = require("skog");
 
 log.init.pino({
-  app: "scannade-tentor",
+  app: "scanned-exams",
 });
 
 process.on("uncaughtException", (err) => {
