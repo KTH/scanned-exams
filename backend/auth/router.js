@@ -40,7 +40,7 @@ router.get("/callback", async (req, res) => {
   });
 
   // At this point we have the users' access token.
-  console.log(tokenSet.access_token);
+  // console.log(tokenSet.access_token);
   // TODO: verify user identity and permissions based on req.query.courseId and tokenSet.user
 
   res.redirect("/scanned-exams/app");
