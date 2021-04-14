@@ -28,6 +28,7 @@
     "got": "^11.8.2",
     "pdfkit": "^0.12.0",
     "pino": "^6.11.2",
+    "rimraf": "^2.4.5",
     "skog": "^2.1.0"
   },
   "devDependencies": {
