@@ -17,7 +17,7 @@ async function tentaApi() {
       data: body,
     };
   } catch (err) {
-    if (err.response.statusCode === 403) {
+    if (err.response?.statusCode === 403) {
       return {
         status: "ERROR",
         data: "403: Forbidden.",
@@ -26,7 +26,7 @@ async function tentaApi() {
       log.error({ err }, "Error");
       return {
         status: "ERROR",
-        data: err.response.body,
+        data: "See monitor page",
       };
     }
   }
