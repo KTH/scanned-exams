@@ -22,17 +22,28 @@ function App() {
 
   const loop = createRef();
 
+  const clearAlert = useCallback(() => {
+    setAlert({ type: null, message: null });
+  }, [setAlert]);
+
   const getStatus = useCallback(async () => {
     try {
       const res = await uploadStatus();
       if (res.ok) {
         const data = await res.json();
         if (data.state === "success") {
-          clearTimeout(loop);
+          setAlert({
+            type: "success",
+            message: "The exams have been successfully uploaded!",
+          });
           setLoading(false);
           return;
         }
-        setLoading(true);
+      } else {
+        setAlert({
+          type: "danger",
+          message: "There was an unexpected error, please try again later...",
+        });
       }
       loop.current = setTimeout(getStatus, 1000);
     } catch (err) {
@@ -41,7 +52,6 @@ function App() {
         type: "danger",
         message: "There was an unexpected error, please try again later...",
       });
-      setLoading(false);
     } finally {
       clearTimeout(loop);
     }
@@ -49,6 +59,8 @@ function App() {
 
   const onUpload = useCallback(
     (e) => {
+      clearAlert();
+      setLoading(true);
       const data = new FormData();
       data.append("file", e.target.files[0]);
 
@@ -57,6 +69,8 @@ function App() {
           const res = await sendExam(data);
           if (res.ok) {
             getStatus();
+          } else {
+            throw new Error();
           }
         } catch (err) {
           console.log(err);
@@ -64,12 +78,13 @@ function App() {
             type: "danger",
             message: "There was an unexpected error, please try again later...",
           });
+          setLoading(false);
         }
       };
 
       sendFile(data);
     },
-    [getStatus, setAlert]
+    [getStatus, setAlert, clearAlert]
   );
 
   const onCreate = useCallback(async () => {
