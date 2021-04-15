@@ -18,14 +18,19 @@ process.on("unhandledRejection", (reason) => {
 require("@kth/reqvars").check();
 
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const path = require("path");
 const apiRouter = require("./api/router");
+const authRouter = require("./auth/router");
 const monitor = require("./monitor");
+const fs = require("fs/promises");
 
 const PORT = 4000;
 const server = express();
 
 server.use(log.middleware);
+server.use(express.urlencoded());
+server.use(cookieParser());
 
 // Routes:
 // - /           The welcome page
@@ -34,16 +39,35 @@ server.use(log.middleware);
 //               like CSS files)
 // - /auth       routes for the authorization process
 // - /_monitor   just the monitor page
+server.post("/scanned-exams", async (req, res) => {
+  log.info("Enter /");
+  const html = await fs.readFile("index.html", { encoding: "utf-8" });
+
+  // TODO: if a session exists, redirect the user to "/app"
+  // TODO: if domain is kth.test.instructure.com > Redirect to the app in referens
+  // TODO: if domain is kth.instructure.com > Show a message encouraging people to use "canvas.kth.se"
+  // TODO: set a cookie to check from client-side JS that the cookie is set correctly
+
+  res
+    .status(200)
+    .send(
+      html
+        .replace("{{COURSE_ID}}", req.body.custom_courseid)
+        .replace("{{DOMAIN}}", req.body.custom_domain)
+    );
+});
 server.get("/scanned-exams", (req, res) => {
   log.info("Enter /");
   res.status(200).send("Yay");
 });
+server.use("/scanned-exams/auth", authRouter);
 server.use("/scanned-exams/api", apiRouter);
 server.use(
   "/scanned-exams/app",
   express.static(path.join(__dirname, "..", "frontend", "build"))
 );
 server.get("/scanned-exams/_monitor", monitor);
+module.exports = server;
 
 server.listen(PORT, () => {
   log.info(`App listening on port ${PORT}`);
