@@ -13,13 +13,12 @@ export const createAssignment = async () =>
     },
   });
 
-export const sendExam = async (body) =>
+export const sendExam = async () =>
   await fetch("/scanned-exams/api/exams", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${process.env.REACT_APP_CANVAS_API_ADMIN_TOKEN}`,
     },
-    body,
   });
 
 export const uploadStatus = async () =>

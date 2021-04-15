@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  createRef,
-} from "react";
+import React, { useState, useEffect, createRef } from "react";
 import CreateAssignment from "./components/CreateAssignment";
 import Layout from "./components/Layout";
 import UploadScannedExams from "./components/UploadScannedExams";
@@ -22,11 +16,11 @@ function App() {
 
   const loop = createRef();
 
-  const clearAlert = useCallback(() => {
+  const clearAlert = () => {
     setAlert({ type: null, message: null });
-  }, [setAlert]);
+  };
 
-  const getStatus = useCallback(async () => {
+  const getStatus = async () => {
     try {
       const res = await uploadStatus();
       if (res.ok) {
@@ -55,13 +49,11 @@ function App() {
     } finally {
       clearTimeout(loop);
     }
-  }, [loop, setLoading, setAlert]);
+  };
 
   const onUpload = (e) => {
     clearAlert();
     setLoading(true);
-      const data = new FormData();
-      data.append("file", e.target.files[0]);
 
     const sendFile = async (data) => {
       try {
@@ -84,7 +76,7 @@ function App() {
     sendFile();
   };
 
-  const onCreate = useCallback(async () => {
+  const onCreate = async () => {
     try {
       setLoading(true);
       const res = await createAssignment();
@@ -102,9 +94,9 @@ function App() {
         message: "There was an unexpected error, please try again later...",
       });
     }
-  }, []);
+  };
 
-  const View = useMemo(() => {
+  const View = () => {
     if (isLoading) {
       return <p>Loading...</p>;
     }
@@ -114,7 +106,7 @@ function App() {
     }
 
     return <CreateAssignment onCreate={onCreate} />;
-  }, [created, isLoading, onCreate, onUpload]);
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -136,7 +128,7 @@ function App() {
     init();
   }, [setCreated, setLoading, setAlert]);
 
-  return <Layout alert={alert}>{View}</Layout>;
+  return <Layout alert={alert}>{View()}</Layout>;
 }
 
 export default App;
