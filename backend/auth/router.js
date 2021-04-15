@@ -27,7 +27,6 @@ const client = new issuer.Client({
 router.post("/", (req, res) => {
   const state = generators.state();
   const url = client.authorizationUrl({
-    courseId: req.body.courseId,
     state,
   });
 
