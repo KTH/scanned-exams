@@ -57,35 +57,32 @@ function App() {
     }
   }, [loop, setLoading, setAlert]);
 
-  const onUpload = useCallback(
-    (e) => {
-      clearAlert();
-      setLoading(true);
+  const onUpload = (e) => {
+    clearAlert();
+    setLoading(true);
       const data = new FormData();
       data.append("file", e.target.files[0]);
 
-      const sendFile = async (data) => {
-        try {
-          const res = await sendExam(data);
-          if (res.ok) {
-            getStatus();
-          } else {
-            throw new Error();
-          }
-        } catch (err) {
-          console.log(err);
-          setAlert({
-            type: "danger",
-            message: "There was an unexpected error, please try again later...",
-          });
-          setLoading(false);
+    const sendFile = async (data) => {
+      try {
+        const res = await sendExam();
+        if (res.ok) {
+          getStatus();
+        } else {
+          throw new Error();
         }
-      };
+      } catch (err) {
+        console.log(err);
+        setAlert({
+          type: "danger",
+          message: "There was an unexpected error, please try again later...",
+        });
+        setLoading(false);
+      }
+    };
 
-      sendFile(data);
-    },
-    [getStatus, setAlert, clearAlert]
-  );
+    sendFile();
+  };
 
   const onCreate = useCallback(async () => {
     try {

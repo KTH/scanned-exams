@@ -6,8 +6,7 @@ function UploadScannedExams({ onUpload }) {
     <Container>
       <h2>Upload scanned exams</h2>
 
-      <CTAButton type="submit">
-        <input type="file" onChange={onUpload} multiple />
+      <CTAButton onClick={onUpload} type="submit">
         Upload
       </CTAButton>
     </Container>
