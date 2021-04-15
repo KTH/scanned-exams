@@ -8,7 +8,7 @@ log.init.pino();
 server.use(express.json());
 
 server.get("/api/v2.0/Ladok/activity/:ladokId", (req, res) => {
-  res.send(getActivity(req.params.ladokId));
+  return res.send(getActivity(req.params.ladokId));
 });
 
 server.post("/api/v2.0/windream/search/documents/false", (req, res) => {
@@ -18,7 +18,7 @@ server.post("/api/v2.0/windream/search/documents/false", (req, res) => {
   const examDate = body.searchIndiceses.find((i) => i.index === "e_date");
 
   if (courseCode && examCode && examDate) {
-    res.send(
+    return res.send(
       getExamList({
         examCode: examCode.value,
         courseCode: courseCode.value,
@@ -26,11 +26,11 @@ server.post("/api/v2.0/windream/search/documents/false", (req, res) => {
       })
     );
   }
-  res.send({});
+  return res.send({});
 });
 
 server.get("/api/v2.0/windream/file/:fileId/true", (req, res) => {
-  res.send(getFile(req.params.fileId));
+  return res.send(getFile(req.params.fileId));
 });
 
 server.listen(4001, (req, res) => {
