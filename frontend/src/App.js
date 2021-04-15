@@ -1,42 +1,134 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createRef } from "react";
 import CreateAssignment from "./components/CreateAssignment";
+import Layout from "./components/Layout";
 import UploadScannedExams from "./components/UploadScannedExams";
-import { createAssignment, getAssignment } from "./utils";
+import {
+  createAssignment,
+  getAssignment,
+  sendExam,
+  uploadStatus,
+} from "./utils";
+
 function App() {
   const [created, setCreated] = useState(false);
   const [isLoading, setLoading] = useState(true);
+  const [alert, setAlert] = useState({ type: null, message: null });
 
-  useEffect(() => {
-    const init = async () => {
-      const res = await getAssignment();
+  const loop = createRef();
+
+  const clearAlert = () => {
+    setAlert({ type: null, message: null });
+  };
+
+  const getStatus = async () => {
+    try {
+      const res = await uploadStatus();
+      if (res.ok) {
+        const data = await res.json();
+        if (data.state === "success") {
+          setAlert({
+            type: "success",
+            message: "The exams have been successfully uploaded!",
+          });
+          setLoading(false);
+          return;
+        }
+      } else {
+        setAlert({
+          type: "danger",
+          message: "There was an unexpected error, please try again later...",
+        });
+      }
+      loop.current = setTimeout(getStatus, 1000);
+    } catch (err) {
+      console.log(err);
+      setAlert({
+        type: "danger",
+        message: "There was an unexpected error, please try again later...",
+      });
+    } finally {
+      clearTimeout(loop);
+    }
+  };
+
+  const onUpload = (e) => {
+    clearAlert();
+    setLoading(true);
+
+    const sendFile = async (data) => {
+      try {
+        const res = await sendExam();
+        if (res.ok) {
+          getStatus();
+        } else {
+          throw new Error();
+        }
+      } catch (err) {
+        console.log(err);
+        setAlert({
+          type: "danger",
+          message: "There was an unexpected error, please try again later...",
+        });
+        setLoading(false);
+      }
+    };
+
+    sendFile();
+  };
+
+  const onCreate = async () => {
+    try {
+      setLoading(true);
+      const res = await createAssignment();
       const data = await res.json();
       if (data.assignment) {
         setCreated(true);
+      } else {
+        throw new Error("Unable to create ");
       }
       setLoading(false);
-    };
-    init();
-  }, [setCreated, setLoading]);
-
-  const onCreate = async () => {
-    setLoading(true);
-    const res = await createAssignment();
-    const data = await res.json();
-    if (data.assignment) {
-      setCreated(true);
+    } catch (err) {
+      console.log(err);
+      setAlert({
+        type: "danger",
+        message: "There was an unexpected error, please try again later...",
+      });
     }
-    setLoading(false);
   };
 
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
+  const View = () => {
+    if (isLoading) {
+      return <p>Loading...</p>;
+    }
 
-  if (created) {
-    return <UploadScannedExams />;
-  }
+    if (created) {
+      return <UploadScannedExams onUpload={onUpload} />;
+    }
 
-  return <CreateAssignment onCreate={onCreate} />;
+    return <CreateAssignment onCreate={onCreate} />;
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const res = await getAssignment();
+        const data = await res.json();
+        if (data.assignment) {
+          setCreated(true);
+        }
+        setLoading(false);
+      } catch (err) {
+        console.log(err);
+        setAlert({
+          type: "danger",
+          message: "There was an unexpected error, please try again later...",
+        });
+      }
+    };
+    init();
+  }, [setCreated, setLoading, setAlert]);
+
+  return <Layout alert={alert}>{View()}</Layout>;
 }
 
 export default App;

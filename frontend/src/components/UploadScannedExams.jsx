@@ -1,14 +1,15 @@
 import React from "react";
+import { Container, CTAButton } from "./styled";
 
-function UploadScannedExams() {
-  const onUpload = () => {};
+function UploadScannedExams({ onUpload }) {
   return (
-    <div>
-      <h1>Upload scanned exams</h1>
-      <button onClick={onUpload} type="file">
+    <Container>
+      <h2>Upload scanned exams</h2>
+
+      <CTAButton onClick={onUpload} type="submit">
         Upload
-      </button>
-    </div>
+      </CTAButton>
+    </Container>
   );
 }
 
