@@ -44,6 +44,14 @@ server.use(
 );
 
 server.use(log.middleware);
+server.use((req, res, next) => {
+  log.child(
+    {
+      session_id: req.session.id.slice(0, 6),
+    },
+    next
+  );
+});
 server.use(express.urlencoded());
 server.use(cookieParser());
 
