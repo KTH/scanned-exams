@@ -69,6 +69,7 @@ server.post("/scanned-exams", async (req, res) => {
     examCode: "ZZZ1",
     examDate: "2100-01-01",
   };
+  req.session.state = "idle";
 
   log.info("Enter /");
   const html = await fs.readFile("index.html", { encoding: "utf-8" });

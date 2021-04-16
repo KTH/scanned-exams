@@ -40,26 +40,21 @@ router.post("/assignment", checkCourseId, async (req, res) => {
 });
 
 router.post("/exams", (req, res) => {
-  const session = sessions.getSession(req, res);
+  transferExams(req.session);
 
-  if (session) {
-    transferExams(session);
-
-    res.json({
-      message: "Exam uploading started",
-    });
-  }
+  res.json({
+    message: "Exam uploading started",
+  });
 });
 
 router.get("/exams", (req, res) => {
-  const session = sessions.getSession(req, res);
+  const session = req.session;
 
-  if (session) {
-    res.json({
-      state: session.state,
-      error: session.error,
-    });
-  }
+  // TODO: return a different code depending on the error
+  res.status(session.error ? 400 : 200).json({
+    state: session.state,
+    error: session.error,
+  });
 });
 
 module.exports = router;

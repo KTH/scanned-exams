@@ -11,12 +11,29 @@ module.exports = async function transferExams(session) {
     return;
   }
 
+  function saveSession() {
+    return new Promise((resolve, reject) => {
+      session.save((err) => {
+        if (err) {
+          reject({
+            name: "SessionError",
+            message: err.message,
+          });
+        }
+
+        resolve();
+      });
+    });
+  }
+
   try {
     session.state = "predownloading";
+    await saveSession();
     log.info("predownloading...");
     const list = await tentaApi.examList(session.examination);
 
     session.state = "downloading";
+    await saveSession();
     const dirName = await fs.mkdtemp(os.tmpdir());
     const unmaskedDir = path.resolve(dirName, "unmasked");
     const maskedDir = path.resolve(dirName, "masked");
@@ -34,6 +51,7 @@ module.exports = async function transferExams(session) {
     log.info("Finished downloading exams");
 
     session.state = "postdownloading";
+    await saveSession();
     log.info("Starting pnr-masking");
 
     for (const { userId } of list) {
@@ -43,6 +61,7 @@ module.exports = async function transferExams(session) {
       );
     }
     session.state = "preuploading";
+    await saveSession();
     log.info("Checking if assignment is published");
     const assignment = await canvas.getValidAssignment(session.courseId);
 
@@ -56,6 +75,7 @@ module.exports = async function transferExams(session) {
       }
 
       session.state = "uploading";
+      await saveSession();
 
       // TODO: upload exams to the published assignment
       for (const { userId } of list) {
@@ -70,13 +90,18 @@ module.exports = async function transferExams(session) {
     }
 
     session.state = "success";
+    await saveSession();
   } catch (err) {
     log.error({ err });
-    session.error = {
-      message: err.message,
-      code: err.code,
-      name: err.name,
-    };
-    session.state = "error";
+
+    if (err.name !== "SessionError") {
+      session.error = {
+        message: err.message,
+        code: err.code,
+        name: err.name,
+      };
+      session.state = "error";
+      await saveSession();
+    }
   }
 };
