@@ -29,19 +29,12 @@ if (process.env.NODE_ENV === "development") {
  * the response with a 401 Unauthorized.
  */
 function getSession(req, res) {
-  const auth = req.get("authorization");
-  if (auth && auth.startsWith("Bearer")) {
-    const token = auth.slice(6).trim();
-    const session = sessions.get(token);
-
-    if (session) {
-      return session;
-    }
+  if (!req.session) {
+    return res.status(401).json({
+      message: "Unauthorized",
+    });
   }
-
-  res.status(401).send({ message: "Unauthorized" });
-
-  return null;
+  return req.session;
 }
 
 module.exports = {

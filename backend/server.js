@@ -63,7 +63,13 @@ server.use(cookieParser());
 // - /auth       routes for the authorization process
 // - /_monitor   just the monitor page
 server.post("/scanned-exams", async (req, res) => {
-  req.session.courseId = req.body.custom_courseid;
+  req.session.courseId = 30247;
+  req.session.examination = {
+    courseCode: "XY0101",
+    examCode: "ZZZ1",
+    examDate: "2100-01-01",
+  };
+
   log.info("Enter /");
   const html = await fs.readFile("index.html", { encoding: "utf-8" });
 
@@ -79,10 +85,6 @@ server.post("/scanned-exams", async (req, res) => {
         .replace("{{COURSE_ID}}", req.body.custom_courseid)
         .replace("{{DOMAIN}}", req.body.custom_domain)
     );
-});
-server.get("/scanned-exams", (req, res) => {
-  log.info("Enter /");
-  res.status(200).send("Yay");
 });
 server.use("/scanned-exams/auth", authRouter);
 server.use("/scanned-exams/api", apiRouter);

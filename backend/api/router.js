@@ -5,36 +5,38 @@ const transferExams = require("./transferExams.js");
 
 const router = express.Router();
 
-router.get("/assignment", async (req, res) => {
-  const session = sessions.getSession(req, res);
-
-  if (session) {
-    const assignment = await canvas.getValidAssignment(session.courseId);
-
-    res.send({
-      assignment,
+function checkCourseId(req, res, next) {
+  if (!req.session.courseId) {
+    return res.status(401).json({
+      message: "Unauthorized",
     });
   }
+
+  next();
+}
+
+router.get("/assignment", checkCourseId, async (req, res) => {
+  const assignment = await canvas.getValidAssignment(req.session.courseId);
+
+  res.json({
+    assignment,
+  });
 });
 
-router.post("/assignment", async (req, res) => {
-  const session = sessions.getSession(req, res);
+router.post("/assignment", checkCourseId, async (req, res) => {
+  let assignment = await canvas.getValidAssignment(req.session.courseId);
 
-  if (session) {
-    let assignment = await canvas.getValidAssignment(session.courseId);
-
-    if (!assignment) {
-      assignment = await canvas.createAssignment(
-        session.courseId,
-        session.examination
-      );
-    }
-
-    res.send({
-      message: "Assignment created successfully",
-      assignment,
-    });
+  if (!assignment) {
+    assignment = await canvas.createAssignment(
+      req.session.courseId,
+      req.session.examination
+    );
   }
+
+  res.json({
+    message: "Assignment created successfully",
+    assignment,
+  });
 });
 
 router.post("/exams", (req, res) => {
@@ -43,7 +45,7 @@ router.post("/exams", (req, res) => {
   if (session) {
     transferExams(session);
 
-    res.send({
+    res.json({
       message: "Exam uploading started",
     });
   }
@@ -53,7 +55,7 @@ router.get("/exams", (req, res) => {
   const session = sessions.getSession(req, res);
 
   if (session) {
-    res.send({
+    res.json({
       state: session.state,
       error: session.error,
     });
