@@ -19,6 +19,7 @@ require("@kth/reqvars").check();
 
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const session = require("express-session");
 const path = require("path");
 const apiRouter = require("./api/router");
 const authRouter = require("./auth/router");
@@ -27,6 +28,20 @@ const fs = require("fs/promises");
 
 const PORT = 4000;
 const server = express();
+
+server.set("trust proxy", 1);
+server.use(
+  session({
+    cookie: {
+      domain: "kth.se",
+      maxAge: 3600 * 1000 /* 1 hour */,
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    },
+    secret: process.env.SESSION_SECRET,
+  })
+);
 
 server.use(log.middleware);
 server.use(express.urlencoded());
@@ -40,6 +55,7 @@ server.use(cookieParser());
 // - /auth       routes for the authorization process
 // - /_monitor   just the monitor page
 server.post("/scanned-exams", async (req, res) => {
+  req.session.courseId = req.body.custom_courseid;
   log.info("Enter /");
   const html = await fs.readFile("index.html", { encoding: "utf-8" });
 
