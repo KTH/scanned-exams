@@ -1,5 +1,4 @@
 const express = require("express");
-const sessions = require("./sessions");
 const canvas = require("./canvasApiClient");
 const transferExams = require("./transferExams.js");
 
