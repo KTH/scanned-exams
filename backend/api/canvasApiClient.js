@@ -8,6 +8,20 @@ const canvas = new Canvas(
   process.env.CANVAS_API_ADMIN_TOKEN
 );
 
+async function getExaminationId(courseId) {
+  const sections = await canvas.list(`courses/${courseId}/sections`).toArray();
+
+  const ids = Array.from(
+    new Set(sections.map((section) => section.sis_section_id.split(".")[1]))
+  );
+
+  if (ids.length > 1) {
+    console.log("NOT SUPPORTED!!!");
+  } else {
+    return ids[0];
+  }
+}
+
 async function getValidAssignment(courseId) {
   const assignments = await canvas
     .list(`courses/${courseId}/assignments`)
@@ -107,6 +121,7 @@ async function uploadExam(filePath, courseId, assignmentId, userId) {
 }
 
 module.exports = {
+  getExaminationId,
   getValidAssignment,
   createAssignment,
   publishAssignment,

@@ -25,6 +25,8 @@ const apiRouter = require("./api/router");
 const authRouter = require("./auth/router");
 const monitor = require("./monitor");
 const fs = require("fs/promises");
+const canvasApi = require("./api/canvasApiClient");
+const tentaApi = require("./api/tentaApiClient");
 
 const PORT = 4000;
 const server = express();
@@ -63,12 +65,10 @@ server.use(cookieParser());
 // - /auth       routes for the authorization process
 // - /_monitor   just the monitor page
 server.post("/scanned-exams", async (req, res) => {
-  req.session.courseId = 30247;
-  req.session.examination = {
-    courseCode: "XY0101",
-    examCode: "ZZZ1",
-    examDate: "2100-01-01",
-  };
+  const courseId = req.body.custom_courseid;
+  const examinationId = await canvasApi.getExaminationId(courseId);
+  req.session.courseId = courseId;
+  req.session.examination = await tentaApi.getExamination(examinationId);
   req.session.state = "idle";
 
   log.info("Enter /");
