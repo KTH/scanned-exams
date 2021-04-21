@@ -22,10 +22,10 @@
 
 1. Now you can go to https://localdev.kth.se/scanned-exams
 
-## Getting started (with explanations)
+---
 
-1. Install ImageMagick or GraphicsMagick to use the **mask personal number** feature
-1. Setup the required environmental variables as explained in `.env.in`
-1. Generate a SSH certificate for `https://localhost` and `https://localdev.kth.se`
+## Concepts
 
-   The name of the generated files should be `certs/key.pem` (for the key) and `certs/cert.pem` (for the certificate)
+### Tenta API
+
+This application makes requests to
