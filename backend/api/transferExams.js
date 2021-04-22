@@ -34,7 +34,7 @@ module.exports = async function transferExams(session) {
 
     session.state = "downloading";
     await saveSession();
-    const dirName = await fs.mkdtemp(os.tmpdir());
+    const dirName = await fs.mkdtemp(path.join(os.tmpdir(), 'scanned-exams'))
     const unmaskedDir = path.resolve(dirName, "unmasked");
     const maskedDir = path.resolve(dirName, "masked");
 
