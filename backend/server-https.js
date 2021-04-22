@@ -15,5 +15,5 @@ const httpsServer = https.createServer(
 );
 
 httpsServer.listen(4443, () => {
-  log.info("Started HTTPS server in https://localhost:443");
+  log.info("Started HTTPS server in https://localhost:4443");
 });
