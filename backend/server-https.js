@@ -1,5 +1,6 @@
 const server = require("./server");
 const fs = require("fs");
+require('dotenv').config()
 const https = require("https");
 const log = require("skog");
 
@@ -14,6 +15,6 @@ const httpsServer = https.createServer(
   server
 );
 
-httpsServer.listen(443, () => {
-  log.info("Started HTTPS server in https://localhost:443");
+httpsServer.listen(process.env.PORT ?? 443, () => {
+  log.info(`Started HTTPS server in https://localhost:${process.env.PORT}`);
 });
