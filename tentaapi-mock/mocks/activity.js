@@ -17,8 +17,8 @@ module.exports = function getActivity(uid) {
     benamning: { sv: "Omtentamen", en: "Re-exam" },
     borttagen: false,
     datumperiod: {
-      slutdatum: "2100-01-01", // IMPORTANT!!!
-      startdatum: "2100-01-01", // IMPORTANT!!!
+      slutdatum: "2021-01-01", // IMPORTANT!!!
+      startdatum: "2021-01-01", // IMPORTANT!!!
       link: [],
     },
     installd: false,

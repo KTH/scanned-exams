@@ -67,7 +67,7 @@ server.post("/scanned-exams", async (req, res) => {
   req.session.examination = {
     courseCode: "XY0101",
     examCode: "ZZZ1",
-    examDate: "2100-01-01",
+    examDate: "2021-01-01",
   };
   req.session.state = "idle";
 

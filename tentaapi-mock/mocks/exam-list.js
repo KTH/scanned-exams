@@ -6,7 +6,7 @@ module.exports = function getExamList({ courseCode, examCode, examDate }) {
   if (
     courseCode !== "XY0101" ||
     examCode !== "ZZZ1" ||
-    examDate !== "2100-01-01"
+    examDate !== "2021-01-01"
   )
     return;
 
