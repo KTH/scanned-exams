@@ -7,7 +7,11 @@ const path = require("path");
 const maskFile = require("./maskFile");
 
 module.exports = async function transferExams(session) {
-  if (session.state !== "idle") {
+  if (
+    session.state !== "idle" &&
+    session.state !== "success" &&
+    session.state !== "error"
+  ) {
     return;
   }
 
@@ -72,13 +76,23 @@ module.exports = async function transferExams(session) {
       await saveSession();
 
       for (const { userId } of list) {
-        log.info(`Uploading exam for ${userId}`);
-        await canvas.uploadExam(path.resolve(maskedDir, `${userId}.pdf`), {
+        const hasSubmission = await canvas.hasSubmission({
           courseId: session.courseId,
           assignmentId: assignment.id,
           userId,
-          examDate: session.examination.examDate,
         });
+
+        if (hasSubmission) {
+          log.info(`User ${userId} has already a submission. Skipping`);
+        } else {
+          log.info(`Uploading exam for ${userId}`);
+          await canvas.uploadExam(path.resolve(maskedDir, `${userId}.pdf`), {
+            courseId: session.courseId,
+            assignmentId: assignment.id,
+            userId,
+            examDate: session.examination.examDate,
+          });
+        }
       }
 
       await canvas.lockAssignment(session.courseId, assignment.id);
