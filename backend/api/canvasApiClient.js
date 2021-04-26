@@ -26,11 +26,16 @@ async function createAssignment(courseId, examination) {
           "This canvas assignment is meant to be used for scanned exams",
         submission_types: ["online_upload"],
         allowed_extensions: ["pdf"],
+        // TODO: save only the "Ladok UID" because `examination.courseCode` and
+        //       `examination.examCode` can be more than one
         // TODO: add more data to be able to filter out better?
         integration_data: examination,
         published: false,
         grading_type: "letter_grade",
-        // TODO: grading_standard_id: 1,
+        notify_of_update: false,
+        due_at: `${examination.examDate}T23:59:59Z`,
+        // TODO: take the grading standard from TentaAPI
+        //       grading_standard_id: 1,
       },
     })
     .then((r) => r.body);
