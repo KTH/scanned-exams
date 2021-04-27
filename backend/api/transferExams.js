@@ -67,6 +67,7 @@ module.exports = async function transferExams(session) {
 
     if (assignment) {
       // TODO: check that assignment.integration_data == session.examination
+      // TODO: publish the exam room if is unpublished
       const alreadyPublished = assignment.published;
 
       if (!alreadyPublished) {

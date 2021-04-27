@@ -6,6 +6,24 @@ const client = got.extend({
   prefixUrl: process.env.TENTA_API_URL,
 });
 
+/** Get the courseCode, examCode, examDate given the Ladok UID */
+async function getExamination(ladokId) {
+  const { body } = await client(`Ladok/activity/${ladokId}`, {
+    responseType: "json",
+  });
+
+  const allCodes = body.kopplingar.map((k) => ({
+    examCode: k.aktivitet.utbildningskod,
+    courseCode: k.kursinstans.utbildningskod,
+  }));
+
+  return {
+    courseCode: allCodes[0].courseCode,
+    examCode: allCodes[0].examCode,
+    examDate: body.datumperiod.startdatum,
+  };
+}
+
 /** Get a list of all exam files for a given exam */
 async function examList({ courseCode, examDate, examCode }) {
   log.info(`Getting exams for ${courseCode} ${examDate} ${examCode}`);
@@ -71,4 +89,5 @@ async function downloadExam(fileId, filePath) {
 module.exports = {
   examList,
   downloadExam,
+  getExamination,
 };
