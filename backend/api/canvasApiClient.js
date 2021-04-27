@@ -18,7 +18,8 @@ async function getExaminationLadokId(courseId) {
     (section) => section.sis_section_id.match(REGEX)?.[1]
   );
 
-  // Deduplicate
+  // Deduplicate IDs (there are usually one "funka" and one "non-funka" with
+  // the same Ladok ID)
   const uniqueIds = Array.from(new Set(sisIds));
 
   // Right now we are not supporting rooms with more than one examination
