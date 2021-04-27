@@ -8,17 +8,24 @@ const canvas = new Canvas(
   process.env.CANVAS_API_ADMIN_TOKEN
 );
 
-async function getExaminationId(courseId) {
+/** Get the Ladok UID of the examination linked with a canvas course */
+async function getExaminationLadokId(courseId) {
   const sections = await canvas.list(`courses/${courseId}/sections`).toArray();
 
-  const ids = Array.from(
-    new Set(sections.map((section) => section.sis_section_id.split(".")[1]))
+  // For SIS IDs with format "AKT.<ladok id>.<suffix>", take the "<ladok id>"
+  const REGEX = /^AKT\.([\w-]+)/;
+  const sisIds = sections.map(
+    (section) => section.sis_section_id.match(REGEX)?.[1]
   );
 
-  if (ids.length > 1) {
+  // Deduplicate
+  const uniqueIds = Array.from(new Set(sisIds));
+
+  // Right now we are not supporting rooms with more than one examination
+  if (uniqueIds.length > 1) {
     console.log("NOT SUPPORTED!!!");
   } else {
-    return ids[0];
+    return uniqueIds[0];
   }
 }
 
@@ -121,7 +128,7 @@ async function uploadExam(filePath, courseId, assignmentId, userId) {
 }
 
 module.exports = {
-  getExaminationId,
+  getExaminationLadokId,
   getValidAssignment,
   createAssignment,
   publishAssignment,

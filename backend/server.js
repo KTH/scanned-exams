@@ -66,9 +66,9 @@ server.use(cookieParser());
 // - /_monitor   just the monitor page
 server.post("/scanned-exams", async (req, res) => {
   const courseId = req.body.custom_courseid;
-  const examinationId = await canvasApi.getExaminationId(courseId);
+  const ladokId = await canvasApi.getExaminationLadokId(courseId);
   req.session.courseId = courseId;
-  req.session.examination = await tentaApi.getExamination(examinationId);
+  req.session.examination = await tentaApi.getExamination(ladokId);
   req.session.state = "idle";
 
   log.info("Enter /");
