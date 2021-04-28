@@ -30,14 +30,17 @@ router.post("/", (req, res) => {
   const url = client.authorizationUrl({
     state,
   });
+  req.session.temporalState = state;
 
-  res.cookie("scanned_exams_state", state).redirect(url);
+  res.redirect(url);
 });
 
 router.get("/callback", async (req, res) => {
   const tokenSet = await client.oauthCallback(OAUTH_REDIRECT_URI, req.query, {
-    state: req.cookies["scanned_exams_state"],
+    state: req.session.temporalState,
   });
+
+  req.session.temporalState = undefined;
 
   // TODO: Verify if user is "acting as"
   // TODO: What happens if there is no "tokenSet"?
