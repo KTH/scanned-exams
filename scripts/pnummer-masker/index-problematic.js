@@ -1,4 +1,4 @@
-const maskFile = require("./mask-file");
+const maskFile = require("../../backend/api/maskFile");
 
 const path = require("path");
 const fs = require("fs");

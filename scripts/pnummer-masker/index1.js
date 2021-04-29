@@ -1,5 +1,5 @@
 const path = require("path");
-const maskFile = require("./mask-file");
+const maskFile = require("../../backend/api/maskFile");
 
 maskFile(
   path.resolve(__dirname, "test/input1.pdf"),
