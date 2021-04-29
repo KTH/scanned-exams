@@ -30,11 +30,24 @@ module.exports = async function transferExams(session) {
     session.state = "predownloading";
     await saveSession();
     log.info("predownloading...");
-    const list = await tentaApi.examList(session.examination);
+    const { activities, examDate } = await tentaApi.getExamination(
+      session.ladokId
+    );
+    const examList = [];
+
+    for (const activity of activities) {
+      const list = await tentaApi.examList({
+        courseCode: activity.courseCode,
+        examCode: activity.examCode,
+        examDate,
+      });
+
+      examList.push(...list);
+    }
 
     session.state = "downloading";
     await saveSession();
-    const dirName = await fs.mkdtemp(path.join(os.tmpdir(), 'scanned-exams'))
+    const dirName = await fs.mkdtemp(path.join(os.tmpdir(), "scanned-exams"));
     const unmaskedDir = path.resolve(dirName, "unmasked");
     // const maskedDir = path.resolve(dirName, "masked");
 
@@ -42,7 +55,7 @@ module.exports = async function transferExams(session) {
     fs.mkdir(unmaskedDir, { recursive: true });
     // fs.mkdir(maskedDir, { recursive: true });
 
-    for (const { userId, fileId } of list) {
+    for (const { userId, fileId } of examList) {
       await tentaApi.downloadExam(
         fileId,
         path.resolve(unmaskedDir, `${userId}.pdf`)
@@ -79,7 +92,7 @@ module.exports = async function transferExams(session) {
       await saveSession();
 
       // TODO: upload exams to the published assignment
-      for (const { userId } of list) {
+      for (const { userId } of examList) {
         log.info(`Uploading exam for ${userId}`);
         await canvas.uploadExam(
           path.resolve(unmaskedDir, `${userId}.pdf`),

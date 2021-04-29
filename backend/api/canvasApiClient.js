@@ -30,16 +30,18 @@ async function getExaminationLadokId(courseId) {
   }
 }
 
-async function getValidAssignment(courseId) {
+async function getValidAssignment(courseId, ladokId) {
   const assignments = await canvas
     .list(`courses/${courseId}/assignments`)
     .toArray();
 
   // TODO: Filter more strictly?
-  return assignments.find((a) => a.integration_data.courseCode) ?? null;
+  return (
+    assignments.find((a) => a.integration_data?.ladokId === ladokId) ?? null
+  );
 }
 
-async function createAssignment(courseId, examination) {
+async function createAssignment(courseId, ladokId) {
   return canvas
     .requestUrl(`courses/${courseId}/assignments`, "POST", {
       assignment: {
@@ -49,7 +51,9 @@ async function createAssignment(courseId, examination) {
         submission_types: ["online_upload"],
         allowed_extensions: ["pdf"],
         // TODO: add more data to be able to filter out better?
-        integration_data: examination,
+        integration_data: {
+          ladokId,
+        },
         published: false,
         grading_type: "letter_grade",
         // TODO: grading_standard_id: 1,

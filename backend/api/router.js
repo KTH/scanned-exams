@@ -23,12 +23,15 @@ router.get("/assignment", checkCourseId, async (req, res) => {
 });
 
 router.post("/assignment", checkCourseId, async (req, res) => {
-  let assignment = await canvas.getValidAssignment(req.session.courseId);
+  let assignment = await canvas.getValidAssignment(
+    req.session.courseId,
+    req.session.ladokId
+  );
 
   if (!assignment) {
     assignment = await canvas.createAssignment(
       req.session.courseId,
-      req.session.examination
+      req.session.ladokId
     );
   }
 

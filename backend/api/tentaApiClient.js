@@ -6,20 +6,17 @@ const client = got.extend({
   prefixUrl: process.env.TENTA_API_URL,
 });
 
-/** Get the courseCode, examCode, examDate given the Ladok UID */
+/** Get the examDate and codes (examCode-courseCode) given the Ladok UID */
 async function getExamination(ladokId) {
   const { body } = await client(`Ladok/activity/${ladokId}`, {
     responseType: "json",
   });
 
-  const allCodes = body.kopplingar.map((k) => ({
-    examCode: k.aktivitet.utbildningskod,
-    courseCode: k.kursinstans.utbildningskod,
-  }));
-
   return {
-    courseCode: allCodes[0].courseCode,
-    examCode: allCodes[0].examCode,
+    activities: body.kopplingar.map((k) => ({
+      examCode: k.aktivitet.utbildningskod,
+      courseCode: k.kursinstans.utbildningskod,
+    })),
     examDate: body.datumperiod.startdatum,
   };
 }
