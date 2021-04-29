@@ -11,7 +11,9 @@
   "author": "KTH Royal Institute of Technology <vc.developers@kth.se> (https:kth.se)",
   "license": "MIT",
   "dependencies": {
+    "@kth/canvas-api": "^3.0.2",
     "gm": "^1.23.1",
+    "inquirer": "^8.0.0",
     "pdfkit": "^0.12.0",
     "rimraf": "^2.7.1"
   }
