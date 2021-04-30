@@ -128,9 +128,19 @@ async function uploadExam(filePath, courseId, assignmentId, userId) {
   );
 }
 
+/** Return the roles of a user in a course */
+async function getRoles(courseId, userId) {
+  const enrollments = await canvas
+    .list(`courses/${courseId}/enrollments`, { user_id: userId })
+    .toArray();
+
+  return enrollments.map((enr) => enr.role_id);
+}
+
 module.exports = {
   getExaminationLadokId,
   getValidAssignment,
+  getRoles,
   createAssignment,
   publishAssignment,
   unPublishAssignment,
