@@ -1,7 +1,0 @@
-all/input
-all/output
-test
-problematic/input
-problematic/output
-node_modules
-.DS_Store

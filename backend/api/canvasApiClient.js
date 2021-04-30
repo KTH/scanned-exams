@@ -8,6 +8,28 @@ const canvas = new Canvas(
   process.env.CANVAS_API_ADMIN_TOKEN
 );
 
+/** Get the Ladok UID of the examination linked with a canvas course */
+async function getExaminationLadokId(courseId) {
+  const sections = await canvas.list(`courses/${courseId}/sections`).toArray();
+
+  // For SIS IDs with format "AKT.<ladok id>.<suffix>", take the "<ladok id>"
+  const REGEX = /^AKT\.([\w-]+)/;
+  const sisIds = sections.map(
+    (section) => section.sis_section_id.match(REGEX)?.[1]
+  );
+
+  // Deduplicate IDs (there are usually one "funka" and one "non-funka" with
+  // the same Ladok ID)
+  const uniqueIds = Array.from(new Set(sisIds));
+
+  // Right now we are not supporting rooms with more than one examination
+  if (uniqueIds.length > 1) {
+    console.log("NOT SUPPORTED!!!");
+  } else {
+    return uniqueIds[0];
+  }
+}
+
 async function getValidAssignment(courseId) {
   const assignments = await canvas
     .list(`courses/${courseId}/assignments`)
@@ -134,8 +156,19 @@ async function uploadExam(
   );
 }
 
+/** Return the roles of a user in a course */
+async function getRoles(courseId, userId) {
+  const enrollments = await canvas
+    .list(`courses/${courseId}/enrollments`, { user_id: userId })
+    .toArray();
+
+  return enrollments.map((enr) => enr.role_id);
+}
+
 module.exports = {
+  getExaminationLadokId,
   getValidAssignment,
+  getRoles,
   createAssignment,
   unlockAssignment,
   lockAssignment,

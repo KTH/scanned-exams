@@ -1,10 +1,10 @@
-const maskFile = require("./mask-file");
+const maskFile = require("../../backend/api/maskFile");
 
 const path = require("path");
 const fs = require("fs");
 
-const inputPath = path.resolve(__dirname, "problematic/input");
-const outputPath = path.resolve(__dirname, "problematic/output");
+const inputPath = path.resolve(__dirname, "all/input");
+const outputPath = path.resolve(__dirname, "all/output");
 
 // Loop through all files in "directory". Return the paths relative to all directories
 function* getFiles(directory, ...otherDirectories) {

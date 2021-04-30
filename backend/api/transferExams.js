@@ -4,7 +4,7 @@ const canvas = require("./canvasApiClient");
 const fs = require("fs/promises");
 const os = require("os");
 const path = require("path");
-const maskFile = require("./maskFile");
+// const maskFile = require("./maskFile");
 
 module.exports = async function transferExams(session) {
   if (
@@ -40,11 +40,11 @@ module.exports = async function transferExams(session) {
     await saveSession();
     const dirName = await fs.mkdtemp(path.join(os.tmpdir(), "scanned-exams"));
     const unmaskedDir = path.resolve(dirName, "unmasked");
-    const maskedDir = path.resolve(dirName, "masked");
+    // const maskedDir = path.resolve(dirName, "masked");
 
     log.info(`Created directory ${dirName}`);
     fs.mkdir(unmaskedDir, { recursive: true });
-    fs.mkdir(maskedDir, { recursive: true });
+    // fs.mkdir(maskedDir, { recursive: true });
 
     for (const { userId, fileId } of list) {
       await tentaApi.downloadExam(
@@ -58,12 +58,12 @@ module.exports = async function transferExams(session) {
     await saveSession();
     log.info("Starting pnr-masking");
 
-    for (const { userId } of list) {
-      await maskFile(
-        path.resolve(unmaskedDir, `${userId}.pdf`),
-        path.resolve(maskedDir, `${userId}.pdf`)
-      );
-    }
+    // for (const { userId } of list) {
+    //   await maskFile(
+    //     path.resolve(unmaskedDir, `${userId}.pdf`),
+    //     path.resolve(maskedDir, `${userId}.pdf`)
+    //   );
+    // }
     session.state = "preuploading";
     await saveSession();
     log.info("Checking if assignment is published");
@@ -86,7 +86,7 @@ module.exports = async function transferExams(session) {
           log.info(`User ${userId} has already a submission. Skipping`);
         } else {
           log.info(`Uploading exam for ${userId}`);
-          await canvas.uploadExam(path.resolve(maskedDir, `${userId}.pdf`), {
+          await canvas.uploadExam(path.resolve(unmaskedDir, `${userId}.pdf`), {
             courseId: session.courseId,
             assignmentId: assignment.id,
             userId,

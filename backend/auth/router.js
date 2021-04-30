@@ -2,6 +2,7 @@ const express = require("express");
 const { Issuer, generators } = require("openid-client");
 const router = express.Router();
 const { URL } = require("url");
+const canvas = require("../api/canvasApiClient");
 
 const OAUTH_REDIRECT_URI = new URL(
   "/scanned-exams/auth/callback",
@@ -29,21 +30,30 @@ router.post("/", (req, res) => {
   const url = client.authorizationUrl({
     state,
   });
+  req.session.temporalState = state;
 
-  res.cookie("scanned_exams_state", state).redirect(url);
+  res.redirect(url);
 });
 
 router.get("/callback", async (req, res) => {
   const tokenSet = await client.oauthCallback(OAUTH_REDIRECT_URI, req.query, {
-    state: req.cookies["scanned_exams_state"],
+    state: req.session.temporalState,
   });
 
-  // At this point we have the users' access token.
-  // console.log(tokenSet.access_token);
-  console.log(tokenSet);
-  // TODO: verify user identity and permissions based on req.query.courseId and tokenSet.user
+  req.session.temporalState = undefined;
 
-  res.redirect("/scanned-exams/app");
+  // TODO: Verify if user is "acting as"
+  // TODO: What happens if there is no "tokenSet"?
+  const roles = await canvas.getRoles(req.session.courseId, tokenSet.user.id);
+
+  // 4 = teacher, 10 = examiner
+  if (roles.includes(4) || roles.includes(10)) {
+    req.session.userId = tokenSet.user.id;
+    return res.redirect("/scanned-exams/app");
+  }
+
+  // TODO: Create a better "unauthorized" page
+  res.status(403).send("You should be a teacher or examiner to use this app");
 });
 
 module.exports = router;
