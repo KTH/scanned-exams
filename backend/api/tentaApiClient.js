@@ -65,7 +65,7 @@ async function examList({ courseCode, examDate, examCode }) {
 
     if (keyValue && keyValue.value) {
       list.push({
-        fileId: result.id,
+        fileId: result.fileId,
         userId: keyValue.value,
       });
     }
