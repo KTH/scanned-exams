@@ -68,6 +68,21 @@ server.post("/scanned-exams", async (req, res) => {
   if (req.session.userId) {
     return res.redirect("/scanned-exams/app");
   }
+  log.info("Enter /");
+
+  if (
+    !process.env.CANVAS_API_URL.startsWith(`https://${req.body.custom_domain}`)
+  ) {
+    log.warn(
+      `This app is configured for ${process.env.CANVAS_API_URL} but you are running it from ${req.body.custom_domain}`
+    );
+
+    return res
+      .status(400)
+      .send(
+        `This app is configured for ${process.env.CANVAS_API_URL} but you are running it from ${req.body.custom_domain}`
+      );
+  }
 
   const courseId = req.body.custom_courseid;
   const ladokId = await canvasApi.getExaminationLadokId(courseId);
@@ -76,7 +91,6 @@ server.post("/scanned-exams", async (req, res) => {
   req.session.state = "idle";
   req.session.userId = null;
 
-  log.info("Enter /");
   const html = await fs.readFile("index.html", { encoding: "utf-8" });
 
   // TODO: if domain is kth.test.instructure.com > Redirect to the app in referens
