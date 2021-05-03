@@ -54,11 +54,17 @@ router.get("/callback", async (req, res) => {
 
     // 4 = teacher, 10 = examiner
     if (roles.includes(4) || roles.includes(10)) {
+      log.info(
+        `Authorized. User ${tokenSet.user.id} in Course ${req.session.courseId} has roles: [${roles}].`
+      );
       req.session.userId = tokenSet.user.id;
       return res.redirect("/scanned-exams/app");
     }
 
     // TODO: Create a better "unauthorized" page
+    log.warn(
+      `Not authorized. User ${tokenSet.user.id} in Course ${req.session.courseId} has roles: [${roles}].`
+    );
     res.status(403).send("You should be a teacher or examiner to use this app");
   } catch (err) {
     log.error({ err });
