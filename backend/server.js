@@ -39,7 +39,9 @@ server.use(
       maxAge: 3600 * 1000 /* 1 hour */,
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: process.env.CANVAS_API_URL.endsWith("kth.se")
+        ? "strict"
+        : "none",
     },
     secret: process.env.SESSION_SECRET,
   })
