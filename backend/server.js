@@ -84,26 +84,31 @@ server.post("/scanned-exams", async (req, res) => {
       );
   }
 
-  const courseId = req.body.custom_courseid;
-  const ladokId = await canvasApi.getExaminationLadokId(courseId);
-  req.session.courseId = courseId;
-  req.session.examination = await tentaApi.getExamination(ladokId);
-  req.session.state = "idle";
-  req.session.userId = null;
+  try {
+    const courseId = req.body.custom_courseid;
+    const ladokId = await canvasApi.getExaminationLadokId(courseId);
+    req.session.courseId = courseId;
+    req.session.examination = await tentaApi.getExamination(ladokId);
+    req.session.state = "idle";
+    req.session.userId = null;
 
-  const html = await fs.readFile("index.html", { encoding: "utf-8" });
+    const html = await fs.readFile("index.html", { encoding: "utf-8" });
 
-  // TODO: if domain is kth.test.instructure.com > Redirect to the app in referens
-  // TODO: if domain is kth.instructure.com > Show a message encouraging people to use "canvas.kth.se"
-  // TODO: set a cookie to check from client-side JS that the cookie is set correctly
+    // TODO: if domain is kth.test.instructure.com > Redirect to the app in referens
+    // TODO: if domain is kth.instructure.com > Show a message encouraging people to use "canvas.kth.se"
+    // TODO: set a cookie to check from client-side JS that the cookie is set correctly
 
-  res
-    .status(200)
-    .send(
-      html
-        .replace("{{COURSE_ID}}", req.body.custom_courseid)
-        .replace("{{DOMAIN}}", req.body.custom_domain)
-    );
+    res
+      .status(200)
+      .send(
+        html
+          .replace("{{COURSE_ID}}", req.body.custom_courseid)
+          .replace("{{DOMAIN}}", req.body.custom_domain)
+      );
+  } catch (err) {
+    log.error({ err });
+    res.status(500).send("Unknown error. Please contact IT support");
+  }
 });
 server.use("/scanned-exams/auth", authRouter);
 server.use("/scanned-exams/api", apiRouter);
