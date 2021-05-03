@@ -84,11 +84,11 @@ async function start() {
       },
       {
         name: "stage (referens)",
-        value: "https://api-r.referens.sys.kth.se/scanned-exams",
+        value: "https://app-r.referens.sys.kth.se/scanned-exams",
       },
       {
         name: "production (app.kth.se)",
-        value: "https://api.kth.se/scanned-exams",
+        value: "https://app.kth.se/scanned-exams",
       },
     ],
   });
@@ -97,7 +97,7 @@ async function start() {
 
   if (buttonUrl === "https://localdev.kth.se:4443/scanned-exams") {
     defaultName = "Scanned Exams - localdev.kth.se";
-  } else if (buttonUrl === "https://api-r.referens.sys.kth.se/scanned-exams") {
+  } else if (buttonUrl === "https://app-r.referens.sys.kth.se/scanned-exams") {
     defaultName = "Scanned exams - referens";
   }
 
@@ -117,7 +117,7 @@ async function start() {
       enabled: true,
       text: buttonName,
       visibility: "admins",
-      windowTarget: "_self",
+      windowTarget: "_blank",
     },
     custom_fields: {
       domain: "$Canvas.api.domain",
