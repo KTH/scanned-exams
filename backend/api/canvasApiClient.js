@@ -23,6 +23,7 @@ async function getExaminationLadokId(courseId) {
   const uniqueIds = Array.from(new Set(sisIds));
 
   // Right now we are not supporting rooms with more than one examination
+  // uniqueIds = { sisIds: [ undefined ] }
   if (uniqueIds.length > 1) {
     console.log("NOT SUPPORTED!!!");
   } else {
