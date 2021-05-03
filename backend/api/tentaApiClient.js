@@ -8,6 +8,8 @@ const client = got.extend({
 
 /** Get the courseCode, examCode, examDate given the Ladok UID */
 async function getExamination(ladokId) {
+  log.info(`Getting information for examination ${ladokId}`);
+
   const { body } = await client(`Ladok/activity/${ladokId}`, {
     responseType: "json",
   });
