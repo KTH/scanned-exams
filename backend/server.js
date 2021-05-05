@@ -26,6 +26,7 @@ const authRouter = require("./auth/router");
 const monitor = require("./monitor");
 const fs = require("fs/promises");
 const canvasApi = require("./api/canvasApiClient");
+const tentaApi = require("./api/tentaApiClient");
 
 const PORT = 4000;
 const server = express();
@@ -95,7 +96,7 @@ server.post("/scanned-exams", async (req, res) => {
     const courseId = req.body.custom_courseid;
     const ladokId = await canvasApi.getExaminationLadokId(courseId);
     req.session.courseId = courseId;
-    req.session.examination = await tentaApi.getExamination(ladokId);
+    req.session.examination = await tentaApi.getAktivitetstillfalle(ladokId);
     req.session.state = "idle";
     req.session.userId = null;
 
