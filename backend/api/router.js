@@ -22,7 +22,7 @@ router.get("/assignment", async (req, res) => {
   });
 });
 
-router.post("/assignment", checkCourseId, async (req, res) => {
+router.post("/assignment", async (req, res) => {
   let assignment = await canvas.getValidAssignment(
     req.session.courseId,
     req.session.ladokId
