@@ -30,7 +30,7 @@ module.exports = async function transferExams(session) {
     session.state = "predownloading";
     await saveSession();
     log.info("predownloading...");
-    const { activities, examDate } = await tentaApi.getExamination(
+    const { activities, examDate } = await tentaApi.getAktivitetstillfalle(
       session.ladokId
     );
     const examList = [];

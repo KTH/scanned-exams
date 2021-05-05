@@ -7,7 +7,7 @@ const client = got.extend({
 });
 
 /** Get the examDate and codes (examCode-courseCode) given the Ladok UID */
-async function getExamination(ladokId) {
+async function getAktivitetstillfalle(ladokId) {
   const { body } = await client(`Ladok/activity/${ladokId}`, {
     responseType: "json",
   });
@@ -86,5 +86,5 @@ async function downloadExam(fileId, filePath) {
 module.exports = {
   examList,
   downloadExam,
-  getExamination,
+  getAktivitetstillfalle,
 };
