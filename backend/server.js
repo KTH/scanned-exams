@@ -70,6 +70,12 @@ server.post("/scanned-exams", async (req, res) => {
   if (req.session.userId) {
     return res.redirect("/scanned-exams/app");
   }
+  const courseId = req.body.custom_courseid;
+  const ladokId = await canvasApi.getExaminationLadokId(courseId);
+  req.session.courseId = courseId;
+  req.session.ladokId = ladokId;
+  req.session.state = "idle";
+
   log.info("Enter /");
 
   if (
@@ -90,7 +96,7 @@ server.post("/scanned-exams", async (req, res) => {
     const courseId = req.body.custom_courseid;
     const ladokId = await canvasApi.getExaminationLadokId(courseId);
     req.session.courseId = courseId;
-    req.session.examination = await tentaApi.getExamination(ladokId);
+    req.session.examination = await tentaApi.getAktivitetstillfalle(ladokId);
     req.session.state = "idle";
     req.session.userId = null;
 
