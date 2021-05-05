@@ -76,7 +76,10 @@ module.exports = async function transferExams(session) {
     session.state = "preuploading";
     await saveSession();
     log.info("Checking if assignment is published");
-    const assignment = await canvas.getValidAssignment(session.courseId);
+    const assignment = await canvas.getValidAssignment(
+      session.courseId,
+      session.ladokId
+    );
 
     if (assignment) {
       // TODO: check that assignment.integration_data == session.examination
