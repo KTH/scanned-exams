@@ -2,6 +2,8 @@ const express = require("express");
 const { Issuer, generators } = require("openid-client");
 const router = express.Router();
 const { URL } = require("url");
+const canvas = require("../api/canvasApiClient");
+const log = require("skog");
 
 const OAUTH_REDIRECT_URI = new URL(
   "/scanned-exams/auth/callback",
@@ -25,25 +27,53 @@ const client = new issuer.Client({
 });
 
 router.post("/", (req, res) => {
+  if (!req.session.courseId) {
+    log.warn("Cannot set cookies to the user");
+    return res.status(400).send("There are no cookies set. We cannot continue");
+  }
   const state = generators.state();
   const url = client.authorizationUrl({
     state,
   });
+  req.session.temporalState = state;
 
-  res.cookie("scanned_exams_state", state).redirect(url);
+  res.redirect(url);
 });
 
 router.get("/callback", async (req, res) => {
-  const tokenSet = await client.oauthCallback(OAUTH_REDIRECT_URI, req.query, {
-    state: req.cookies["scanned_exams_state"],
-  });
+  try {
+    const tokenSet = await client.oauthCallback(OAUTH_REDIRECT_URI, req.query, {
+      state: req.session.temporalState,
+    });
 
-  // At this point we have the users' access token.
-  // console.log(tokenSet.access_token);
-  console.log(tokenSet);
-  // TODO: verify user identity and permissions based on req.query.courseId and tokenSet.user
+    req.session.temporalState = undefined;
 
-  res.redirect("/scanned-exams/app");
+    // TODO: Verify if user is "acting as"
+    // TODO: What happens if there is no "tokenSet"?
+    const roles = await canvas.getRoles(req.session.courseId, tokenSet.user.id);
+
+    // 4 = teacher, 10 = examiner
+    if (roles.includes(4) || roles.includes(10)) {
+      log.info(
+        `Authorized. User ${tokenSet.user.id} in Course ${req.session.courseId} has roles: [${roles}].`
+      );
+      req.session.userId = tokenSet.user.id;
+      return res.redirect("/scanned-exams/app");
+    }
+
+    // TODO: Create a better "unauthorized" page
+    log.warn(
+      `Not authorized. User ${tokenSet.user.id} in Course ${req.session.courseId} has roles: [${roles}].`
+    );
+    res.status(403).send("You should be a teacher or examiner to use this app");
+  } catch (err) {
+    log.error({ err });
+    res
+      .status(500)
+      .send(
+        "Unknown error when accessing /auth/callback. Please contact IT support"
+      );
+  }
 });
 
 module.exports = router;

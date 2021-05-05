@@ -4,17 +4,17 @@ const transferExams = require("./transferExams.js");
 
 const router = express.Router();
 
-function checkCourseId(req, res, next) {
-  if (!req.session.courseId) {
+router.use(function checkAuthorization(req, res, next) {
+  if (!req.session.courseId || !req.session.userId) {
     return res.status(401).json({
       message: "Unauthorized",
     });
   }
 
   next();
-}
+});
 
-router.get("/assignment", checkCourseId, async (req, res) => {
+router.get("/assignment", async (req, res) => {
   const assignment = await canvas.getValidAssignment(req.session.courseId);
 
   res.json({

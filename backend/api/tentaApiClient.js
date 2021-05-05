@@ -8,6 +8,8 @@ const client = got.extend({
 
 /** Get the examDate and codes (examCode-courseCode) given the Ladok UID */
 async function getExamination(ladokId) {
+  log.info(`Getting information for examination ${ladokId}`);
+
   const { body } = await client(`Ladok/activity/${ladokId}`, {
     responseType: "json",
   });
@@ -60,7 +62,7 @@ async function examList({ courseCode, examDate, examCode }) {
 
     if (keyValue && keyValue.value) {
       list.push({
-        fileId: result.id,
+        fileId: result.fileId,
         userId: keyValue.value,
       });
     }
