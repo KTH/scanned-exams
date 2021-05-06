@@ -2,6 +2,7 @@ const Canvas = require("@kth/canvas-api");
 const FormData = require("formdata-node").default;
 const fs = require("fs");
 const got = require("got");
+const log = require("skog");
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,
@@ -108,30 +109,38 @@ async function sendFile({ upload_url, upload_params }, filePath) {
 }
 
 async function uploadExam(filePath, courseId, assignmentId, userId) {
-  const { body: user } = await canvas.get(`users/sis_user_id:${userId}`);
+  try {
+    const { body: user } = await canvas.get(`users/sis_user_id:${userId}`);
 
-  // TODO: will return a 400 if the course is unpublished
-  const { body: slot } = await canvas.requestUrl(
-    `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}/files`,
-    "POST",
-    {
-      name: `${userId}.pdf`,
+    // TODO: will return a 400 if the course is unpublished
+    const { body: slot } = await canvas.requestUrl(
+      `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}/files`,
+      "POST",
+      {
+        name: `${userId}.pdf`,
+      }
+    );
+
+    const { body: uploadedFile } = await sendFile(slot, filePath);
+
+    await canvas.requestUrl(
+      `courses/${courseId}/assignments/${assignmentId}/submissions/`,
+      "POST",
+      {
+        submission: {
+          submission_type: "online_upload",
+          user_id: user.id,
+          file_ids: [uploadedFile.id],
+        },
+      }
+    );
+  } catch (err) {
+    if (err.response?.statusCode === 404) {
+      log.warn(`User ${userId} is missing in Canvas course ${courseId}`);
+    } else {
+      throw err;
     }
-  );
-
-  const { body: uploadedFile } = await sendFile(slot, filePath);
-
-  await canvas.requestUrl(
-    `courses/${courseId}/assignments/${assignmentId}/submissions/`,
-    "POST",
-    {
-      submission: {
-        submission_type: "online_upload",
-        user_id: user.id,
-        file_ids: [uploadedFile.id],
-      },
-    }
-  );
+  }
 }
 
 /** Return the roles of a user in a course */
