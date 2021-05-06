@@ -67,33 +67,31 @@ server.use(cookieParser());
 // - /auth       routes for the authorization process
 // - /_monitor   just the monitor page
 server.post("/scanned-exams", async (req, res) => {
-  if (req.session.userId) {
-    return res.redirect("/scanned-exams/app");
-  }
-  const courseId = req.body.custom_courseid;
-  const ladokId = await canvasApi.getExaminationLadokId(courseId);
-  req.session.courseId = courseId;
-  req.session.ladokId = ladokId;
-  req.session.state = "idle";
+  try {
+    if (req.session.userId) {
+      log.info("POST /scanned-exams: user has a session. Redirecting to /app");
+      return res.redirect("/scanned-exams/app");
+    }
 
-  log.info("Enter /");
+    const domain = req.body.custom_domain;
+    const courseId = req.body.custom_courseid;
 
-  if (
-    !process.env.CANVAS_API_URL.startsWith(`https://${req.body.custom_domain}`)
-  ) {
-    log.warn(
-      `This app is configured for ${process.env.CANVAS_API_URL} but you are running it from ${req.body.custom_domain}`
+    log.info(
+      `POST /scanned-exams: user has launched the app from course ${courseId}`
     );
 
-    return res
-      .status(400)
-      .send(
-        `This app is configured for ${process.env.CANVAS_API_URL} but you are running it from ${req.body.custom_domain}`
+    if (!process.env.CANVAS_API_URL.startsWith(`https://${domain}`)) {
+      log.warn(
+        `This app is configured for ${process.env.CANVAS_API_URL} but you are running it from ${domain}`
       );
-  }
 
-  try {
-    const courseId = req.body.custom_courseid;
+      return res
+        .status(400)
+        .send(
+          `This app is configured for ${process.env.CANVAS_API_URL} but you are running it from ${domain}`
+        );
+    }
+
     const ladokId = await canvasApi.getExaminationLadokId(courseId);
     req.session.courseId = courseId;
     req.session.examination = await tentaApi.getAktivitetstillfalle(ladokId);
@@ -109,9 +107,7 @@ server.post("/scanned-exams", async (req, res) => {
     res
       .status(200)
       .send(
-        html
-          .replace("{{COURSE_ID}}", req.body.custom_courseid)
-          .replace("{{DOMAIN}}", req.body.custom_domain)
+        html.replace("{{COURSE_ID}}", courseId).replace("{{DOMAIN}}", domain)
       );
   } catch (err) {
     log.error({ err });
