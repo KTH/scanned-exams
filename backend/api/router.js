@@ -16,7 +16,10 @@ router.use(function checkAuthorization(req, res, next) {
 
 router.get("/assignment", async (req, res) => {
   try {
-    const assignment = await canvas.getValidAssignment(req.session.courseId);
+    const assignment = await canvas.getValidAssignment(
+      req.session.courseId,
+      req.session.ladokId
+    );
 
     res.json({
       assignment,
@@ -29,12 +32,15 @@ router.get("/assignment", async (req, res) => {
 
 router.post("/assignment", async (req, res) => {
   try {
-    let assignment = await canvas.getValidAssignment(req.session.courseId);
+    let assignment = await canvas.getValidAssignment(
+      req.session.courseId,
+      req.session.ladokId
+    );
 
     if (!assignment) {
       assignment = await canvas.createAssignment(
         req.session.courseId,
-        req.session.examination
+        req.session.ladokId
       );
     }
 

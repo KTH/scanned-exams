@@ -6,20 +6,18 @@ const client = got.extend({
   prefixUrl: process.env.TENTA_API_URL,
 });
 
-/** Get the courseCode, examCode, examDate given the Ladok UID */
-async function getExamination(ladokId) {
+/** Get the examDate and codes (examCode-courseCode) given the Ladok UID */
+async function getAktivitetstillfalle(ladokId) {
+  log.info(`Getting information for aktivitetstillfälle ${ladokId}`);
   const { body } = await client(`Ladok/activity/${ladokId}`, {
     responseType: "json",
   });
 
-  const allCodes = body.kopplingar.map((k) => ({
-    examCode: k.aktivitet.utbildningskod,
-    courseCode: k.kursinstans.utbildningskod,
-  }));
-
   return {
-    courseCode: allCodes[0].courseCode,
-    examCode: allCodes[0].examCode,
+    activities: body.kopplingar.map((k) => ({
+      examCode: k.aktivitet.utbildningskod,
+      courseCode: k.kursinstans.utbildningskod,
+    })),
     examDate: body.datumperiod.startdatum,
   };
 }
@@ -54,6 +52,13 @@ async function examList({ courseCode, examDate, examCode }) {
     responseType: "json",
   });
 
+  log.info({ body: JSON.stringify(body) });
+
+  if (!body.documentSearchResults) {
+    log.info(`No exams found for ${courseCode} ${examDate} ${examCode}`);
+    return [];
+  }
+
   const list = [];
 
   for (const result of body.documentSearchResults) {
@@ -63,7 +68,7 @@ async function examList({ courseCode, examDate, examCode }) {
 
     if (keyValue && keyValue.value) {
       list.push({
-        fileId: result.id,
+        fileId: result.fileId,
         userId: keyValue.value,
       });
     }
@@ -89,5 +94,5 @@ async function downloadExam(fileId, filePath) {
 module.exports = {
   examList,
   downloadExam,
-  getExamination,
+  getAktivitetstillfalle,
 };
