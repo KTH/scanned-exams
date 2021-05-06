@@ -15,7 +15,7 @@ async function getExaminationLadokId(courseId) {
   // For SIS IDs with format "AKT.<ladok id>.<suffix>", take the "<ladok id>"
   const REGEX = /^AKT\.([\w-]+)/;
   const sisIds = sections.map(
-    (section) => section.sis_section_id.match(REGEX)?.[1]
+    (section) => section.sis_section_id?.match(REGEX)?.[1]
   );
 
   // Deduplicate IDs (there are usually one "funka" and one "non-funka" with
