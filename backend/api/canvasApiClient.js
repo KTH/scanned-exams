@@ -14,17 +14,19 @@ async function getExaminationLadokId(courseId) {
 
   // For SIS IDs with format "AKT.<ladok id>.<suffix>", take the "<ladok id>"
   const REGEX = /^AKT\.([\w-]+)/;
-  const sisIds = sections.map(
-    (section) => section.sis_section_id?.match(REGEX)?.[1]
-  );
+  const sisIds = sections
+    .map((section) => section.sis_section_id?.match(REGEX)?.[1])
+    .filter((sisId) => sisId /* Filter out null and undefined */);
 
   // Deduplicate IDs (there are usually one "funka" and one "non-funka" with
   // the same Ladok ID)
   const uniqueIds = Array.from(new Set(sisIds));
 
   // Right now we are not supporting rooms with more than one examination
-  if (uniqueIds.length > 1) {
-    console.log("NOT SUPPORTED!!!");
+  if (uniqueIds.length !== 1) {
+    throw new Error(
+      `Course ${courseId} not supported: it is connected to ${uniqueIds.length} different Ladok Ids`
+    );
   } else {
     return uniqueIds[0];
   }
