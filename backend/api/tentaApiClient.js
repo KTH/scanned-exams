@@ -13,8 +13,8 @@ async function getAktivitetstillfalle(ladokId) {
     responseType: "json",
   });
 
-  logger.info(JSON.stringify(body.kopplingar ))
-  logger.info(JSON.stringify(body))
+  log.info(JSON.stringify(body.kopplingar ))
+  log.info(JSON.stringify(body))
 
   return {
     activities: body.kopplingar.map((k) => ({
