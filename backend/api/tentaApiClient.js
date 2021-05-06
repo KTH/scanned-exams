@@ -13,6 +13,9 @@ async function getAktivitetstillfalle(ladokId) {
     responseType: "json",
   });
 
+  logger.info(JSON.stringify(body.kopplingar )
+  logger.info(JSON.stringify(body)
+
   return {
     activities: body.kopplingar.map((k) => ({
       examCode: k.aktivitet.utbildningskod,
