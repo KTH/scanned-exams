@@ -13,9 +13,6 @@ async function getAktivitetstillfalle(ladokId) {
     responseType: "json",
   });
 
-  log.info(JSON.stringify(body.kopplingar));
-  log.info(JSON.stringify(body));
-
   return {
     activities: body.kopplingar.map((k) => ({
       examCode: k.aktivitet.utbildningskod,
@@ -54,6 +51,13 @@ async function examList({ courseCode, examDate, examCode }) {
     },
     responseType: "json",
   });
+
+  log.info({ body: JSON.stringify(body) });
+
+  if (!body.documentSearchResults) {
+    log.info(`No exams found for ${courseCode} ${examDate} ${examCode}`);
+    return [];
+  }
 
   const list = [];
 
