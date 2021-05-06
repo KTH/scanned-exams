@@ -54,6 +54,11 @@ async function examList({ courseCode, examDate, examCode }) {
 
   log.info({ body: JSON.stringify(body) });
 
+  if (!body.documentSearchResults) {
+    log.info(`No exams found for ${courseCode} ${examDate} ${examCode}`);
+    return [];
+  }
+
   const list = [];
 
   for (const result of body.documentSearchResults) {
