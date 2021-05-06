@@ -94,7 +94,7 @@ server.post("/scanned-exams", async (req, res) => {
 
     const ladokId = await canvasApi.getExaminationLadokId(courseId);
     req.session.courseId = courseId;
-    req.session.examination = await tentaApi.getAktivitetstillfalle(ladokId);
+    req.session.ladokId = ladokId;
     req.session.state = "idle";
     req.session.userId = null;
 
