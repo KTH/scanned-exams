@@ -1,7 +1,7 @@
 let currentBatch = 0;
 const batch1 = [
   {
-    id: 6,
+    fileId: 6,
     documentIndiceses: [
       {
         index: "s_uid",
@@ -10,7 +10,7 @@ const batch1 = [
     ],
   },
   {
-    id: 23,
+    fileId: 23,
     documentIndiceses: [
       {
         index: "s_uid",
@@ -22,7 +22,7 @@ const batch1 = [
 
 const batch2 = [
   {
-    id: 56,
+    fileId: 56,
     documentIndiceses: [
       {
         index: "s_uid",
@@ -34,7 +34,7 @@ const batch2 = [
 
 const batch3 = [
   {
-    id: 126,
+    fileId: 126,
     documentIndiceses: [
       {
         index: "s_uid",
@@ -43,7 +43,7 @@ const batch3 = [
     ],
   },
   {
-    id: 721,
+    fileId: 721,
     documentIndiceses: [
       {
         index: "s_uid",
@@ -52,7 +52,7 @@ const batch3 = [
     ],
   },
   {
-    id: 892,
+    fileId: 892,
     documentIndiceses: [
       {
         index: "s_uid",

@@ -14,33 +14,36 @@ async function getExaminationLadokId(courseId) {
 
   // For SIS IDs with format "AKT.<ladok id>.<suffix>", take the "<ladok id>"
   const REGEX = /^AKT\.([\w-]+)/;
-  const sisIds = sections.map(
-    (section) => section.sis_section_id.match(REGEX)?.[1]
-  );
+  const sisIds = sections
+    .map((section) => section.sis_section_id?.match(REGEX)?.[1])
+    .filter((sisId) => sisId /* Filter out null and undefined */);
 
   // Deduplicate IDs (there are usually one "funka" and one "non-funka" with
   // the same Ladok ID)
   const uniqueIds = Array.from(new Set(sisIds));
 
   // Right now we are not supporting rooms with more than one examination
-  // uniqueIds = { sisIds: [ undefined ] }
-  if (uniqueIds.length > 1) {
-    console.log("NOT SUPPORTED!!!");
+  if (uniqueIds.length !== 1) {
+    throw new Error(
+      `Course ${courseId} not supported: it is connected to ${uniqueIds.length} different Ladok Ids`
+    );
   } else {
     return uniqueIds[0];
   }
 }
 
-async function getValidAssignment(courseId) {
+async function getValidAssignment(courseId, ladokId) {
   const assignments = await canvas
     .list(`courses/${courseId}/assignments`)
     .toArray();
 
   // TODO: Filter more strictly?
-  return assignments.find((a) => a.integration_data.courseCode) ?? null;
+  return (
+    assignments.find((a) => a.integration_data?.ladokId === ladokId) ?? null
+  );
 }
 
-async function createAssignment(courseId, examination) {
+async function createAssignment(courseId, ladokId) {
   return canvas
     .requestUrl(`courses/${courseId}/assignments`, "POST", {
       assignment: {
@@ -52,7 +55,9 @@ async function createAssignment(courseId, examination) {
         // TODO: save only the "Ladok UID" because `examination.courseCode` and
         //       `examination.examCode` can be more than one
         // TODO: add more data to be able to filter out better?
-        integration_data: examination,
+        integration_data: {
+          ladokId,
+        },
         published: false,
         grading_type: "letter_grade",
         notify_of_update: false,

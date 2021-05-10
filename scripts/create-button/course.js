@@ -89,11 +89,11 @@ async function start() {
       },
       {
         name: "stage (referens)",
-        value: "https://api-r.referens.sys.kth.se/scanned-exams",
+        value: "https://app-r.referens.sys.kth.se/scanned-exams",
       },
       {
         name: "production (app.kth.se)",
-        value: "https://api.kth.se/scanned-exams",
+        value: "https://app.kth.se/scanned-exams",
       },
     ],
   });
