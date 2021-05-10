@@ -27,6 +27,7 @@ function getPages(file) {
 /**
  * Convert a list of images (inputs) into a single PDF file (output)
  */
+// TODO: why is this function async? It doesn't await anything.
 async function convertToPdf(inputs, output) {
   const doc = new PDFDocument({ autoFirstPage: false });
   doc.pipe(fs.createWriteStream(output));
@@ -37,6 +38,7 @@ async function convertToPdf(inputs, output) {
     doc.image(input, { fit: [595, 842], align: "center", valign: "center" });
   }
 
+  // How do we know that the document has finished writing, since we don't await anything within this function? Is the code within this function synchronous and blocks the process? Or could we end it before it's finished writing?
   doc.end();
 }
 
