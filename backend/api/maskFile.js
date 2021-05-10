@@ -1,4 +1,5 @@
 const gm = require("gm");
+
 const path = require("path");
 const fs = require("fs");
 // TODO: remove rimraf, use fsPromises.rmdir instead
@@ -19,6 +20,7 @@ function getPages(file) {
     // TODO: what does this line do? Add a comment.
     gm(file).identify("%p ", (err, data) => {
       //TODO: what are these 10 and 1 magic numbers? Name them.
+      // And why split by whitespace? I don't understand what this line is supposed to do.
       resolve(data.split(" ").map((d) => parseInt(d, 10) - 1));
     });
   });
@@ -62,7 +64,7 @@ function maskImage(input, output) {
 }
 
 module.exports = async function maskFile(input, output) {
-  // TODO: can't have sync calls, that will block the app from all other requests. Should be change to await fsPromises.mkdtemp without sync.
+  // TODO: can't have sync calls, it will block the app from all other requests. Should be change to await fsPromises.mkdtemp without sync.
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "masked-images"));
 
   const pages = await getPages(input);
@@ -76,6 +78,7 @@ module.exports = async function maskFile(input, output) {
     maskedImages.push(maskedImage);
   }
   await convertToPdf(maskedImages, output);
+  // TODO: remove console.log and use skog logging instead
   console.log("DONE", output);
   // TODO: remove rimraf, use fsPromises.rmdir instead
   rimraf.sync(tmp);
