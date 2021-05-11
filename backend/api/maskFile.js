@@ -8,7 +8,7 @@ const os = require("os");
 const PDFDocument = require("pdfkit");
 
 // TODO: this has to be load tested. In the test course, my pretty beefy computer used around 5% cpu when masking the exams.
-// What if a user in a big course with 1000:s of exams, each around 100 MB, clicks multiple times in a row? Will our docker servers be able to manage that?
+// What if, in a big course with 1000:s of exams each around 100 MB, multiple teachers click before the last run has completed? Will our docker servers be able to manage that?
 //
 
 // TODO: we should test if this blocks the process. If you click the 'upload' button, is the app still responsive? Or will other users not be able to reach the app while it masks the exams?
