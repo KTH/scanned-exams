@@ -2,6 +2,7 @@ const Canvas = require("@kth/canvas-api");
 const FormData = require("formdata-node").default;
 const fs = require("fs");
 const got = require("got");
+const { getAktivitetstillfalle } = require("./tentaApiClient");
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,
@@ -44,6 +45,8 @@ async function getValidAssignment(courseId, ladokId) {
 }
 
 async function createAssignment(courseId, ladokId) {
+  const examination = await getAktivitetstillfalle(ladokId);
+
   return canvas
     .requestUrl(`courses/${courseId}/assignments`, "POST", {
       assignment: {
