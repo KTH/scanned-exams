@@ -106,7 +106,7 @@ module.exports = async function transferExams(session) {
             courseId: session.courseId,
             assignmentId: assignment.id,
             userId,
-            examDate: session.examination.examDate,
+            examDate,
           });
         }
       }
