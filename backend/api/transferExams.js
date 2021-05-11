@@ -4,6 +4,7 @@ const canvas = require("./canvasApiClient");
 const fs = require("fs/promises");
 const os = require("os");
 const path = require("path");
+const log = require("skog");
 // const maskFile = require("./maskFile");
 
 module.exports = async function transferExams(session) {
@@ -33,6 +34,8 @@ module.exports = async function transferExams(session) {
   try {
     session.state = "predownloading";
     await saveSession();
+    let startDate = new Date();
+    log.info(`started at ${startDate}`);
     log.info("predownloading...");
     const { activities, examDate } = await tentaApi.getAktivitetstillfalle(
       session.ladokId
@@ -116,6 +119,11 @@ module.exports = async function transferExams(session) {
 
     session.state = "success";
     await saveSession();
+    log.info(
+      `Ended at ${new Date()} took ${Math.abs(
+        (d1.getTime() - d2.getTime()) / 1000
+      )}`
+    );
   } catch (err) {
     log.error({ err });
 
