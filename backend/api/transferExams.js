@@ -7,7 +7,11 @@ const path = require("path");
 // const maskFile = require("./maskFile");
 
 module.exports = async function transferExams(session) {
-  if (session.state !== "idle") {
+  if (
+    session.state !== "idle" &&
+    session.state !== "success" &&
+    session.state !== "error"
+  ) {
     return;
   }
 
@@ -83,28 +87,31 @@ module.exports = async function transferExams(session) {
 
     if (assignment) {
       // TODO: check that assignment.integration_data == session.examination
-      // TODO: publish the exam room if is unpublished
-      const alreadyPublished = assignment.published;
-
-      if (!alreadyPublished) {
-        log.info("Assignment was not published. Publishing now");
-        await canvas.publishAssignment(session.courseId, assignment.id);
-      }
-
+      await canvas.unlockAssignment(session.courseId, assignment.id);
       session.state = "uploading";
       await saveSession();
 
-      // TODO: upload exams to the published assignment
       for (const { userId } of examList) {
-        log.info(`Uploading exam for ${userId}`);
-        await canvas.uploadExam(
-          path.resolve(unmaskedDir, `${userId}.pdf`),
-          // path.resolve(maskedDir, `${userId}.pdf`),
-          session.courseId,
-          assignment.id,
-          userId
-        );
+        const hasSubmission = await canvas.hasSubmission({
+          courseId: session.courseId,
+          assignmentId: assignment.id,
+          userId,
+        });
+
+        if (hasSubmission) {
+          log.info(`User ${userId} has already a submission. Skipping`);
+        } else {
+          log.info(`Uploading exam for ${userId}`);
+          await canvas.uploadExam(path.resolve(unmaskedDir, `${userId}.pdf`), {
+            courseId: session.courseId,
+            assignmentId: assignment.id,
+            userId,
+            examDate,
+          });
+        }
       }
+
+      await canvas.lockAssignment(session.courseId, assignment.id);
     }
 
     session.state = "success";
