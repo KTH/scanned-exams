@@ -2,6 +2,7 @@ const Canvas = require("@kth/canvas-api");
 const FormData = require("formdata-node").default;
 const fs = require("fs");
 const got = require("got");
+const log = require("skog");
 const { getAktivitetstillfalle } = require("./tentaApiClient");
 
 const canvas = new Canvas(
@@ -137,32 +138,40 @@ async function uploadExam(
   filePath,
   { courseId, assignmentId, userId, examDate }
 ) {
-  const { body: user } = await canvas.get(`users/sis_user_id:${userId}`);
+  try {
+    const { body: user } = await canvas.get(`users/sis_user_id:${userId}`);
 
-  // TODO: will return a 400 if the course is unpublished
-  const { body: slot } = await canvas.requestUrl(
-    `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}/files`,
-    "POST",
-    {
-      name: `${userId}.pdf`,
+    // TODO: will return a 400 if the course is unpublished
+    const { body: slot } = await canvas.requestUrl(
+      `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}/files`,
+      "POST",
+      {
+        name: `${userId}.pdf`,
+      }
+    );
+
+    const { body: uploadedFile } = await sendFile(slot, filePath);
+
+    await canvas.requestUrl(
+      `courses/${courseId}/assignments/${assignmentId}/submissions/`,
+      "POST",
+      {
+        submission: {
+          submission_type: "online_upload",
+          user_id: user.id,
+          file_ids: [uploadedFile.id],
+          // IMPORTANT: do not pass the timezone in the "submitted_at" field
+          submitted_at: `${examDate}T08:00:00`,
+        },
+      }
+    );
+  } catch (err) {
+    if (err.response?.statusCode === 404) {
+      log.warn(`User ${userId} is missing in Canvas course ${courseId}`);
+    } else {
+      throw err;
     }
-  );
-
-  const { body: uploadedFile } = await sendFile(slot, filePath);
-
-  await canvas.requestUrl(
-    `courses/${courseId}/assignments/${assignmentId}/submissions/`,
-    "POST",
-    {
-      submission: {
-        submission_type: "online_upload",
-        user_id: user.id,
-        file_ids: [uploadedFile.id],
-        // IMPORTANT: do not pass the timezone in the "submitted_at" field
-        submitted_at: `${examDate}T08:00:00`,
-      },
-    }
-  );
+  }
 }
 
 /** Return the roles of a user in a course */
