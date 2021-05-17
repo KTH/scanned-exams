@@ -119,9 +119,10 @@ module.exports = async function transferExams(session) {
 
     session.state = "success";
     await saveSession();
+    const endDate = new Date();
     log.info(
-      `Ended at ${new Date()} took ${Math.abs(
-        (d1.getTime() - d2.getTime()) / 1000
+      `Ended at ${endDate} took ${Math.abs(
+        (startDate.getTime() - endDate.getTime()) / 1000
       )}`
     );
   } catch (err) {
