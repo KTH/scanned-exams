@@ -33,8 +33,6 @@ module.exports = async function transferExams(session) {
   try {
     session.state = "predownloading";
     await saveSession();
-    let startDate = new Date();
-    log.info(`transferExams started at ${startDate}`);
     log.info("predownloading...");
     const { activities, examDate } = await tentaApi.getAktivitetstillfalle(
       session.ladokId
@@ -62,9 +60,17 @@ module.exports = async function transferExams(session) {
     // fs.mkdir(maskedDir, { recursive: true });
 
     for (const { userId, fileId } of examList) {
+      let startDate = new Date();
+      log.info(`Started downloading ${fileId} at ${startDate}`);
       await tentaApi.downloadExam(
         fileId,
         path.resolve(unmaskedDir, `${userId}.pdf`)
+      );
+      const endDate = new Date();
+      log.info(
+        `Finished downloading ${fileId} ended at ${endDate} and took ${Math.abs(
+          (startDate.getTime() - endDate.getTime()) / 1000
+        )} seconds`
       );
     }
     log.info("Finished downloading exams");
@@ -118,12 +124,6 @@ module.exports = async function transferExams(session) {
 
     session.state = "success";
     await saveSession();
-    const endDate = new Date();
-    log.info(
-      `transferExams ended at ${endDate} took ${Math.abs(
-        (startDate.getTime() - endDate.getTime()) / 1000
-      )} seconds`
-    );
   } catch (err) {
     log.error({ err });
 
