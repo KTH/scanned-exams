@@ -4,7 +4,6 @@ const canvas = require("./canvasApiClient");
 const fs = require("fs/promises");
 const os = require("os");
 const path = require("path");
-const log = require("skog");
 // const maskFile = require("./maskFile");
 
 module.exports = async function transferExams(session) {
