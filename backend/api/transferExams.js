@@ -34,7 +34,7 @@ module.exports = async function transferExams(session) {
     session.state = "predownloading";
     await saveSession();
     let startDate = new Date();
-    log.info(`started at ${startDate}`);
+    log.info(`transferExams started at ${startDate}`);
     log.info("predownloading...");
     const { activities, examDate } = await tentaApi.getAktivitetstillfalle(
       session.ladokId
@@ -120,9 +120,9 @@ module.exports = async function transferExams(session) {
     await saveSession();
     const endDate = new Date();
     log.info(
-      `Ended at ${endDate} took ${Math.abs(
+      `transferExams ended at ${endDate} took ${Math.abs(
         (startDate.getTime() - endDate.getTime()) / 1000
-      )}`
+      )} seconds`
     );
   } catch (err) {
     log.error({ err });
