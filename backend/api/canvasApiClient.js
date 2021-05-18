@@ -126,12 +126,23 @@ async function sendFile({ upload_url, upload_params }, filePath) {
 }
 
 async function hasSubmission({ courseId, assignmentId, userId }) {
-  const { body: user } = await canvas.get(`users/sis_user_id:${userId}`);
-  const { body: assignment } = await canvas.get(
-    `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}`
-  );
+  try {
+    const { body: user } = await canvas.get(`users/sis_user_id:${userId}`);
+    const { body: assignment } = await canvas.get(
+      `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}`
+    );
 
-  return assignment.workflow_state === "submitted";
+    return assignment.workflow_state === "submitted";
+  } catch (err) {
+    if (err.response?.statusCode === 404) {
+      log.warn(
+        `User ${userId} is missing in Canvas or missing in the course ${courseId}`
+      );
+      return true;
+    } else {
+      throw err;
+    }
+  }
 }
 
 async function uploadExam(
