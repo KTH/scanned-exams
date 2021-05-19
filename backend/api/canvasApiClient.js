@@ -125,6 +125,8 @@ async function sendFile({ upload_url, upload_params }, filePath) {
   });
 }
 
+// TODO: Refactor this function and uploadExam to avoid requesting the endpoint
+//       "GET users/sis_user_id:${userId}" twice
 async function hasSubmission({ courseId, assignmentId, userId }) {
   try {
     const { body: user } = await canvas.get(`users/sis_user_id:${userId}`);
@@ -135,10 +137,7 @@ async function hasSubmission({ courseId, assignmentId, userId }) {
     return assignment.workflow_state === "submitted";
   } catch (err) {
     if (err.response?.statusCode === 404) {
-      log.warn(
-        `User ${userId} is missing in Canvas or missing in the course ${courseId}`
-      );
-      return true;
+      return false;
     } else {
       throw err;
     }
