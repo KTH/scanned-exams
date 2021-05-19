@@ -13,15 +13,21 @@ const PDFDocument = require("pdfkit");
 
 // TODO: we should test if this blocks the process. If you click the 'upload' button, is the app still responsive? Or will other users not be able to reach the app while it masks the exams?
 
-function getPages(file) {
-  // TODO: comment or refactor to make this code more understandable
-  // TODO: crash with an obvious error if ImageMagick or GraphicsMagick insn't installed
-  return new Promise((resolve) => {
-    // TODO: what does this line do? Add a comment.
-    gm(file).identify("%p ", (err, data) => {
-      //TODO: what are these 10 and 1 magic numbers? Name them.
-      // And why split by whitespace? I don't understand what this line is supposed to do.
-      resolve(data.split(" ").map((d) => parseInt(d, 10) - 1));
+/** Returns how many pages have the "file" */
+function numberOfPages(file) {
+  return new Promise((resolve, reject) => {
+    // The following line executes ImageMagick/GraphicsMagic command that returns
+    // all page numbers separated by spaces
+    // (e.g. for a 7 pages document, it returns "1 2 3 4 5 6 7")
+    gm(file).identity("%p ", (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        // from the "1 2 3 4 5 6 7" string, take the "last word" and
+        // convert it to a number
+        const lastWord = data.split(" ").pop();
+        resolve(parseInt(lastWord, 10));
+      }
     });
   });
 }
@@ -29,30 +35,49 @@ function getPages(file) {
 /**
  * Convert a list of images (inputs) into a single PDF file (output)
  */
-// TODO: why is this function async? It doesn't await anything.
-async function convertToPdf(inputs, output) {
+function convertToPdf(inputs, output) {
+  // Note: these numbers are measurements in "points", not pixels
+  const PAGE_WIDTH = 595;
+  const PAGE_HEIGHT = 842;
   const doc = new PDFDocument({ autoFirstPage: false });
-  doc.pipe(fs.createWriteStream(output));
+  const writer = fs.createWriteStream(output);
+  doc.pipe(writer);
 
   for (const input of inputs) {
-    // TODO: what are these 595,842 magic numbers? Name them.
-    doc.addPage({ size: [595, 842], margin: 0 });
-    doc.image(input, { fit: [595, 842], align: "center", valign: "center" });
+    doc.addPage({ size: [PAGE_WIDTH, PAGE_HEIGHT], margin: 0 });
+    doc.image(input, {
+      fit: [PAGE_WIDTH, PAGE_HEIGHT],
+      align: "center",
+      valign: "center",
+    });
   }
 
-  // How do we know that the document has finished writing, since we don't await anything within this function? Is the code within this function synchronous and blocks the process? Or could we end it before it's finished writing?
   doc.end();
+
+  return new Promise((resolve, reject) => {
+    writer.on("finish", () => resolve());
+    writer.on("error", (error) => reject(error));
+  });
 }
 
 function maskImage(input, output) {
+  // Note: these numbers are measurements in "pixels" after converting each
+  // PDF page into a JPEG image
+  const MASK_COORDINATES = [
+    // Top-left corner:
+    560, // x coordinate
+    170, // y coordinate
+    // Botttom-right corner
+    800, // x coordinate
+    310, // y coordinate
+  ];
   return new Promise((resolve, reject) => {
     gm(input)
       .density(150, 150)
       .compress("jpeg")
       .fill("#fff")
       .stroke("#9dc2ea", 1)
-      // These numbers should be named to make it easier to understand
-      .drawRectangle(560, 240 - 70, 560 + 240, 240 + 70)
+      .drawRectangle(...MASK_COORDINATES)
       .write(output, function (err) {
         if (err) {
           reject(err);
@@ -67,11 +92,10 @@ module.exports = async function maskFile(input, output) {
   // TODO: can't have sync calls, it will block the app from all other requests. Should be change to await fsPromises.mkdtemp without sync.
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "masked-images"));
 
-  const pages = await getPages(input);
+  const pages = await numberOfPages(input);
   const maskedImages = [];
 
-  // Why do we slice? Add a comment.
-  for (const page of pages.slice(1)) {
+  for (let page = 1; page < pages; page++) {
     const maskedImage = path.resolve(tmp, `${page}.png`);
 
     await maskImage(`${input}[${page}]`, maskedImage);
