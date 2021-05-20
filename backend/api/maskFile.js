@@ -1,9 +1,7 @@
 const gm = require("gm");
 
 const path = require("path");
-const fs = require("fs");
-// TODO: remove rimraf, use fsPromises.rmdir instead
-const rimraf = require("rimraf");
+const fs = require("fs").promises;
 const os = require("os");
 const PDFDocument = require("pdfkit");
 
@@ -16,8 +14,8 @@ const PDFDocument = require("pdfkit");
 /** Returns how many pages have the "file" */
 function numberOfPages(file) {
   return new Promise((resolve, reject) => {
-    // The following line executes ImageMagick/GraphicsMagic command that returns
-    // all page numbers separated by spaces
+    // The following line executes ImageMagick/GraphicsMagic command that
+    // returns all page numbers separated by spaces
     // (e.g. for a 7 pages document, it returns "1 2 3 4 5 6 7")
     gm(file).identity("%p ", (err, data) => {
       if (err) {
@@ -89,8 +87,7 @@ function maskImage(input, output) {
 }
 
 module.exports = async function maskFile(input, output) {
-  // TODO: can't have sync calls, it will block the app from all other requests. Should be change to await fsPromises.mkdtemp without sync.
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "masked-images"));
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "masked-images"));
 
   const pages = await numberOfPages(input);
   const maskedImages = [];
@@ -102,8 +99,5 @@ module.exports = async function maskFile(input, output) {
     maskedImages.push(maskedImage);
   }
   await convertToPdf(maskedImages, output);
-  // TODO: remove console.log and use skog logging instead
-  console.log("DONE", output);
-  // TODO: remove rimraf, use fsPromises.rmdir instead
-  rimraf.sync(tmp);
+  await fs.rmdir(tmp, { force: true, recursive: true });
 };
