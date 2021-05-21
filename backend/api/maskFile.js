@@ -2,6 +2,7 @@ const gm = require("gm");
 
 const path = require("path");
 const fs = require("fs").promises;
+const { createWriteStream } = require("fs");
 const os = require("os");
 const PDFDocument = require("pdfkit");
 
@@ -17,7 +18,7 @@ function numberOfPages(file) {
     // The following line executes ImageMagick/GraphicsMagic command that
     // returns all page numbers separated by spaces
     // (e.g. for a 7 pages document, it returns "1 2 3 4 5 6 7")
-    gm(file).identity("%p ", (err, data) => {
+    gm(file).identify("%p ", (err, data) => {
       if (err) {
         reject(err);
       } else {
@@ -38,7 +39,7 @@ function convertToPdf(inputs, output) {
   const PAGE_WIDTH = 595;
   const PAGE_HEIGHT = 842;
   const doc = new PDFDocument({ autoFirstPage: false });
-  const writer = fs.createWriteStream(output);
+  const writer = createWriteStream(output);
   doc.pipe(writer);
 
   for (const input of inputs) {
@@ -92,6 +93,7 @@ module.exports = async function maskFile(input, output) {
   const pages = await numberOfPages(input);
   const maskedImages = [];
 
+  // Note: we start from "1" to remove the "försättsblad" (examination cover)
   for (let page = 1; page < pages; page++) {
     const maskedImage = path.resolve(tmp, `${page}.png`);
 
