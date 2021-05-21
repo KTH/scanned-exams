@@ -5,6 +5,15 @@ const batch1 = [
     documentIndiceses: [
       {
         index: "s_uid",
+        value: "uxxxFAKE",
+      },
+    ],
+  },
+  {
+    fileId: 6,
+    documentIndiceses: [
+      {
+        index: "s_uid",
         value: "u1b7rfvx",
       },
     ],
