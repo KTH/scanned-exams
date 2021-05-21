@@ -1,6 +1,6 @@
 # Scanned exams
 
-Application that downloads exams from the "tenta API" and uploads them into a Canvas course.
+Application that downloads exams from the "Windream/AlcomREST tenta API" and uploads them into a Canvas course.
 
 ---
 
