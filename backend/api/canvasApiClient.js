@@ -2,6 +2,7 @@ const Canvas = require("@kth/canvas-api");
 const FormData = require("formdata-node").default;
 const fs = require("fs");
 const got = require("got");
+const { getAktivitetstillfalle } = require("./tentaApiClient");
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,
@@ -44,6 +45,8 @@ async function getValidAssignment(courseId, ladokId) {
 }
 
 async function createAssignment(courseId, ladokId) {
+  const examination = await getAktivitetstillfalle(ladokId);
+
   return canvas
     .requestUrl(`courses/${courseId}/assignments`, "POST", {
       assignment: {
@@ -52,37 +55,51 @@ async function createAssignment(courseId, ladokId) {
           "This canvas assignment is meant to be used for scanned exams",
         submission_types: ["online_upload"],
         allowed_extensions: ["pdf"],
+        // TODO: save only the "Ladok UID" because `examination.courseCode` and
+        //       `examination.examCode` can be more than one
         // TODO: add more data to be able to filter out better?
         integration_data: {
           ladokId,
         },
         published: false,
         grading_type: "letter_grade",
-        // TODO: grading_standard_id: 1,
+        notify_of_update: false,
+        lock_at: new Date().toISOString(),
+        // IMPORTANT: do NOT pass a time zone in the "due_at" field
+        due_at: `${examination.examDate}T23:59:59`,
+        // TODO: take the grading standard from TentaAPI
+        //       grading_standard_id: 1,
       },
     })
     .then((r) => r.body);
 }
 
-async function publishAssignment(courseId, assignmentId) {
+async function unlockAssignment(courseId, assignmentId) {
+  const TOMORROW = new Date();
+  TOMORROW.setDate(TOMORROW.getDate() + 1);
+
   return canvas.requestUrl(
     `courses/${courseId}/assignments/${assignmentId}`,
     "PUT",
     {
       assignment: {
+        lock_at: TOMORROW.toISOString(),
         published: true,
       },
     }
   );
 }
 
-async function unPublishAssignment(courseId, assignmentId) {
+async function lockAssignment(courseId, assignmentId) {
+  const YESTERDAY = new Date();
+  YESTERDAY.setDate(YESTERDAY.getDate() - 1);
+
   return canvas.requestUrl(
     `courses/${courseId}/assignments/${assignmentId}`,
     "PUT",
     {
       assignment: {
-        published: false,
+        lock_at: YESTERDAY.toISOString(),
       },
     }
   );
@@ -107,7 +124,19 @@ async function sendFile({ upload_url, upload_params }, filePath) {
   });
 }
 
-async function uploadExam(filePath, courseId, assignmentId, userId) {
+async function hasSubmission({ courseId, assignmentId, userId }) {
+  const { body: user } = await canvas.get(`users/sis_user_id:${userId}`);
+  const { body: assignment } = await canvas.get(
+    `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}`
+  );
+
+  return assignment.workflow_state === "submitted";
+}
+
+async function uploadExam(
+  filePath,
+  { courseId, assignmentId, userId, examDate }
+) {
   const { body: user } = await canvas.get(`users/sis_user_id:${userId}`);
 
   // TODO: will return a 400 if the course is unpublished
@@ -129,6 +158,8 @@ async function uploadExam(filePath, courseId, assignmentId, userId) {
         submission_type: "online_upload",
         user_id: user.id,
         file_ids: [uploadedFile.id],
+        // IMPORTANT: do not pass the timezone in the "submitted_at" field
+        submitted_at: `${examDate}T08:00:00`,
       },
     }
   );
@@ -148,7 +179,8 @@ module.exports = {
   getValidAssignment,
   getRoles,
   createAssignment,
-  publishAssignment,
-  unPublishAssignment,
+  unlockAssignment,
+  lockAssignment,
+  hasSubmission,
   uploadExam,
 };
