@@ -6,36 +6,38 @@ const os = require("os");
 const path = require("path");
 // const maskFile = require("./maskFile");
 
-module.exports = async function transferExams(session) {
+const allStatus = new Map();
+
+// TODO: To allow "cross-listed" courses, replace this argument (courseId) with
+//       Ladok AktivitetstillfalleUID
+function getStatus(courseId) {
+  return (
+    allStatus.get(courseId) || {
+      state: "idle",
+    }
+  );
+}
+
+async function transferExams(courseId) {
+  if (!allStatus.has(courseId)) {
+    allStatus.set(courseId, { state: "idle" });
+  }
+  const currentStatus = getStatus(courseId);
+
   if (
-    session.state !== "idle" &&
-    session.state !== "success" &&
-    session.state !== "error"
+    currentStatus.state !== "idle" &&
+    currentStatus.state !== "success" &&
+    currentStatus.state !== "error"
   ) {
     return;
   }
 
-  function saveSession() {
-    return new Promise((resolve, reject) => {
-      session.save((err) => {
-        if (err) {
-          reject({
-            name: "SessionError",
-            message: err.message,
-          });
-        }
-
-        resolve();
-      });
-    });
-  }
-
   try {
-    session.state = "predownloading";
-    await saveSession();
+    currentStatus.state = "predownloading";
     log.info("predownloading...");
+    const ladokId = await canvas.getExaminationLadokId(courseId);
     const { activities, examDate } = await tentaApi.getAktivitetstillfalle(
-      session.ladokId
+      ladokId
     );
     const examList = [];
 
@@ -49,8 +51,7 @@ module.exports = async function transferExams(session) {
       examList.push(...list);
     }
 
-    session.state = "downloading";
-    await saveSession();
+    currentStatus.state = "downloading";
     const dirName = await fs.mkdtemp(path.join(os.tmpdir(), "scanned-exams"));
     const unmaskedDir = path.resolve(dirName, "unmasked");
     // const maskedDir = path.resolve(dirName, "masked");
@@ -75,8 +76,7 @@ module.exports = async function transferExams(session) {
     }
     log.info("Finished downloading exams");
 
-    session.state = "postdownloading";
-    await saveSession();
+    currentStatus.state = "postdownloading";
     log.info("Starting pnr-masking");
 
     // for (const { userId } of list) {
@@ -85,23 +85,18 @@ module.exports = async function transferExams(session) {
     //     path.resolve(maskedDir, `${userId}.pdf`)
     //   );
     // }
-    session.state = "preuploading";
-    await saveSession();
+    currentStatus.state = "preuploading";
     log.info("Checking if assignment is published");
-    const assignment = await canvas.getValidAssignment(
-      session.courseId,
-      session.ladokId
-    );
+    const assignment = await canvas.getValidAssignment(courseId, ladokId);
 
     if (assignment) {
       // TODO: check that assignment.integration_data == session.examination
-      await canvas.unlockAssignment(session.courseId, assignment.id);
-      session.state = "uploading";
-      await saveSession();
+      await canvas.unlockAssignment(courseId, assignment.id);
+      currentStatus.state = "uploading";
 
       for (const { userId } of examList) {
         const hasSubmission = await canvas.hasSubmission({
-          courseId: session.courseId,
+          courseId,
           assignmentId: assignment.id,
           userId,
         });
@@ -111,7 +106,7 @@ module.exports = async function transferExams(session) {
         } else {
           log.info(`Uploading exam for ${userId}`);
           await canvas.uploadExam(path.resolve(unmaskedDir, `${userId}.pdf`), {
-            courseId: session.courseId,
+            courseId,
             assignmentId: assignment.id,
             userId,
             examDate,
@@ -119,22 +114,23 @@ module.exports = async function transferExams(session) {
         }
       }
 
-      await canvas.lockAssignment(session.courseId, assignment.id);
+      await canvas.lockAssignment(courseId, assignment.id);
     }
 
-    session.state = "success";
-    await saveSession();
+    currentStatus.state = "success";
   } catch (err) {
     log.error({ err });
 
-    if (err.name !== "SessionError") {
-      session.error = {
-        message: err.message,
-        code: err.code,
-        name: err.name,
-      };
-      session.state = "error";
-      await saveSession();
-    }
+    currentStatus.error = {
+      message: err.message,
+      code: err.code,
+      name: err.name,
+    };
+    currentStatus.state = "error";
   }
+}
+
+module.exports = {
+  getStatus,
+  transferExams,
 };

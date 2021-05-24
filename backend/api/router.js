@@ -1,6 +1,6 @@
 const express = require("express");
 const canvas = require("./canvasApiClient");
-const transferExams = require("./transferExams.js");
+const { transferExams, getStatus } = require("./transferExams.js");
 const log = require("skog");
 const { internalServerError, unauthorized } = require("../utils");
 
@@ -69,7 +69,7 @@ router.post("/assignment", async (req, res) => {
 
 router.post("/exams", (req, res) => {
   try {
-    transferExams(req.session);
+    transferExams(req.body.courseId);
 
     res.json({
       message: "Exam uploading started",
@@ -81,12 +81,12 @@ router.post("/exams", (req, res) => {
 
 router.get("/exams", (req, res) => {
   try {
-    const session = req.session;
+    const status = getStatus(req.query.courseId);
 
     // TODO: return a different code depending on the error
-    res.status(session.error ? 400 : 200).json({
-      state: session.state,
-      error: session.error,
+    res.status(status.error ? 400 : 200).json({
+      state: status.state,
+      error: status.error,
     });
   } catch (err) {
     internalServerError(err, res);
