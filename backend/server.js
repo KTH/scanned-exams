@@ -112,6 +112,13 @@ server.use("/scanned-exams/auth", authRouter);
 server.use("/scanned-exams/api", apiRouter);
 server.get("/scanned-exams/app", async (req, res) => {
   const courseId = req.query.courseId;
+
+  if (process.env.NODE_ENV === "development") {
+    return res.redirect(
+      `http://localhost:3000/scanned-exams/app/?courseId=${courseId}`
+    );
+  }
+
   const html = await fs.readFile(
     path.join(__dirname, "..", "frontend", "build", "index.html"),
     { encoding: "utf-8" }
