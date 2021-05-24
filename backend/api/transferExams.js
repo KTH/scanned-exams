@@ -6,6 +6,7 @@ const os = require("os");
 const path = require("path");
 // const maskFile = require("./maskFile");
 
+// Key for `allStatus` is course ID
 const allStatus = new Map();
 
 // TODO: To allow "cross-listed" courses, replace this argument (courseId) with
