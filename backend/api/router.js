@@ -7,30 +7,37 @@ const { internalServerError, unauthorized } = require("../utils");
 const router = express.Router();
 
 router.use(async function checkAuthorization(req, res, next) {
-  const courseId = req.query.courseId;
-  const roles = await canvas.getRoles(req.session.courseId, tokenSet.user.id);
+  try {
+    const courseId = req.query.courseId || req.body.courseId;
+    const roles = await canvas.getRoles(courseId, req.session.userId);
 
-  if (!req.session.courseId || !req.session.userId) {
-    // 4 = teacher, 10 = examiner
     if (roles.includes(4) || roles.includes(10)) {
       log.info(
-        `Authorized. User ${tokenSet.user.id} in Course ${req.session.courseId} has roles: [${roles}].`
+        `Authorized. User ${req.session.userId} in Course ${req.session.courseId} has roles: [${roles}].`
       );
 
-      return res.redirect("/scanned-exams/app");
+      return next();
     }
-    return unauthorized(`Missing userId (unauthorized): ${userId}`, res);
-  }
 
-  next();
+    log.warn(
+      `Not authorized. User ${req.session.userId} in Course ${req.session.courseId} has roles: [${roles}].`
+    );
+
+    return unauthorized(
+      `Unauthorized: you must be teacher or examiner to use this app`,
+      res
+    );
+  } catch (err) {
+    log.error(err);
+    internalServerError(err, res);
+  }
 });
 
 router.get("/assignment", async (req, res) => {
   try {
-    const assignment = await canvas.getValidAssignment(
-      req.session.courseId,
-      req.session.ladokId
-    );
+    const courseId = req.query.courseId;
+    const ladokId = await canvas.getExaminationLadokId(courseId);
+    const assignment = await canvas.getValidAssignment(courseId, ladokId);
 
     res.json({
       assignment,
@@ -43,16 +50,12 @@ router.get("/assignment", async (req, res) => {
 
 router.post("/assignment", async (req, res) => {
   try {
-    let assignment = await canvas.getValidAssignment(
-      req.session.courseId,
-      req.session.ladokId
-    );
+    const courseId = req.body.courseId;
+    const ladokId = await canvas.getExaminationLadokId(courseId);
+    let assignment = await canvas.getValidAssignment(courseId, ladokId);
 
     if (!assignment) {
-      assignment = await canvas.createAssignment(
-        req.session.courseId,
-        req.session.ladokId
-      );
+      assignment = await canvas.createAssignment(courseId, ladokId);
     }
 
     res.json({
