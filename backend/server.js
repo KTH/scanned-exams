@@ -110,10 +110,19 @@ server.post("/scanned-exams", async (req, res) => {
 });
 server.use("/scanned-exams/auth", authRouter);
 server.use("/scanned-exams/api", apiRouter);
+server.get("/scanned-exams/app", async (req, res) => {
+  const courseId = req.query.courseId;
+  const html = await fs.readFile(
+    path.join(__dirname, "..", "frontend", "build", "index.html"),
+    { encoding: "utf-8" }
+  );
+  res.send(html.replace("__COURSE_ID__", courseId));
+});
 server.use(
-  "/scanned-exams/app",
-  express.static(path.join(__dirname, "..", "frontend", "build"))
+  "/scanned-exams/app/static",
+  express.static(path.join(__dirname, "..", "frontend", "build", "static"))
 );
+
 server.get("/scanned-exams/_monitor", monitor);
 module.exports = server;
 
