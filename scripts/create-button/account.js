@@ -117,7 +117,7 @@ async function start() {
       enabled: true,
       text: buttonName,
       visibility: "admins",
-      windowTarget: "_blank",
+      windowTarget: "_self",
     },
     custom_fields: {
       domain: "$Canvas.api.domain",
