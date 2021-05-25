@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server-https.js | pino-pretty",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -31,10 +31,10 @@
     "openid-client": "^4.6.0",
     "pdfkit": "^0.12.0",
     "pino": "^6.11.2",
-    "rimraf": "^2.4.5",
     "skog": "^2.1.0"
   },
   "devDependencies": {
+    "jest": "^26.6.3",
     "nodemon": "^2.0.7",
     "pino-pretty": "^4.7.1",
     "prettier": "^2.2.1"
