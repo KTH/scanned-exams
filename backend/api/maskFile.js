@@ -1,32 +1,14 @@
 const gm = require("gm");
-
 const path = require("path");
-const fs = require("fs").promises;
-const { createWriteStream } = require("fs");
+const fs = require("fs");
+const rimraf = require("rimraf");
 const os = require("os");
 const PDFDocument = require("pdfkit");
 
-// TODO: this has to be load tested. In the test course, my pretty beefy computer used around 5% cpu when masking the exams.
-// What if, in a big course with 1000:s of exams each around 100 MB, multiple teachers click before the last run has completed? Will our docker servers be able to manage that?
-//
-
-// TODO: we should test if this blocks the process. If you click the 'upload' button, is the app still responsive? Or will other users not be able to reach the app while it masks the exams?
-
-/** Returns how many pages have the "file" */
-function numberOfPages(file) {
-  return new Promise((resolve, reject) => {
-    // The following line executes ImageMagick/GraphicsMagic command that
-    // returns all page numbers separated by spaces
-    // (e.g. for a 7 pages document, it returns "1 2 3 4 5 6 7")
+function getPages(file) {
+  return new Promise((resolve) => {
     gm(file).identify("%p ", (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        // from the "1 2 3 4 5 6 7" string, take the "last word" and
-        // convert it to a number
-        const lastWord = data.split(" ").pop();
-        resolve(parseInt(lastWord, 10));
-      }
+      resolve(data.split(" ").map((d) => parseInt(d, 10) - 1));
     });
   });
 }
@@ -34,49 +16,26 @@ function numberOfPages(file) {
 /**
  * Convert a list of images (inputs) into a single PDF file (output)
  */
-function convertToPdf(inputs, output) {
-  // Note: these numbers are measurements in "points", not pixels
-  const PAGE_WIDTH = 595;
-  const PAGE_HEIGHT = 842;
+async function convertToPdf(inputs, output) {
   const doc = new PDFDocument({ autoFirstPage: false });
-  const writer = createWriteStream(output);
-  doc.pipe(writer);
+  doc.pipe(fs.createWriteStream(output));
 
   for (const input of inputs) {
-    doc.addPage({ size: [PAGE_WIDTH, PAGE_HEIGHT], margin: 0 });
-    doc.image(input, {
-      fit: [PAGE_WIDTH, PAGE_HEIGHT],
-      align: "center",
-      valign: "center",
-    });
+    doc.addPage({ size: [595, 842], margin: 0 });
+    doc.image(input, { fit: [595, 842], align: "center", valign: "center" });
   }
 
   doc.end();
-
-  return new Promise((resolve, reject) => {
-    writer.on("finish", () => resolve());
-    writer.on("error", (error) => reject(error));
-  });
 }
 
 function maskImage(input, output) {
-  // Note: these numbers are measurements in "pixels" after converting each
-  // PDF page into a JPEG image
-  const MASK_COORDINATES = [
-    // Top-left corner:
-    560, // x coordinate
-    170, // y coordinate
-    // Botttom-right corner
-    800, // x coordinate
-    310, // y coordinate
-  ];
   return new Promise((resolve, reject) => {
     gm(input)
       .density(150, 150)
       .compress("jpeg")
       .fill("#fff")
       .stroke("#9dc2ea", 1)
-      .drawRectangle(...MASK_COORDINATES)
+      .drawRectangle(560, 240 - 70, 560 + 240, 240 + 70)
       .write(output, function (err) {
         if (err) {
           reject(err);
@@ -88,18 +47,18 @@ function maskImage(input, output) {
 }
 
 module.exports = async function maskFile(input, output) {
-  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "masked-images"));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "masked-images"));
 
-  const pages = await numberOfPages(input);
+  const pages = await getPages(input);
   const maskedImages = [];
 
-  // Note: we start from "1" to remove the "försättsblad" (examination cover)
-  for (let page = 1; page < pages; page++) {
+  for (const page of pages.slice(1)) {
     const maskedImage = path.resolve(tmp, `${page}.png`);
 
     await maskImage(`${input}[${page}]`, maskedImage);
     maskedImages.push(maskedImage);
   }
   await convertToPdf(maskedImages, output);
-  await fs.rmdir(tmp, { force: true, recursive: true });
+  console.log("DONE", output);
+  rimraf.sync(tmp);
 };
