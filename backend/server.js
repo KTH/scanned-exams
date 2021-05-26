@@ -25,6 +25,7 @@ const apiRouter = require("./api/router");
 const authRouter = require("./auth/router");
 const monitor = require("./monitor");
 const fs = require("fs/promises");
+const canvas = require("./api/canvasApiClient");
 
 const PORT = 4000;
 const server = express();
@@ -113,12 +114,14 @@ server.use("/scanned-exams/auth", authRouter);
 server.use("/scanned-exams/api", apiRouter);
 server.get("/scanned-exams/app", async (req, res) => {
   const courseId = req.query.courseId;
+  const userId = req.session.userId;
+  const authorized = await canvas.isAuthorized(courseId, userId);
 
-  // if (process.env.NODE_ENV === "development") {
-  //   return res.redirect(
-  //     `https://localdev.kth.se:3000/scanned-exams/app/?courseId=${courseId}`
-  //   );
-  // }
+  if (!authorized) {
+    return res.send(
+      "Unauthorized: you must be teacher or examiner to use this app"
+    );
+  }
 
   const html = await fs.readFile(
     path.join(__dirname, "..", "frontend", "build", "index.html"),

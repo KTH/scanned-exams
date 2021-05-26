@@ -9,9 +9,8 @@ const router = express.Router();
 router.use(async function checkAuthorization(req, res, next) {
   try {
     const courseId = req.query.courseId || req.body.courseId;
-    const roles = await canvas.getRoles(courseId, req.session.userId);
 
-    if (roles.includes(4) || roles.includes(10)) {
+    if (await canvas.isAuthorized(courseId, req.session.userId)) {
       log.info(
         `Authorized. User ${req.session.userId} in Course ${req.session.courseId} has roles: [${roles}].`
       );

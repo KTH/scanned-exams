@@ -193,6 +193,15 @@ async function getRoles(courseId, userId) {
   return enrollments.map((enr) => enr.role_id);
 }
 
+async function isAuthorized(courseId, userId) {
+  const roles = await getRoles(courseId, userId);
+
+  const TEACHER = 4;
+  const EXAMINER = 10;
+
+  return roles.includes(TEACHER) || roles.includes(EXAMINER);
+}
+
 module.exports = {
   getExaminationLadokId,
   getValidAssignment,
@@ -202,4 +211,5 @@ module.exports = {
   lockAssignment,
   hasSubmission,
   uploadExam,
+  isAuthorized,
 };
