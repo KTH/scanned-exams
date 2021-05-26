@@ -115,7 +115,7 @@ server.use("/scanned-exams/api", apiRouter);
 server.get("/scanned-exams/app", async (req, res) => {
   const courseId = req.query.courseId;
   const userId = req.session.userId;
-  const authorized = await canvas.isAuthorized(courseId, userId);
+  const { authorized } = await canvas.getAuthorizationData(courseId, userId);
 
   if (!authorized) {
     return res.send(

@@ -9,17 +9,20 @@ const router = express.Router();
 router.use(async function checkAuthorization(req, res, next) {
   try {
     const courseId = req.query.courseId || req.body.courseId;
+    const userId = req.session.userId;
+    const { roles, authorized } = await canvas.getAuthorizationData(
+      courseId,
+      userId
+    );
 
-    if (await canvas.isAuthorized(courseId, req.session.userId)) {
-      log.info(
-        `Authorized. User ${req.session.userId} in Course ${req.session.courseId} has roles: [${roles}].`
-      );
+    if (authorized) {
+      log.info(`Authorized. User ${userId} in Course ${courseId}.`);
 
       return next();
     }
 
     log.warn(
-      `Not authorized. User ${req.session.userId} in Course ${req.session.courseId} has roles: [${roles}].`
+      `Not authorized. User ${userId} in Course ${courseId} has roles: [${roles}].`
     );
 
     return unauthorized(
