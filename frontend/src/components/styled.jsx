@@ -17,6 +17,9 @@ export const GlobalStyle = createGlobalStyle`
     margin: 0 0 27px;
     max-width: 730px;
   }
+  a {
+    color: #006cb7;
+  }
 `;
 
 export const Container = styled.div``;
