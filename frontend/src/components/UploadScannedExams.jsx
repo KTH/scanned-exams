@@ -38,7 +38,7 @@ function UploadScannedExams({ onUpload }) {
         Transfer2Ladok.
       </p>
       <p>
-        If you have any questions, or any problem arises, please contact
+        If you have any questions, or any problem arises, please contact{" "}
         <a href="mailto:it-support@kth.se">it-support@kth.se</a>!
       </p>
       <CTAButton onClick={onUpload} type="submit">
