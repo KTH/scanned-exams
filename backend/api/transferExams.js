@@ -79,7 +79,7 @@ module.exports = async function transferExams(session) {
     await saveSession();
     log.info("Starting pnr-masking");
 
-    for (const { userId } of list) {
+    for (const { userId } of examList) {
       await maskFile(
         path.resolve(unmaskedDir, `${userId}.pdf`),
         path.resolve(maskedDir, `${userId}.pdf`)
