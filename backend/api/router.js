@@ -16,7 +16,7 @@ router.use(async function checkAuthorization(req, res, next) {
     );
 
     if (authorized) {
-      log.info(`Authorized. User ${userId} in Course ${courseId}.`);
+      log.debug(`Authorized. User ${userId} in Course ${courseId}.`);
 
       return next();
     }
