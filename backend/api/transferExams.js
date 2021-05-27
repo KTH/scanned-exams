@@ -110,7 +110,7 @@ module.exports = async function transferExams(session) {
           log.info(`User ${userId} has already a submission. Skipping`);
         } else {
           log.info(`Uploading exam for ${userId}`);
-          await canvas.uploadExam(path.resolve(unmaskedDir, `${userId}.pdf`), {
+          await canvas.uploadExam(path.resolve(maskedDir, `${userId}.pdf`), {
             courseId: session.courseId,
             assignmentId: assignment.id,
             userId,
