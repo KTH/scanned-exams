@@ -12,6 +12,7 @@
   "license": "MIT",
   "dependencies": {
     "@kth/canvas-api": "^3.0.2",
+    "dotenv": "^10.0.0",
     "gm": "^1.23.1",
     "inquirer": "^8.0.0",
     "pdfkit": "^0.12.0",
