@@ -1,5 +1,6 @@
 const inquirer = require("inquirer");
 const Canvas = require("@kth/canvas-api");
+require("dotenv").config({});
 
 async function start() {
   try {
@@ -47,18 +48,22 @@ async function start() {
       `Go to ${canvasRoot}profile/settings to get a Canvas API token.`
     );
 
-    const { canvasApiToken } = await inquirer.prompt({
-      name: "canvasApiToken",
-      message: `Paste the API token here`,
-      type: "password",
-    });
+    if (!process.env.CANVAS_API_TOKEN) {
+      const { canvasApiToken } = await inquirer.prompt({
+        name: "canvasApiToken",
+        message: `Paste the API token here`,
+        type: "password",
+      });
+    }
+
+    const canvasToken = process.env.CANVAS_API_TOKEN || canvasApiToken;
 
     const { courseId } = await inquirer.prompt({
       name: "courseId",
       message: "Enter the Canvas course id",
     });
 
-    const canvas = new Canvas(`${canvasRoot}api/v1`, canvasApiToken);
+    const canvas = new Canvas(`${canvasRoot}api/v1`, canvasToken);
     const tools = (
       await canvas.get(`courses/${courseId}/external_tools?per_page=100`)
     ).body.map((tool) => ({
