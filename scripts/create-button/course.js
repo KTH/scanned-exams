@@ -51,34 +51,36 @@ async function start() {
       message: "Choose a button to edit or create a new one",
       choices: tools,
     });
+    let url = process.env.STAGE;
 
-    const { buttonUrl } = await inquirer.prompt({
-      type: "list",
-      name: "buttonUrl",
-      message: "What application do you want to open with the button?",
-      choices: [
-        {
-          name: "localdev.kth.se",
-          value: "https://localdev.kth.se:4443/scanned-exams",
-        },
-        {
-          name: "stage (referens)",
-          value: "https://app-r.referens.sys.kth.se/scanned-exams",
-        },
-        {
-          name: "production (app.kth.se)",
-          value: "https://app.kth.se/scanned-exams",
-        },
-      ],
-    });
+    if (!url) {
+      const { buttonUrl } = await inquirer.prompt({
+        type: "list",
+        name: "buttonUrl",
+        message: "What application do you want to open with the button?",
+        choices: [
+          {
+            name: "localdev.kth.se",
+            value: "https://localdev.kth.se:4443/scanned-exams",
+          },
+          {
+            name: "stage (referens)",
+            value: "https://app-r.referens.sys.kth.se/scanned-exams",
+          },
+          {
+            name: "production (app.kth.se)",
+            value: "https://app.kth.se/scanned-exams",
+          },
+        ],
+      });
+      url = buttonUrl;
+    }
 
     let defaultName = "KTH Import exams";
 
-    if (buttonUrl === "https://localdev.kth.se:4443/scanned-exams") {
+    if (url === "https://localdev.kth.se:4443/scanned-exams") {
       defaultName = "Scanned Exams - localdev.kth.se";
-    } else if (
-      buttonUrl === "https://api-r.referens.sys.kth.se/scanned-exams"
-    ) {
+    } else if (url === "https://api-r.referens.sys.kth.se/scanned-exams") {
       defaultName = "Scanned exams - referens";
     }
 
@@ -92,7 +94,7 @@ async function start() {
       name: buttonName,
       consumer_key: "not_used",
       shared_secret: "not_used",
-      url: buttonUrl,
+      url,
       privacy_level: "public",
       course_navigation: {
         enabled: true,
