@@ -98,7 +98,19 @@ function App() {
 
   const View = () => {
     if (isLoading) {
-      return <p>Loading...</p>;
+      return (
+        <>
+          <p>
+            The exams are now being imported to Canvas which can take up to 10
+            minutes. You can close this browser window.
+          </p>
+          <p>
+            If you have any questions, or any problem arises, please contact{" "}
+            <a href="mailto:it-support@kth.se">it-support@kth.se</a>!
+          </p>
+          <p>Loading...</p>
+        </>
+      );
     }
 
     if (created) {
