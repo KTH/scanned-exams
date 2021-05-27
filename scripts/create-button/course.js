@@ -105,7 +105,7 @@ async function start() {
       ],
     });
 
-    let defaultName = "Scanned Exams";
+    let defaultName = "KTH Import exams";
 
     if (buttonUrl === "https://localdev.kth.se:4443/scanned-exams") {
       defaultName = "Scanned Exams - localdev.kth.se";
