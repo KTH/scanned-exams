@@ -43,7 +43,6 @@ async function start() {
       ],
     });
 
-    console.log();
     console.log(
       `Go to ${canvasRoot}profile/settings to get a Canvas API token.`
     );
