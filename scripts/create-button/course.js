@@ -20,49 +20,16 @@ async function start() {
 
     if (!answer) return;
 
-    const { canvasRoot } = await inquirer.prompt({
-      type: "list",
-      name: "canvasRoot",
-      message: "Select a Canvas instance",
-      choices: [
-        {
-          name: "Canvas test (kth.test.instructure.com)",
-          value: "https://kth.test.instructure.com/",
-          short: "test",
-        },
-        {
-          name: "Canvas beta (kth.beta.instructure.com)",
-          value: "https://kth.beta.instructure.com/",
-          short: "beta",
-        },
-        {
-          name: "Canvas production (canvas.kth.se)",
-          value: "https://canvas.kth.se/",
-          short: "production",
-        },
-      ],
-    });
+    const canvasRoot = process.env.CANVAS_ROOT;
 
-    console.log(
-      `Go to ${canvasRoot}profile/settings to get a Canvas API token.`
-    );
-
-    if (!process.env.CANVAS_API_TOKEN) {
-      const { canvasApiToken } = await inquirer.prompt({
-        name: "canvasApiToken",
-        message: `Paste the API token here`,
-        type: "password",
-      });
-    }
-
-    const canvasToken = process.env.CANVAS_API_TOKEN || canvasApiToken;
+    const canvasApiToken = process.env.CANVAS_API_TOKEN;
 
     const { courseId } = await inquirer.prompt({
       name: "courseId",
       message: "Enter the Canvas course id",
     });
 
-    const canvas = new Canvas(`${canvasRoot}api/v1`, canvasToken);
+    const canvas = new Canvas(`${canvasRoot}api/v1`, canvasApiToken);
     const tools = (
       await canvas.get(`courses/${courseId}/external_tools?per_page=100`)
     ).body.map((tool) => ({
