@@ -107,7 +107,7 @@ async function transferExams(courseId) {
           log.info(`User ${userId} has already a submission. Skipping`);
         } else {
           log.info(`Uploading exam for ${userId}`);
-          await canvas.uploadExam(path.resolve(masked, `${userId}.pdf`), {
+          await canvas.uploadExam(path.resolve(maskedDir, `${userId}.pdf`), {
             courseId,
             assignmentId: assignment.id,
             userId,
