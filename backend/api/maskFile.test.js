@@ -14,4 +14,4 @@ test("Make sure that `maskFile` works", async () => {
 
   // Check that "output" exists
   expect(fs.existsSync(output)).toBe(true);
-});
+}, 30000);
