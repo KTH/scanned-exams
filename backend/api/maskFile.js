@@ -1,5 +1,5 @@
 const gm = require("gm");
-
+const log = require("skog");
 const path = require("path");
 const fs = require("fs").promises;
 const { createWriteStream } = require("fs");
@@ -88,6 +88,7 @@ function maskImage(input, output) {
 }
 
 module.exports = async function maskFile(input, output) {
+  const startDate = new Date();
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "masked-images"));
 
   const pages = await numberOfPages(input);
@@ -101,5 +102,11 @@ module.exports = async function maskFile(input, output) {
     maskedImages.push(maskedImage);
   }
   await convertToPdf(maskedImages, output);
+  const endDate = new Date();
   await fs.rmdir(tmp, { force: true, recursive: true });
+  log.info(
+    `Finished masking of ${input}. It took ${Math.abs(
+      (startDate.getTime() - endDate.getTime()) / 1000
+    )} seconds`
+  );
 };

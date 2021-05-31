@@ -53,7 +53,7 @@ async function createAssignment(courseId, ladokId) {
       assignment: {
         name: "Scanned exams",
         description:
-          "This canvas assignment is meant to be used for scanned exams",
+          'This is an assignment created automatically by importing scanned exams to Canvas. The grade posting policy is set to "Manual" which makes it possible to grade all submissions before publishing the student feedback for all students at once.',
         submission_types: ["online_upload"],
         allowed_extensions: ["pdf"],
         // TODO: save only the "Ladok UID" because `examination.courseCode` and

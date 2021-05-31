@@ -9,6 +9,17 @@ export const GlobalStyle = createGlobalStyle`
   * {
     box-sizing: border-box;
   }
+  p {
+    font-family: Georgia,"garamond pro", garamond, "times new roman", times, serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5625;
+    margin: 0 0 27px;
+    max-width: 730px;
+  }
+  a {
+    color: #006cb7;
+  }
 `;
 
 export const Container = styled.div``;
