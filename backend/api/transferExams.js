@@ -1,7 +1,7 @@
 const log = require("skog");
 const tentaApi = require("./tentaApiClient");
 const canvas = require("./canvasApiClient");
-const fs = require("fs/promises");
+const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const maskFile = require("./maskFile");
@@ -53,13 +53,15 @@ async function transferExams(courseId) {
     }
 
     currentStatus.state = "downloading";
-    const dirName = await fs.mkdtemp(path.join(os.tmpdir(), "scanned-exams"));
+    const dirName = await fs.promises.mkdtemp(
+      path.join(os.tmpdir(), "scanned-exams")
+    );
     const unmaskedDir = path.resolve(dirName, "unmasked");
     const maskedDir = path.resolve(dirName, "masked");
 
     log.info(`Created directory ${dirName}`);
-    fs.mkdir(unmaskedDir, { recursive: true });
-    fs.mkdir(maskedDir, { recursive: true });
+    await fs.promises.mkdir(unmaskedDir, { recursive: true });
+    await fs.promises.mkdir(maskedDir, { recursive: true });
 
     for (const { userId, fileId } of examList) {
       let startDate = new Date();
@@ -116,7 +118,7 @@ async function transferExams(courseId) {
         }
       }
 
-      await fs.rmdir(dirName, { force: true, recursive: true });
+      await fs.promises.rmdir(dirName, { force: true, recursive: true });
       await canvas.lockAssignment(courseId, assignment.id);
     }
 

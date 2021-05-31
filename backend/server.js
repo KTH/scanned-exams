@@ -24,7 +24,7 @@ const path = require("path");
 const apiRouter = require("./api/router");
 const authRouter = require("./auth/router");
 const monitor = require("./monitor");
-const fs = require("fs/promises");
+const fs = require("fs");
 const canvas = require("./api/canvasApiClient");
 
 const PORT = 4000;
@@ -98,7 +98,9 @@ server.post("/scanned-exams", async (req, res) => {
     // TODO: if domain is kth.instructure.com > Show a message encouraging people to use "canvas.kth.se"
     // TODO: set a cookie to check from client-side JS that the cookie is set correctly
 
-    const html = await fs.readFile("index.html", { encoding: "utf-8" });
+    const html = await fs.promises.readFile("index.html", {
+      encoding: "utf-8",
+    });
 
     res
       .status(200)
@@ -123,7 +125,7 @@ server.get("/scanned-exams/app", async (req, res) => {
     );
   }
 
-  const html = await fs.readFile(
+  const html = await fs.promises.readFile(
     path.join(__dirname, "..", "frontend", "build", "index.html"),
     { encoding: "utf-8" }
   );

@@ -1,4 +1,4 @@
-const fs = require("fs").promises;
+const fs = require("fs");
 const got = require("got");
 const log = require("skog");
 
@@ -86,7 +86,7 @@ async function downloadExam(fileId, filePath) {
     body.wdFile.fileAsBase64.toString("utf-8"),
     "base64"
   );
-  await fs.writeFile(filePath, download);
+  await fs.promises.writeFile(filePath, download);
 }
 
 module.exports = {
