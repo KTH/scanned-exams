@@ -116,6 +116,7 @@ async function transferExams(courseId) {
         }
       }
 
+      await fs.rmdir(dirName, { force: true, recursive: true });
       await canvas.lockAssignment(courseId, assignment.id);
     }
 
