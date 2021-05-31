@@ -1,4 +1,4 @@
-const fs = require("fs");
+const fs = require("fs").promises;
 const got = require("got");
 const log = require("skog");
 
@@ -59,8 +59,6 @@ async function examList({ courseCode, examDate, examCode }) {
 
   const list = [];
 
-  // log.info('body.documentSearchResults:')
-  // log.info(body.documentSearchResults)
   for (const result of body.documentSearchResults) {
     const keyValue = result.documentIndiceses.find(
       (di) => di.index === "s_uid"
@@ -88,7 +86,7 @@ async function downloadExam(fileId, filePath) {
     body.wdFile.fileAsBase64.toString("utf-8"),
     "base64"
   );
-  fs.writeFileSync(filePath, download);
+  await fs.writeFile(filePath, download);
 }
 
 module.exports = {
