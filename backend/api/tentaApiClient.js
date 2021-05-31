@@ -52,8 +52,6 @@ async function examList({ courseCode, examDate, examCode }) {
     responseType: "json",
   });
 
-  log.info({ body: JSON.stringify(body) });
-
   if (!body.documentSearchResults) {
     log.info(`No exams found for ${courseCode} ${examDate} ${examCode}`);
     return [];
@@ -61,8 +59,8 @@ async function examList({ courseCode, examDate, examCode }) {
 
   const list = [];
 
-  log.info('body.documentSearchResults:')
-  log.info(body.documentSearchResults)
+  // log.info('body.documentSearchResults:')
+  // log.info(body.documentSearchResults)
   for (const result of body.documentSearchResults) {
     const keyValue = result.documentIndiceses.find(
       (di) => di.index === "s_uid"

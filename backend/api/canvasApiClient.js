@@ -184,22 +184,29 @@ async function uploadExam(
   }
 }
 
-/** Return the roles of a user in a course */
-async function getRoles(courseId, userId) {
+async function getAuthorizationData(courseId, userId) {
   const enrollments = await canvas
     .list(`courses/${courseId}/enrollments`, { user_id: userId })
     .toArray();
 
-  return enrollments.map((enr) => enr.role_id);
+  const roles = enrollments.map((enr) => enr.role_id);
+
+  const TEACHER = 4;
+  const EXAMINER = 10;
+
+  return {
+    authorized: roles.includes(TEACHER) || roles.includes(EXAMINER),
+    roles,
+  };
 }
 
 module.exports = {
   getExaminationLadokId,
   getValidAssignment,
-  getRoles,
   createAssignment,
   unlockAssignment,
   lockAssignment,
   hasSubmission,
   uploadExam,
+  getAuthorizationData,
 };

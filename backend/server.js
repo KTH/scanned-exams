@@ -25,8 +25,7 @@ const apiRouter = require("./api/router");
 const authRouter = require("./auth/router");
 const monitor = require("./monitor");
 const fs = require("fs/promises");
-const canvasApi = require("./api/canvasApiClient");
-const tentaApi = require("./api/tentaApiClient");
+const canvas = require("./api/canvasApiClient");
 
 const PORT = 4000;
 const server = express();
@@ -57,6 +56,7 @@ server.use((req, res, next) => {
   );
 });
 server.use(express.urlencoded());
+server.use(express.json());
 server.use(cookieParser());
 
 // Routes:
@@ -68,13 +68,13 @@ server.use(cookieParser());
 // - /_monitor   just the monitor page
 server.post("/scanned-exams", async (req, res) => {
   try {
-    if (req.session.userId) {
-      log.info("POST /scanned-exams: user has a session. Redirecting to /app");
-      return res.redirect("/scanned-exams/app");
-    }
-
     const domain = req.body.custom_domain;
     const courseId = req.body.custom_courseid;
+
+    if (req.session.userId) {
+      log.info("POST /scanned-exams: user has a session. Redirecting to /app");
+      return res.redirect(`/scanned-exams/app?courseId=${courseId}`);
+    }
 
     log.info(
       `POST /scanned-exams: user has launched the app from course ${courseId}`
@@ -92,17 +92,13 @@ server.post("/scanned-exams", async (req, res) => {
         );
     }
 
-    const ladokId = await canvasApi.getExaminationLadokId(courseId);
-    req.session.courseId = courseId;
-    req.session.ladokId = ladokId;
-    req.session.state = "idle";
     req.session.userId = null;
-
-    const html = await fs.readFile("index.html", { encoding: "utf-8" });
 
     // TODO: if domain is kth.test.instructure.com > Redirect to the app in referens
     // TODO: if domain is kth.instructure.com > Show a message encouraging people to use "canvas.kth.se"
     // TODO: set a cookie to check from client-side JS that the cookie is set correctly
+
+    const html = await fs.readFile("index.html", { encoding: "utf-8" });
 
     res
       .status(200)
@@ -116,10 +112,28 @@ server.post("/scanned-exams", async (req, res) => {
 });
 server.use("/scanned-exams/auth", authRouter);
 server.use("/scanned-exams/api", apiRouter);
+server.get("/scanned-exams/app", async (req, res) => {
+  const courseId = req.query.courseId;
+  const userId = req.session.userId;
+  const { authorized } = await canvas.getAuthorizationData(courseId, userId);
+
+  if (!authorized) {
+    return res.send(
+      "Unauthorized: you must be teacher or examiner to use this app"
+    );
+  }
+
+  const html = await fs.readFile(
+    path.join(__dirname, "..", "frontend", "build", "index.html"),
+    { encoding: "utf-8" }
+  );
+  res.send(html.replace("__COURSE_ID__", courseId));
+});
 server.use(
-  "/scanned-exams/app",
-  express.static(path.join(__dirname, "..", "frontend", "build"))
+  "/scanned-exams/app/static",
+  express.static(path.join(__dirname, "..", "frontend", "build", "static"))
 );
+
 server.get("/scanned-exams/_monitor", monitor);
 module.exports = server;
 
