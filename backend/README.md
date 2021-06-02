@@ -16,11 +16,12 @@
 ## Linux
 1. Run
 
-   ```sudo apt-get install openssl
+   ```sh
+   sudo apt-get install openssl
    cd certs
   openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem
   ```
-
+## All environments
 
 1. Run
 
