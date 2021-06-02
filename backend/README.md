@@ -19,7 +19,7 @@
    ```sh
    sudo apt-get install openssl
    cd certs
-  openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem
+   openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem
   ```
 ## All environments
 
