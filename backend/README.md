@@ -14,9 +14,12 @@
    mkcert -key-file ./certs/key.pem -cert-file ./certs/cert.pem localdev.kth.se localhost
    ```
 ## Linux
-```sudo apt-get install openssl
-cd certs
-openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem```
+1. Run
+
+   ```sudo apt-get install openssl
+   cd certs
+  openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out cert.pem
+  ```
 
 
 1. Run
