@@ -99,22 +99,26 @@ async function transferExams(courseId) {
       currentStatus.state = "uploading";
 
       for (const { userId } of examList) {
-        const hasSubmission = await canvas.hasSubmission({
-          courseId,
-          assignmentId: assignment.id,
-          userId,
-        });
-
-        if (hasSubmission) {
-          log.info(`User ${userId} has already a submission. Skipping`);
-        } else {
-          log.info(`Uploading exam for ${userId}`);
-          await canvas.uploadExam(path.resolve(maskedDir, `${userId}.pdf`), {
+        try {
+          const hasSubmission = await canvas.hasSubmission({
             courseId,
             assignmentId: assignment.id,
             userId,
-            examDate,
           });
+
+          if (hasSubmission) {
+            log.info(`User ${userId} has already a submission. Skipping`);
+          } else {
+            log.info(`Uploading exam for ${userId}`);
+            await canvas.uploadExam(path.resolve(maskedDir, `${userId}.pdf`), {
+              courseId,
+              assignmentId: assignment.id,
+              userId,
+              examDate,
+            });
+          }
+        } catch (err) {
+          log.error({ err }, `Cannot upload exam for student ${userId} `);
         }
       }
 
