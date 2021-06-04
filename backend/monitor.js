@@ -1,9 +1,9 @@
-const got = require("got");
 const log = require("skog");
+const tentaApiClient = require("./api/tentaApiClient");
 
 async function tentaApi() {
   try {
-    const { body } = await got("https://tentaapi.ug.kth.se/api/v2.0/Version");
+    const body = await tentaApiClient.getVersion();
     return {
       status: "OK",
       data: body,

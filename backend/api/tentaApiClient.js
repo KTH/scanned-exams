@@ -4,7 +4,16 @@ const log = require("skog");
 
 const client = got.extend({
   prefixUrl: process.env.TENTA_API_URL,
+  headers: {
+    "Ocp-Apim-Subscription-Key": process.env.TENTA_API_SUBSCRIPTION_KEY,
+  },
 });
+
+async function getVersion() {
+  const { body } = await client("Version");
+
+  return body;
+}
 
 /** Get the examDate and codes (examCode-courseCode) given the Ladok UID */
 async function getAktivitetstillfalle(ladokId) {
@@ -93,4 +102,5 @@ module.exports = {
   examList,
   downloadExam,
   getAktivitetstillfalle,
+  getVersion,
 };
