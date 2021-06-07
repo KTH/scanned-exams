@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server-https.js | pino-pretty",
+    "debug": "node --inspect-brk server-https.js",
     "test": "jest"
   },
   "repository": {
