@@ -1,4 +1,4 @@
-const courseId = window.COURSE_ID
+const courseId = window.COURSE_ID;
 
 export const getAssignment = async () =>
   await fetch(`/scanned-exams/api/assignment?courseId=${courseId}`, {

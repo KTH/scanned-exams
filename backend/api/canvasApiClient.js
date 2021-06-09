@@ -3,7 +3,7 @@ const FormData = require("formdata-node").default;
 const fs = require("fs");
 const got = require("got");
 const log = require("skog");
-const { getAktivitetstillfalle } = require("./tentaApiClient");
+const { getAktivitetstillfalle } = require("./ladokApiClient");
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,
