@@ -4,7 +4,16 @@ const log = require("skog");
 
 const client = got.extend({
   prefixUrl: process.env.TENTA_API_URL,
+  headers: {
+    "Ocp-Apim-Subscription-Key": process.env.TENTA_API_SUBSCRIPTION_KEY,
+  },
 });
+
+async function getVersion() {
+  const { body } = await client("Version");
+
+  return body;
+}
 
 /** Get a list of all exam files for a given exam */
 async function examList({ courseCode, examDate, examCode }) {
@@ -76,4 +85,5 @@ async function downloadExam(fileId, filePath) {
 module.exports = {
   examList,
   downloadExam,
+  getVersion,
 };

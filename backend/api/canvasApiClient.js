@@ -134,7 +134,7 @@ async function hasSubmission({ courseId, assignmentId, userId }) {
       `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}`
     );
 
-    return assignment.workflow_state === "submitted";
+    return !assignment.missing;
   } catch (err) {
     if (err.response?.statusCode === 404) {
       return false;

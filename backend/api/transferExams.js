@@ -124,6 +124,7 @@ async function transferExams(courseId) {
       await fs.promises.rmdir(dirName, { force: true, recursive: true });
       await canvas.lockAssignment(courseId, assignment.id);
     }
+    log.info("😺 Finished uploading exams");
 
     currentStatus.state = "success";
   } catch (err) {
