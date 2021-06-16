@@ -15,22 +15,6 @@ async function getVersion() {
   return body;
 }
 
-/** Get the examDate and codes (examCode-courseCode) given the Ladok UID */
-async function getAktivitetstillfalle(ladokId) {
-  log.info(`Getting information for aktivitetstillfälle ${ladokId}`);
-  const { body } = await client(`Ladok/activity/${ladokId}`, {
-    responseType: "json",
-  });
-
-  return {
-    activities: body.kopplingar.map((k) => ({
-      examCode: k.aktivitet.utbildningskod,
-      courseCode: k.kursinstans.utbildningskod,
-    })),
-    examDate: body.datumperiod.startdatum,
-  };
-}
-
 /** Get a list of all exam files for a given exam */
 async function examList({ courseCode, examDate, examCode }) {
   log.info(`Getting exams for ${courseCode} ${examDate} ${examCode}`);
@@ -101,6 +85,5 @@ async function downloadExam(fileId, filePath) {
 module.exports = {
   examList,
   downloadExam,
-  getAktivitetstillfalle,
   getVersion,
 };

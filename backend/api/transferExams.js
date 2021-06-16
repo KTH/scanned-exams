@@ -5,6 +5,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const maskFile = require("./maskFile");
+const { getAktivitetstillfalle } = require("./ladokApiClient");
 
 // Key for `allStatus` is course ID
 const allStatus = new Map();
@@ -37,9 +38,7 @@ async function transferExams(courseId) {
     currentStatus.state = "predownloading";
     log.info("predownloading...");
     const ladokId = await canvas.getExaminationLadokId(courseId);
-    const { activities, examDate } = await tentaApi.getAktivitetstillfalle(
-      ladokId
-    );
+    const { activities, examDate } = await getAktivitetstillfalle(ladokId);
     const examList = [];
 
     for (const activity of activities) {
