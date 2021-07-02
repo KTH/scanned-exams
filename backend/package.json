@@ -6,6 +6,7 @@
   "scripts": {
     "start": "nodemon server-https.js | pino-pretty",
     "debug": "node --inspect-brk server-https.js",
+    "test:lint": "eslint *.js",
     "test": "jest"
   },
   "repository": {
@@ -35,9 +36,11 @@
     "skog": "^2.1.0"
   },
   "devDependencies": {
+    "@kth/eslint-config-kth": "^1.0.10",
+    "eslint": "^7.29.0",
     "jest": "^26.6.3",
     "nodemon": "^2.0.7",
     "pino-pretty": "^4.7.1",
-    "prettier": "^2.2.1"
+    "prettier": "^2.3.2"
   }
 }
