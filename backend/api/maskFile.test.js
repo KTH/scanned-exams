@@ -1,9 +1,9 @@
-const { describe, expect, test } = require("@jest/globals");
+const { expect, test } = require("@jest/globals");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
 
-const maskFile = require("../api/maskFile");
+const maskFile = require("./maskFile");
 
 test("Make sure that `maskFile` works", async () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "masked-image-test"));

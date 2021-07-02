@@ -76,7 +76,7 @@ function maskImage(input, output) {
       .fill("#fff")
       .stroke("#9dc2ea", 1)
       .drawRectangle(...MASK_COORDINATES)
-      .write(output, function (err) {
+      .write(output, (err) => {
         if (err) {
           reject(err);
         } else {
@@ -99,6 +99,7 @@ module.exports = async function maskFile(input, output) {
   for (let page = 1; page < pages; page++) {
     const maskedImage = path.resolve(tmp, `${page}.png`);
 
+    // eslint-disable-next-line no-await-in-loop
     await maskImage(`${input}[${page}]`, maskedImage);
     maskedImages.push(maskedImage);
   }

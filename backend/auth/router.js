@@ -1,5 +1,6 @@
 const express = require("express");
 const { Issuer, generators } = require("openid-client");
+
 const router = express.Router();
 const { URL } = require("url");
 const log = require("skog");

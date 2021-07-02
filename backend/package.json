@@ -6,8 +6,10 @@
   "scripts": {
     "start": "nodemon server-https.js | pino-pretty",
     "debug": "node --inspect-brk server-https.js",
-    "test:lint": "eslint *.js",
-    "test": "jest"
+    "format": "prettier --write .",
+    "test:lint": "eslint *.js api/**/*.js auth/**/*.js",
+    "test:format": "prettier --check .",
+    "test": "npm run test:lint && npm run test:format && jest"
   },
   "repository": {
     "type": "git",
@@ -36,6 +38,7 @@
     "skog": "^2.1.0"
   },
   "devDependencies": {
+    "@jest/globals": "^26.6.2",
     "@kth/eslint-config-kth": "^1.0.10",
     "eslint": "^7.29.0",
     "jest": "^26.6.3",

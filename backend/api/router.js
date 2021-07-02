@@ -1,15 +1,16 @@
 const express = require("express");
+const log = require("skog");
 const canvas = require("./canvasApiClient");
 const { transferExams, getStatus } = require("./transferExams.js");
-const log = require("skog");
 const { internalServerError, unauthorized } = require("../utils");
 
 const router = express.Router();
 
+// eslint-disable-next-line prefer-arrow-callback
 router.use(async function checkAuthorization(req, res, next) {
   try {
     const courseId = req.query.courseId || req.body.courseId;
-    const userId = req.session.userId;
+    const { userId } = req.session;
     const { roles, authorized } = await canvas.getAuthorizationData(
       courseId,
       userId
@@ -31,13 +32,14 @@ router.use(async function checkAuthorization(req, res, next) {
     );
   } catch (err) {
     log.error(err);
-    internalServerError(err, res);
+
+    return internalServerError(err, res);
   }
 });
 
 router.get("/assignment", async (req, res) => {
   try {
-    const courseId = req.query.courseId;
+    const { courseId } = req.query;
     const ladokId = await canvas.getExaminationLadokId(courseId);
     const assignment = await canvas.getValidAssignment(courseId, ladokId);
 
@@ -52,7 +54,7 @@ router.get("/assignment", async (req, res) => {
 
 router.post("/assignment", async (req, res) => {
   try {
-    const courseId = req.body.courseId;
+    const { courseId } = req.body;
     const ladokId = await canvas.getExaminationLadokId(courseId);
     let assignment = await canvas.getValidAssignment(courseId, ladokId);
 

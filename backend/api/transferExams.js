@@ -1,9 +1,9 @@
 const log = require("skog");
-const tentaApi = require("./tentaApiClient");
-const canvas = require("./canvasApiClient");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const canvas = require("./canvasApiClient");
+const tentaApi = require("./tentaApiClient");
 const maskFile = require("./maskFile");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
 
@@ -42,6 +42,7 @@ async function transferExams(courseId) {
     const examList = [];
 
     for (const activity of activities) {
+      // eslint-disable-next-line no-await-in-loop
       const list = await tentaApi.examList({
         courseCode: activity.courseCode,
         examCode: activity.examCode,
@@ -63,8 +64,10 @@ async function transferExams(courseId) {
     await fs.promises.mkdir(maskedDir, { recursive: true });
 
     for (const { userId, fileId } of examList) {
-      let startDate = new Date();
+      const startDate = new Date();
       log.info(`Started downloading ${fileId} at ${startDate}`);
+
+      // eslint-disable-next-line no-await-in-loop
       await tentaApi.downloadExam(
         fileId,
         path.resolve(unmaskedDir, `${userId}.pdf`)
@@ -82,6 +85,7 @@ async function transferExams(courseId) {
     log.info("Starting pnr-masking");
 
     for (const { userId } of examList) {
+      // eslint-disable-next-line no-await-in-loop
       await maskFile(
         path.resolve(unmaskedDir, `${userId}.pdf`),
         path.resolve(maskedDir, `${userId}.pdf`)
@@ -99,6 +103,7 @@ async function transferExams(courseId) {
 
       for (const { userId } of examList) {
         try {
+          // eslint-disable-next-line no-await-in-loop
           const hasSubmission = await canvas.hasSubmission({
             courseId,
             assignmentId: assignment.id,
@@ -109,6 +114,7 @@ async function transferExams(courseId) {
             log.info(`User ${userId} has already a submission. Skipping`);
           } else {
             log.info(`Uploading exam for ${userId}`);
+            // eslint-disable-next-line no-await-in-loop
             await canvas.uploadExam(path.resolve(maskedDir, `${userId}.pdf`), {
               courseId,
               assignmentId: assignment.id,

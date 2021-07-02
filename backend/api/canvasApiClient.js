@@ -106,9 +106,11 @@ async function lockAssignment(courseId, assignmentId) {
   );
 }
 
+// eslint-disable-next-line camelcase
 async function sendFile({ upload_url, upload_params }, filePath) {
   const form = new FormData();
 
+  // eslint-disable-next-line camelcase
   for (const key in upload_params) {
     if (upload_params[key]) {
       form.append(key, upload_params[key]);
@@ -138,9 +140,8 @@ async function hasSubmission({ courseId, assignmentId, userId }) {
   } catch (err) {
     if (err.response?.statusCode === 404) {
       return false;
-    } else {
-      throw err;
     }
+    throw err;
   }
 }
 
