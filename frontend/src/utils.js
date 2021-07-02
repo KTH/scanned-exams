@@ -1,7 +1,7 @@
 const courseId = window.COURSE_ID;
 
 export const getAssignment = async () =>
-  await fetch(`/scanned-exams/api/assignment?courseId=${courseId}`, {
+  fetch(`/scanned-exams/api/assignment?courseId=${courseId}`, {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.REACT_APP_CANVAS_API_ADMIN_TOKEN}`,
@@ -9,7 +9,7 @@ export const getAssignment = async () =>
   });
 
 export const createAssignment = async () =>
-  await fetch(`/scanned-exams/api/assignment`, {
+  fetch(`/scanned-exams/api/assignment`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -21,7 +21,7 @@ export const createAssignment = async () =>
   });
 
 export const sendExam = async () =>
-  await fetch(`/scanned-exams/api/exams`, {
+  fetch(`/scanned-exams/api/exams`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -33,7 +33,7 @@ export const sendExam = async () =>
   });
 
 export const uploadStatus = async () =>
-  await fetch(`/scanned-exams/api/exams?courseId=${courseId}`, {
+  fetch(`/scanned-exams/api/exams?courseId=${courseId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

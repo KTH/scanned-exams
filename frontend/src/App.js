@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-one-expression-per-line, no-console */
 import React, { useState, useEffect, createRef } from "react";
 import CreateAssignment from "./components/CreateAssignment";
 import Layout from "./components/Layout";
@@ -51,11 +52,11 @@ function App() {
     }
   };
 
-  const onUpload = (e) => {
+  const onUpload = () => {
     clearAlert();
     setLoading(true);
 
-    const sendFile = async (data) => {
+    const sendFile = async () => {
       try {
         const res = await sendExam();
         if (res.ok) {
