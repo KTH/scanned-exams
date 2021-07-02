@@ -21,10 +21,10 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const path = require("path");
+const fs = require("fs");
 const apiRouter = require("./api/router");
 const authRouter = require("./auth/router");
 const monitor = require("./monitor");
-const fs = require("fs");
 const canvas = require("./api/canvasApiClient");
 
 const PORT = 4000;
@@ -102,21 +102,21 @@ server.post("/scanned-exams", async (req, res) => {
       encoding: "utf-8",
     });
 
-    res
+    return res
       .status(200)
       .send(
         html.replace("{{COURSE_ID}}", courseId).replace("{{DOMAIN}}", domain)
       );
   } catch (err) {
     log.error({ err });
-    res.status(500).send("Unknown error. Please contact IT support");
+    return res.status(500).send("Unknown error. Please contact IT support");
   }
 });
 server.use("/scanned-exams/auth", authRouter);
 server.use("/scanned-exams/api", apiRouter);
 server.get("/scanned-exams/app", async (req, res) => {
-  const courseId = req.query.courseId;
-  const userId = req.session.userId;
+  const { courseId } = req.query;
+  const { userId } = req.session;
   const { authorized } = await canvas.getAuthorizationData(courseId, userId);
 
   if (!authorized) {
@@ -129,7 +129,8 @@ server.get("/scanned-exams/app", async (req, res) => {
     path.join(__dirname, "..", "frontend", "build", "index.html"),
     { encoding: "utf-8" }
   );
-  res.send(html.replace("__COURSE_ID__", courseId));
+
+  return res.send(html.replace("__COURSE_ID__", courseId));
 });
 server.use(
   "/scanned-exams/app/static",

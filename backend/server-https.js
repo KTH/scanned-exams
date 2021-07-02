@@ -1,7 +1,7 @@
-const server = require("./server");
 const fs = require("fs");
 const https = require("https");
 const log = require("skog");
+const server = require("./server");
 
 const privateKey = fs.readFileSync("certs/key.pem");
 const certificate = fs.readFileSync("certs/cert.pem");

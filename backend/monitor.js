@@ -14,13 +14,12 @@ async function tentaApi() {
         status: "ERROR",
         data: "403: Forbidden.",
       };
-    } else {
-      log.error({ err }, "Error");
-      return {
-        status: "ERROR",
-        data: "See the logs for further information",
-      };
     }
+    log.error({ err }, "Error");
+    return {
+      status: "ERROR",
+      data: "See the logs for further information",
+    };
   }
 }
 
