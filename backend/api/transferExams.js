@@ -53,6 +53,8 @@ async function importOneExam(
     upload_time: uploadEnd.getTime() - maskEnd.getTime(),
     total_time: uploadEnd.getTime() - startDate.getTime(),
   });
+
+  return fs.promises.rm(tempDir, { force: true, recursive: true });
 }
 
 async function transferExams(courseId) {
