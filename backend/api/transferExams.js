@@ -20,6 +20,41 @@ function getStatus(courseId) {
   );
 }
 
+async function importOneExam(
+  fileId,
+  { userId, courseId, assignmentId, examDate }
+) {
+  const tempDir = await fs.promises.mkdtemp(
+    path.join(os.tmpdir(), "scanned-exams", fileId)
+  );
+  const unmaskedFile = path.resolve(tempDir, "unmasked.pdf");
+  const maskedFile = path.resolve(tempDir, "masked.pdf");
+  const startDate = new Date();
+
+  log.info(`Student ${userId}. Downloading`);
+  await tentaApi.downloadExam(fileId, unmaskedFile);
+  const downloadEnd = new Date();
+
+  await maskFile(unmaskedFile, maskedFile);
+  const maskEnd = new Date();
+
+  log.info(`Student ${userId}. Uploading`);
+  await canvas.uploadExam(maskedFile, {
+    courseId,
+    assignmentId,
+    userId,
+    examDate,
+  });
+  const uploadEnd = new Date();
+
+  log.info(`Student ${userId}. Finish importing exam`, {
+    download_time: downloadEnd.getTime() - startDate.getTime(),
+    masking_time: maskEnd.getTime() - downloadEnd.getTime(),
+    upload_time: uploadEnd.getTime() - maskEnd.getTime(),
+    total_time: uploadEnd.getTime() - startDate.getTime(),
+  });
+}
+
 async function transferExams(courseId) {
   if (!allStatus.has(courseId)) {
     allStatus.set(courseId, { state: "idle" });
@@ -52,84 +87,44 @@ async function transferExams(courseId) {
       examList.push(...list);
     }
 
-    currentStatus.state = "downloading";
-    const dirName = await fs.promises.mkdtemp(
-      path.join(os.tmpdir(), "scanned-exams")
-    );
-    const unmaskedDir = path.resolve(dirName, "unmasked");
-    const maskedDir = path.resolve(dirName, "masked");
-
-    log.info(`Created directory ${dirName}`);
-    await fs.promises.mkdir(unmaskedDir, { recursive: true });
-    await fs.promises.mkdir(maskedDir, { recursive: true });
-
-    for (const { userId, fileId } of examList) {
-      const startDate = new Date();
-      log.info(`Started downloading ${fileId} at ${startDate}`);
-
-      // eslint-disable-next-line no-await-in-loop
-      await tentaApi.downloadExam(
-        fileId,
-        path.resolve(unmaskedDir, `${userId}.pdf`)
-      );
-      const endDate = new Date();
-      log.info(
-        `Finished downloading ${fileId} ended at ${endDate} and took ${Math.abs(
-          (startDate.getTime() - endDate.getTime()) / 1000
-        )} seconds`
-      );
-    }
-    log.info("Finished downloading exams");
-
-    currentStatus.state = "postdownloading";
-    log.info("Starting pnr-masking");
-
-    for (const { userId } of examList) {
-      // eslint-disable-next-line no-await-in-loop
-      await maskFile(
-        path.resolve(unmaskedDir, `${userId}.pdf`),
-        path.resolve(maskedDir, `${userId}.pdf`)
-      );
-    }
-    currentStatus.state = "preuploading";
-
     log.info("Checking if assignment is published");
+
     const assignment = await canvas.getValidAssignment(courseId, ladokId);
 
-    if (assignment) {
-      // TODO: check that assignment.integration_data == session.examination
-      await canvas.unlockAssignment(courseId, assignment.id);
-      currentStatus.state = "uploading";
+    if (!assignment) {
+      return;
+    }
 
-      for (const { userId } of examList) {
-        try {
+    // TODO: check that assignment.integration_data == session.examination
+    await canvas.unlockAssignment(courseId, assignment.id);
+    currentStatus.state = "uploading";
+
+    for (const { userId, fileId } of examList) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const hasSubmission = await canvas.hasSubmission({
+          courseId,
+          assignmentId: assignment.id,
+          userId,
+        });
+
+        if (!hasSubmission) {
           // eslint-disable-next-line no-await-in-loop
-          const hasSubmission = await canvas.hasSubmission({
+          await importOneExam(fileId, {
+            userId,
             courseId,
             assignmentId: assignment.id,
-            userId,
+            examDate,
           });
-
-          if (hasSubmission) {
-            log.info(`User ${userId} has already a submission. Skipping`);
-          } else {
-            log.info(`Uploading exam for ${userId}`);
-            // eslint-disable-next-line no-await-in-loop
-            await canvas.uploadExam(path.resolve(maskedDir, `${userId}.pdf`), {
-              courseId,
-              assignmentId: assignment.id,
-              userId,
-              examDate,
-            });
-          }
-        } catch (err) {
-          log.error({ err }, `Cannot upload exam for student ${userId} `);
+        } else {
+          log.info(`User ${userId} has already a submission. Skipping`);
         }
+      } catch (err) {
+        log.error({ err }, `Cannot import exam for student ${userId} `);
       }
-
-      await fs.promises.rmdir(dirName, { force: true, recursive: true });
-      await canvas.lockAssignment(courseId, assignment.id);
     }
+
+    await canvas.lockAssignment(courseId, assignment.id);
     log.info("😺 Finished uploading exams");
 
     currentStatus.state = "success";
