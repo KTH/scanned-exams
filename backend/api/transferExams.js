@@ -94,10 +94,10 @@ async function transferExams(courseId) {
     const assignment = await canvas.getValidAssignment(courseId, ladokId);
 
     if (!assignment) {
+      log.warn("No valid assignment found, exit function.");
       return;
     }
 
-    // TODO: check that assignment.integration_data == session.examination
     await canvas.unlockAssignment(courseId, assignment.id);
     currentStatus.state = "uploading";
 
@@ -110,6 +110,9 @@ async function transferExams(courseId) {
           userId,
         });
 
+        // If a student have a submission from earlier runs,
+        // don't upload anything, neither the same submission again
+        // nor newer submissions
         if (!hasSubmission) {
           // eslint-disable-next-line no-await-in-loop
           await importOneExam(fileId, {
