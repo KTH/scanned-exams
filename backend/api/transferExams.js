@@ -25,7 +25,7 @@ async function importOneExam(
   { userId, courseId, assignmentId, examDate }
 ) {
   const tempDir = await fs.promises.mkdtemp(
-    path.join(os.tmpdir(), "scanned-exams", fileId)
+    path.join(os.tmpdir(), "scanned-exams-")
   );
   const unmaskedFile = path.resolve(tempDir, "unmasked.pdf");
   const maskedFile = path.resolve(tempDir, "masked.pdf");
@@ -53,6 +53,8 @@ async function importOneExam(
     upload_time: uploadEnd.getTime() - maskEnd.getTime(),
     total_time: uploadEnd.getTime() - startDate.getTime(),
   });
+
+  return fs.promises.rm(tempDir, { force: true, recursive: true });
 }
 
 async function transferExams(courseId) {
@@ -92,10 +94,10 @@ async function transferExams(courseId) {
     const assignment = await canvas.getValidAssignment(courseId, ladokId);
 
     if (!assignment) {
+      log.warn("No valid assignment found, exit function.");
       return;
     }
 
-    // TODO: check that assignment.integration_data == session.examination
     await canvas.unlockAssignment(courseId, assignment.id);
     currentStatus.state = "uploading";
 
@@ -108,6 +110,9 @@ async function transferExams(courseId) {
           userId,
         });
 
+        // If a student have a submission from earlier runs,
+        // don't upload anything, neither the same submission again
+        // nor newer submissions
         if (!hasSubmission) {
           // eslint-disable-next-line no-await-in-loop
           await importOneExam(fileId, {

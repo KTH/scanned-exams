@@ -132,11 +132,11 @@ async function sendFile({ upload_url, upload_params }, filePath) {
 async function hasSubmission({ courseId, assignmentId, userId }) {
   try {
     const { body: user } = await canvas.get(`users/sis_user_id:${userId}`);
-    const { body: assignment } = await canvas.get(
+    const { body: submission } = await canvas.get(
       `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}`
     );
 
-    return !assignment.missing;
+    return !submission.missing;
   } catch (err) {
     if (err.response?.statusCode === 404) {
       return false;
