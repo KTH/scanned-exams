@@ -25,7 +25,7 @@ async function importOneExam(
   { userId, courseId, assignmentId, examDate }
 ) {
   const tempDir = await fs.promises.mkdtemp(
-    path.join(os.tmpdir(), "scanned-exams", fileId)
+    path.join(os.tmpdir(), "scanned-exams-")
   );
   const unmaskedFile = path.resolve(tempDir, "unmasked.pdf");
   const maskedFile = path.resolve(tempDir, "masked.pdf");
