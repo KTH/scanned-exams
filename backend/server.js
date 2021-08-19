@@ -115,22 +115,27 @@ server.post("/scanned-exams", async (req, res) => {
 server.use("/scanned-exams/auth", authRouter);
 server.use("/scanned-exams/api", apiRouter);
 server.get("/scanned-exams/app", async (req, res) => {
-  const { courseId } = req.query;
-  const { userId } = req.session;
-  const { authorized } = await canvas.getAuthorizationData(courseId, userId);
+  try {
+    const { courseId } = req.query;
+    const { userId } = req.session;
+    const { authorized } = await canvas.getAuthorizationData(courseId, userId);
 
-  if (!authorized) {
-    return res.send(
-      "Unauthorized: you must be teacher or examiner to use this app"
+    if (!authorized) {
+      return res.send(
+        "Unauthorized: you must be teacher or examiner to use this app"
+      );
+    }
+
+    const html = await fs.promises.readFile(
+      path.join(__dirname, "..", "frontend", "build", "index.html"),
+      { encoding: "utf-8" }
     );
+
+    return res.send(html.replace("__COURSE_ID__", courseId));
+  } catch (err) {
+    log.error(err);
+    return res.status(500).send("Unknown error. Please contact IT support");
   }
-
-  const html = await fs.promises.readFile(
-    path.join(__dirname, "..", "frontend", "build", "index.html"),
-    { encoding: "utf-8" }
-  );
-
-  return res.send(html.replace("__COURSE_ID__", courseId));
 });
 server.use(
   "/scanned-exams/app/static",
