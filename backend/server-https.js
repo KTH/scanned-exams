@@ -14,6 +14,8 @@ const httpsServer = https.createServer(
   server
 );
 
-httpsServer.listen(4443, () => {
-  log.info("Started HTTPS server in https://localhost:4443");
+httpsServer.listen(process.env.PORT || 4443, () => {
+  log.info(
+    `Started HTTPS server in https://localhost:${process.env.PORT || 4443}`
+  );
 });

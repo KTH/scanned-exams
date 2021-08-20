@@ -38,6 +38,7 @@
     ]
   },
   "homepage": "/scanned-exams/app",
+  "proxy": "https://localdev.kth.se:4444",
   "devDependencies": {
     "@kth/eslint-config-kth": "^1.0.10",
     "autoprefixer": "^9.8.6",

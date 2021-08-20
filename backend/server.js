@@ -25,7 +25,6 @@ const fs = require("fs");
 const apiRouter = require("./api/router");
 const authRouter = require("./auth/router");
 const monitor = require("./monitor");
-const canvas = require("./api/canvasApiClient");
 
 const PORT = 4000;
 const server = express();
@@ -71,6 +70,10 @@ server.post("/scanned-exams", async (req, res) => {
     const domain = req.body.custom_domain;
     const courseId = req.body.custom_courseid;
 
+    // TODO: if domain is kth.test.instructure.com > Redirect to the app in referens
+    // TODO: if domain is kth.instructure.com > Show a message encouraging people to use "canvas.kth.se"
+    // TODO: set a cookie to check from client-side JS that the cookie is set correctly
+
     if (req.session.userId) {
       log.info("POST /scanned-exams: user has a session. Redirecting to /app");
       return res.redirect(`/scanned-exams/app?courseId=${courseId}`);
@@ -94,19 +97,7 @@ server.post("/scanned-exams", async (req, res) => {
 
     req.session.userId = null;
 
-    // TODO: if domain is kth.test.instructure.com > Redirect to the app in referens
-    // TODO: if domain is kth.instructure.com > Show a message encouraging people to use "canvas.kth.se"
-    // TODO: set a cookie to check from client-side JS that the cookie is set correctly
-
-    const html = await fs.promises.readFile("index.html", {
-      encoding: "utf-8",
-    });
-
-    return res
-      .status(200)
-      .send(
-        html.replace("{{COURSE_ID}}", courseId).replace("{{DOMAIN}}", domain)
-      );
+    return res.redirect(`/scanned-exams/app?courseId=${courseId}`);
   } catch (err) {
     log.error({ err });
     return res.status(500).send("Unknown error. Please contact IT support");
@@ -117,14 +108,6 @@ server.use("/scanned-exams/api", apiRouter);
 server.get("/scanned-exams/app", async (req, res) => {
   try {
     const { courseId } = req.query;
-    const { userId } = req.session;
-    const { authorized } = await canvas.getAuthorizationData(courseId, userId);
-
-    if (!authorized) {
-      return res.send(
-        "Unauthorized: you must be teacher or examiner to use this app"
-      );
-    }
 
     const html = await fs.promises.readFile(
       path.join(__dirname, "..", "frontend", "build", "index.html"),
