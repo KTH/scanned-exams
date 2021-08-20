@@ -10,6 +10,7 @@
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/react": "^11.2.6",
     "@testing-library/user-event": "^12.8.3",
+    "http-proxy-middleware": "^2.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-query": "^3.19.6",
@@ -39,7 +40,6 @@
     ]
   },
   "homepage": "/scanned-exams/app",
-  "proxy": "https://localdev.kth.se:4444",
   "devDependencies": {
     "@kth/eslint-config-kth": "^1.0.10",
     "autoprefixer": "^9.8.6",

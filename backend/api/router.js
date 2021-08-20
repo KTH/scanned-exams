@@ -51,9 +51,11 @@ router.get("/me", async (req, res) => {
   const { userId } = req.session;
 
   if (!userId) {
+    log.info("Getting user information. User is logged out");
     return res.status(404).send("You are logged out");
   }
 
+  log.info("Getting user information. User is logged in");
   return res.status(200).send({ userId });
 });
 
