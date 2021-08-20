@@ -1,23 +1,8 @@
 import React from "react";
-import { useQuery, QueryClient, QueryClientProvider } from "react-query";
+import { useQuery } from "react-query";
+import { getUserData } from "./utils/apiClient";
 
-const queryClient = new QueryClient();
-
-async function getUserData() {
-  const response = await window.fetch("/scanned-exams/api/me");
-
-  if (response.status === 404) {
-    return null;
-  }
-
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
-  }
-
-  return response.json();
-}
-
-function App2() {
+export default function App() {
   const query = useQuery("user", getUserData);
 
   if (query.isLoading) {
@@ -33,14 +18,4 @@ function App2() {
   }
 
   return <div>You are not logged in</div>;
-}
-
-export default function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <div className="container mx-auto">
-        <App2 />
-      </div>
-    </QueryClientProvider>
-  );
 }
