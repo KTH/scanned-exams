@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery } from "react-query";
 import { getUserData } from "./utils/apiClient";
+import Welcome from "./screens/Welcome";
 
 export default function App() {
   const query = useQuery("user", getUserData);
@@ -17,5 +18,5 @@ export default function App() {
     return <div>You are logged in</div>;
   }
 
-  return <div>You are not logged in</div>;
+  return <Welcome />;
 }
