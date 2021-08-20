@@ -1,6 +1,8 @@
 const express = require("express");
 const log = require("skog");
 const canvas = require("./canvasApiClient");
+const ladok = require("./ladokApiClient");
+
 const { transferExams, getStatus } = require("./transferExams.js");
 const { internalServerError, unauthorized } = require("../utils");
 
@@ -56,15 +58,29 @@ router.get("/me", async (req, res) => {
 });
 
 router.get("/courses/:id", async (req, res) => {
-  log.info(`Getting information for course ID ${req.params.id}`);
+  try {
+    log.info(`Getting information for course ID ${req.params.id}`);
 
-  res.send({
-    id: req.params.id,
-    courseCode: "AA0000",
-    examCode: "TENX",
-    examDate: "2000-01-01",
-    students: 42,
-  });
+    const { activities, examDate } = await canvas
+      .getExaminationLadokId(req.params.id)
+      .then((aktivitetstillfalleId) =>
+        ladok.getAktivitetstillfalle(aktivitetstillfalleId)
+      );
+
+    return res.send({
+      valid: activities.length === 1,
+      courseCode: activities.map((a) => a.courseCode).join(", "),
+      examCode: activities.map((a) => a.examCode).join(", "),
+      examDate,
+    });
+  } catch (err) {
+    log.error(
+      err,
+      `Error when fetching information for course ID ${req.params.id}`
+    );
+
+    return res.status(500).send("Unknown error");
+  }
 });
 
 router.get("/assignment", checkAuthorization, async (req, res) => {
