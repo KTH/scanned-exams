@@ -55,6 +55,18 @@ router.get("/me", async (req, res) => {
   return res.status(200).send({ userId });
 });
 
+router.get("/courses/:id", async (req, res) => {
+  log.info(`Getting information for course ID ${req.params.id}`);
+
+  res.send({
+    id: req.params.id,
+    courseCode: "AA0000",
+    examCode: "TENX",
+    examDate: "2000-01-01",
+    students: 42,
+  });
+});
+
 router.get("/assignment", checkAuthorization, async (req, res) => {
   try {
     const { courseId } = req.query;

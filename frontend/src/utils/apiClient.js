@@ -12,3 +12,15 @@ export async function getUserData() {
 
   return response.json();
 }
+
+export async function getCourse({ queryKey }) {
+  const [, courseId] = queryKey;
+  console.log(queryKey);
+  const response = await window.fetch(`/scanned-exams/api/courses/${courseId}`);
+
+  if (!response.ok) {
+    throw new Error("Something wrong happened");
+  }
+
+  return response.json();
+}
