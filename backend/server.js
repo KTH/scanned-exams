@@ -107,14 +107,12 @@ server.use("/scanned-exams/auth", authRouter);
 server.use("/scanned-exams/api", apiRouter);
 server.get("/scanned-exams/app", async (req, res) => {
   try {
-    const { courseId } = req.query;
-
     const html = await fs.promises.readFile(
       path.join(__dirname, "..", "frontend", "build", "index.html"),
       { encoding: "utf-8" }
     );
 
-    return res.send(html.replace("__COURSE_ID__", courseId));
+    return res.send(html);
   } catch (err) {
     log.error(err);
     return res.status(500).send("Unknown error. Please contact IT support");
