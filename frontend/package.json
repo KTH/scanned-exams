@@ -6,6 +6,7 @@
   "author": "KTH Royal Institute of Technology <vc.developers@kth.se> (https:kth.se)",
   "license": "MIT",
   "dependencies": {
+    "@craco/craco": "^6.2.0",
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/react": "^11.2.6",
     "@testing-library/user-event": "^12.8.3",
@@ -16,19 +17,13 @@
     "web-vitals": "^1.1.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "DISABLE_ESLINT_PLUGIN=true react-scripts build",
+    "start": "DISABLE_ESLINT_PLUGIN=true craco start",
+    "build": "DISABLE_ESLINT_PLUGIN=true craco build",
     "eject": "react-scripts eject",
     "format": "prettier --write .",
     "test:lint": "eslint src/**/*.js",
     "test:format": "prettier --check .",
     "test": "npm run test:lint && npm run test:format && react-scripts test"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [
@@ -45,7 +40,10 @@
   "homepage": "/scanned-exams/app",
   "devDependencies": {
     "@kth/eslint-config-kth": "^1.0.10",
+    "autoprefixer": "^9.8.6",
     "eslint": "^7.29.0",
-    "prettier": "^2.3.2"
+    "postcss": "^7.0.36",
+    "prettier": "^2.3.2",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.7"
   }
 }
