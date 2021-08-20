@@ -6,8 +6,12 @@ const { internalServerError, unauthorized } = require("../utils");
 
 const router = express.Router();
 
-// eslint-disable-next-line prefer-arrow-callback
-router.use(async function checkAuthorization(req, res, next) {
+/**
+ * Check if the requester has teacher roles.
+ * - If it does, continues the request
+ * - Otherwise responds with an "Unauthorized"
+ */
+async function checkAuthorization(req, res, next) {
   try {
     const courseId = req.query.courseId || req.body.courseId;
     const { userId } = req.session;
@@ -35,9 +39,23 @@ router.use(async function checkAuthorization(req, res, next) {
 
     return internalServerError(err, res);
   }
+}
+
+/**
+ * Returns data from the logged in user.
+ * - Returns a 404 if the user is not logged in
+ */
+router.get("/me", async (req, res) => {
+  const { userId } = req.session;
+
+  if (!userId) {
+    return res.status(404).send("You are logged out");
+  }
+
+  return res.status(200).send({ userId });
 });
 
-router.get("/assignment", async (req, res) => {
+router.get("/assignment", checkAuthorization, async (req, res) => {
   try {
     const { courseId } = req.query;
     const ladokId = await canvas.getExaminationLadokId(courseId);
@@ -52,7 +70,7 @@ router.get("/assignment", async (req, res) => {
   }
 });
 
-router.post("/assignment", async (req, res) => {
+router.post("/assignment", checkAuthorization, async (req, res) => {
   try {
     const { courseId } = req.body;
     const ladokId = await canvas.getExaminationLadokId(courseId);
@@ -71,7 +89,7 @@ router.post("/assignment", async (req, res) => {
   }
 });
 
-router.post("/exams", (req, res) => {
+router.post("/exams", checkAuthorization, (req, res) => {
   try {
     transferExams(req.body.courseId);
 
@@ -83,7 +101,7 @@ router.post("/exams", (req, res) => {
   }
 });
 
-router.get("/exams", (req, res) => {
+router.get("/exams", checkAuthorization, (req, res) => {
   try {
     const status = getStatus(req.query.courseId);
 
