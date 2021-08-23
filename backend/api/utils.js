@@ -2,7 +2,7 @@ const log = require("skog");
 const canvas = require("./canvasApiClient");
 
 async function checkAuthorization(req, res, next) {
-  const { courseId } = req.params;
+  const { id: courseId } = req.params;
   const { userId } = req.session;
   const { roles, authorized } = await canvas.getAuthorizationData(
     courseId,

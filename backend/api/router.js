@@ -20,6 +20,14 @@ router.get("/me", (req, res) => {
   return res.status(200).send({ userId });
 });
 
+router.get("/courses/:id/setup", checkAuthorization, (req, res) => {
+  res.send({
+    coursePublished: true,
+    assignmentCreated: true,
+    assignmentPublished: true,
+  });
+});
+
 router.use(handleUnexpectedError);
 
 module.exports = router;
