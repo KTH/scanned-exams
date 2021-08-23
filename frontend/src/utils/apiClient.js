@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export */
 export async function getUserData() {
   const response = await window.fetch("/scanned-exams/api/me");
 
@@ -7,17 +8,6 @@ export async function getUserData() {
 
   if (!response.ok) {
     throw new Error("Network response was not ok");
-  }
-
-  return response.json();
-}
-
-export async function getCourse({ queryKey }) {
-  const [, courseId] = queryKey;
-  const response = await window.fetch(`/scanned-exams/api/courses/${courseId}`);
-
-  if (!response.ok) {
-    throw new Error("Something wrong happened");
   }
 
   return response.json();
