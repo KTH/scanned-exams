@@ -12,6 +12,7 @@ module.exports = function setupProxy(app) {
     changeOrigin: true,
     secure: false,
   });
+  app.post("/scanned-exams", proxy);
   app.use("/scanned-exams/api", proxy);
   app.use("/scanned-exams/auth", proxy);
 };
