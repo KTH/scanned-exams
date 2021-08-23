@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 export async function getUserData() {
   const response = await window.fetch("/scanned-exams/api/me");
 
@@ -15,7 +14,6 @@ export async function getUserData() {
 
 export async function getCourse({ queryKey }) {
   const [, courseId] = queryKey;
-  console.log(queryKey);
   const response = await window.fetch(`/scanned-exams/api/courses/${courseId}`);
 
   if (!response.ok) {

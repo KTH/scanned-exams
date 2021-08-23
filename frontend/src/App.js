@@ -2,6 +2,7 @@ import React from "react";
 import { useQuery } from "react-query";
 import { getUserData } from "./utils/apiClient";
 import Welcome from "./screens/Welcome";
+import AuthenticatedApp from "./screens/AuthenticatedApp";
 
 /*
 function getCourseId() {
@@ -24,7 +25,7 @@ export default function App() {
   }
 
   if (query.data) {
-    return <div>You are logged in</div>;
+    return <AuthenticatedApp />;
   }
 
   return <Welcome />;
