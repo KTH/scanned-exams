@@ -1,6 +1,5 @@
 import React from "react";
-import { useQuery } from "react-query";
-import { getUserData } from "./utils/apiClient";
+import { useUser } from "./hooks/useUser";
 import Welcome from "./screens/Welcome";
 import AuthenticatedApp from "./screens/AuthenticatedApp";
 
@@ -11,15 +10,11 @@ function getCourseId() {
 }
 
 export default function App() {
-  const query = useQuery("user", getUserData);
+  const query = useUser();
   const courseId = getCourseId();
 
   if (query.isLoading) {
     return <div>Loading...</div>;
-  }
-
-  if (query.isError) {
-    throw query.error;
   }
 
   if (query.data) {
