@@ -1,5 +1,5 @@
 import React from "react";
-import { useUser } from "./hooks/useUser";
+import { useUser } from "./hooks/user";
 import Welcome from "./screens/Welcome";
 import AuthenticatedApp from "./screens/AuthenticatedApp";
 
