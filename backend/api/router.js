@@ -1,5 +1,6 @@
 const express = require("express");
 const log = require("skog");
+const { checkAuthorization, handleUnexpectedError } = require("./utils");
 
 const router = express.Router();
 
@@ -7,7 +8,7 @@ const router = express.Router();
  * Returns data from the logged in user.
  * - Returns a 404 if the user is not logged in
  */
-router.get("/me", async (req, res) => {
+router.get("/me", (req, res) => {
   const { userId } = req.session;
 
   if (!userId) {
@@ -18,5 +19,7 @@ router.get("/me", async (req, res) => {
   log.info("Getting user information. User is logged in");
   return res.status(200).send({ userId });
 });
+
+router.use(handleUnexpectedError);
 
 module.exports = router;
