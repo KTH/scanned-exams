@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Welcome() {
+export default function Welcome({ courseId }) {
   return (
     <div className="max-w-screen-lg">
       <div className="text-4xl font-semibold mt-8 mb-4 tracking-tight">
@@ -13,6 +13,7 @@ export default function Welcome() {
       </div>
       <div className="bg-blue-100 w-96 py-6 px-12 my-12">
         <form method="post" action="/scanned-exams/auth">
+          <input name="courseId" type="hidden" value={courseId} />
           <button
             type="submit"
             className="bg-blue-500 text-white rounded-md font-semibold w-full py-2 mt-3 mb-2 hover:bg-blue-700 transition-colors"
