@@ -1,6 +1,7 @@
 import React from "react";
 import Stepper from "./Stepper";
 import CreateHomePage from "./steps/CreateHomePage";
+import PublishCourse from "./steps/PublishCourse";
 
 export default function Setup({ courseId }) {
   return (
@@ -36,7 +37,8 @@ export default function Setup({ courseId }) {
             ]}
           />
         </div>
-        <CreateHomePage />
+        {/* <CreateHomePage /> */}
+        <PublishCourse />
       </div>
     </div>
   );
