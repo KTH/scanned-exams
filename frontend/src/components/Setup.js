@@ -47,8 +47,8 @@ export default function Setup({
             ]}
           />
         </div>
-        {/* <CreateHomePage /> */}
-        <PublishCourse />
+        {currentStep === 0 && <CreateHomePage />}
+        {currentStep === 1 && <PublishCourse />}
       </div>
     </div>
   );
