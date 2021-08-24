@@ -1,5 +1,5 @@
 import React from "react";
-import { Check } from "./icons";
+import Stepper from "./Stepper";
 import CreateHomePage from "./steps/CreateHomePage";
 
 export default function Setup({ courseId }) {
@@ -11,26 +11,30 @@ export default function Setup({ courseId }) {
       </div>
       <div className="flex">
         <div className="w-64 flex-none mr-16">
-          <div className="mt-3">
-            <div className="flex mb-6">
-              <div className="flex-none mr-4 w-6 h-6 text-green-700">
-                <Check />
-              </div>
-              <div>Create an examroom homepage</div>
-            </div>
-            <div className="flex mb-6 font-semibold">
-              <div className="flex-none mr-4 w-6 h-6" />
-              <div>Publish the examroom</div>
-            </div>
-            <div className="flex mb-6">
-              <div className="flex-none mr-4 w-6 h-6" />
-              <div>Create a special assignment</div>
-            </div>
-            <div className="flex">
-              <div className="flex-none mr-4 w-6 h-6" />
-              <div>Publish the special assignment</div>
-            </div>
-          </div>
+          <Stepper
+            steps={[
+              {
+                title: "Create an examroom homepage",
+                done: true,
+                current: false,
+              },
+              {
+                title: "Publish the examroom",
+                done: false,
+                current: true,
+              },
+              {
+                title: "Create a special assignment",
+                done: false,
+                current: false,
+              },
+              {
+                title: "Publish the special assignment",
+                done: false,
+                current: false,
+              },
+            ]}
+          />
         </div>
         <CreateHomePage />
       </div>
