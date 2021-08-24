@@ -1,7 +1,16 @@
 import React from "react";
-import Stepper from "./Stepper";
+import { Step, StepList } from "./StepList";
 import CreateHomePage from "./steps/CreateHomePage";
 import PublishCourse from "./steps/PublishCourse";
+
+function StepText({ long, short }) {
+  return (
+    <span>
+      <span className="md:hidden">{short}</span>
+      <span className="hidden md:inline">{long}</span>
+    </span>
+  );
+}
 
 export default function Setup({
   coursePublished,
@@ -18,34 +27,26 @@ export default function Setup({
   ].findIndex((s) => !s);
 
   return (
-    <div className="container mx-auto">
-      <div className="text-gray-500 mt-8 mb-6 pb-2 flex">
-        <div className="flex-1">Scanned Exams / Setting up the examroom</div>
-        <div className="flex-none">Carlos Saito | Logout</div>
-      </div>
-      <div className="flex">
-        <div className="w-64 flex-none mr-16">
-          <Stepper
-            currentStep={currentStep}
-            steps={[
-              {
-                title: "Create an examroom homepage",
-                done: homepageCreated,
-              },
-              {
-                title: "Publish the examroom",
-                done: coursePublished,
-              },
-              {
-                title: "Create a special assignment",
-                done: assignmentCreated,
-              },
-              {
-                title: "Publish the special assignment",
-                done: assignmentPublished,
-              },
-            ]}
-          />
+    <div className="container mx-auto my-8">
+      <div className="">
+        <div className="mb-4">
+          <StepList currentStep={currentStep}>
+            <Step index={0} done={homepageCreated}>
+              <StepText short="Step 1" long="1. Create an examroom homepage" />
+            </Step>
+            <Step index={1} done={coursePublished}>
+              <StepText short="Step 2" long="2. Publish examroom" />
+            </Step>
+            <Step index={2} done={assignmentCreated}>
+              <StepText short="Step 3" long="3. Create a special assignment" />
+            </Step>
+            <Step index={3} done={assignmentPublished}>
+              <StepText short="Step 4" long="4. Publish assignment" />
+            </Step>
+          </StepList>
+        </div>
+        <div className="text-sm text-gray-700 mt-8">
+          Step {currentStep + 1} of 4
         </div>
         {currentStep === 0 && <CreateHomePage />}
         {currentStep === 1 && <PublishCourse />}
