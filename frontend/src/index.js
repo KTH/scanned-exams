@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider, focusManager } from "react-query";
 import { ErrorBoundary } from "react-error-boundary";
 
 import "./index.css";
@@ -9,6 +9,17 @@ import FullPageError from "./components/FullPageError";
 import reportWebVitals from "./reportWebVitals";
 
 const queryClient = new QueryClient();
+focusManager.setEventListener((handleFocus) => {
+  // Listen only to visibillitychange
+  if (typeof window !== "undefined" && window.addEventListener) {
+    window.addEventListener("visibilitychange", handleFocus, false);
+  }
+
+  return () => {
+    // Be sure to unsubscribe if a new handler is set
+    window.removeEventListener("visibilitychange", handleFocus);
+  };
+});
 
 ReactDOM.render(
   <React.StrictMode>

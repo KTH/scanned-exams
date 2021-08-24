@@ -14,7 +14,7 @@ export default function App() {
   const courseId = getCourseId();
 
   if (query.isLoading) {
-    return <div>Loading...</div>;
+    return <div />;
   }
 
   if (query.data) {
