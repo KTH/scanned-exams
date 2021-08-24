@@ -13,5 +13,11 @@ export default function AuthenticatedApp({ courseId }) {
     throw query.error;
   }
 
-  return <Setup courseId={courseId} />;
+  return (
+    <Setup
+      coursePublished={query.data.coursePublished}
+      assignmentCreated={query.data.assignmentCreated}
+      assignmentPublished={query.data.assignmentPublished}
+    />
+  );
 }

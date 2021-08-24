@@ -3,7 +3,20 @@ import Stepper from "./Stepper";
 import CreateHomePage from "./steps/CreateHomePage";
 import PublishCourse from "./steps/PublishCourse";
 
-export default function Setup({ courseId }) {
+export default function Setup({
+  coursePublished,
+  assignmentCreated,
+  assignmentPublished,
+}) {
+  const [homepageCreated, setHomepageCreated] = React.useState(coursePublished);
+
+  const currentStep = [
+    coursePublished,
+    homepageCreated,
+    assignmentCreated,
+    assignmentPublished,
+  ].findIndex((s) => !s);
+
   return (
     <div className="container mx-auto">
       <div className="text-gray-500 mt-8 mb-6 pb-2 flex">
@@ -13,26 +26,23 @@ export default function Setup({ courseId }) {
       <div className="flex">
         <div className="w-64 flex-none mr-16">
           <Stepper
+            currentStep={currentStep}
             steps={[
               {
                 title: "Create an examroom homepage",
-                done: true,
-                current: false,
+                done: homepageCreated,
               },
               {
                 title: "Publish the examroom",
-                done: false,
-                current: true,
+                done: coursePublished,
               },
               {
                 title: "Create a special assignment",
-                done: false,
-                current: false,
+                done: assignmentCreated,
               },
               {
                 title: "Publish the special assignment",
-                done: false,
-                current: false,
+                done: assignmentPublished,
               },
             ]}
           />
