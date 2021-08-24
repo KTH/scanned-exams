@@ -1,5 +1,6 @@
 import React from "react";
 import { useCourseSetup } from "../hooks/course";
+import Setup from "../components/Setup";
 
 export default function AuthenticatedApp({ courseId }) {
   const query = useCourseSetup(courseId);
@@ -12,5 +13,5 @@ export default function AuthenticatedApp({ courseId }) {
     throw query.error;
   }
 
-  return <div>You are logged in</div>;
+  return <Setup courseId={courseId} />;
 }
