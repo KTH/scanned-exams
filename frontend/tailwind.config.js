@@ -12,15 +12,19 @@ module.exports = {
       white: colors.white,
       gray: colors.trueGray,
       blue: {
-        100: "#E0F5FF",
-        200: "#94DCFF",
-        300: "#33BDFF",
-        400: "#0091D6",
-        500: "#007CB7",
-        600: "#006293",
-        700: "#00517a",
-        800: "#003956",
-        900: "#002538",
+        // 600 or more distance: AAA
+        // 500 distance: AA
+        // 400 distance: AA-L
+        //                 white  black
+        100: "#E0F5FF", //        AAA
+        200: "#94DCFF", //        AAA
+        300: "#33BDFF", //        AAA
+        400: "#0091D6", // AA-L   AA
+        500: "#007CB7", // AA     AA
+        600: "#006293", // AA     AA-L
+        700: "#00517a", // AAA
+        800: "#003956", // AAA
+        900: "#002538", // AAA
       },
       green: colors.lime,
       yellow: colors.yellow,
