@@ -32,13 +32,13 @@ export default function Setup({
         <div className="mb-8">
           <StepList currentStep={currentStep}>
             <Step index={0} done={homepageCreated}>
-              <StepText short="Step 1" long="1. Create an examroom homepage" />
+              <StepText short="Step 1" long="1. Prepare the homepage" />
             </Step>
             <Step index={1} done={coursePublished}>
               <StepText short="Step 2" long="2. Publish examroom" />
             </Step>
             <Step index={2} done={assignmentCreated}>
-              <StepText short="Step 3" long="3. Create a special assignment" />
+              <StepText short="Step 3" long="3. Prepare the assignment" />
             </Step>
             <Step index={3} done={assignmentPublished}>
               <StepText short="Step 4" long="4. Publish assignment" />

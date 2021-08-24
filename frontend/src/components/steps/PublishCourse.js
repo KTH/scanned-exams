@@ -1,16 +1,13 @@
 import React from "react";
-import { H2, ButtonBar, PrimaryButton, P } from "./util";
+import { H2, PrimaryButton, P } from "./util";
 
 export default function PublishCourse() {
   return (
     <div>
       <H2>Publish the examroom</H2>
-      <P>The examroom needs to be published in order to import exams to it</P>
-      <P>Once it is published, the registred students will have access</P>
+      <P>Now its time to publish the examroom</P>
 
-      <ButtonBar>
-        <PrimaryButton type="button">Publish examroom</PrimaryButton>
-      </ButtonBar>
+      <PrimaryButton type="button">Publish examroom</PrimaryButton>
     </div>
   );
 }

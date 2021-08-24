@@ -10,25 +10,24 @@ export function H2(props) {
   return <h2 className="font-semibold mt-4 mb-8 text-2xl" {...props} />;
 }
 
-export function ButtonBar(props) {
-  return <div className="mt-10" {...props} />;
-}
+const baseButtonClass =
+  "block w-full sm:inline-block sm:w-auto rounded-md font-semibold py-2 px-6 transition colors";
 
 export function PrimaryButton(props) {
   return (
     <button
       type="button"
-      className="bg-blue-500 text-white rounded-md font-semibold py-2 px-6 mt-4 hover:bg-blue-700 transition-colors mr-4"
+      className={`${baseButtonClass} text-white bg-blue-500 hover:bg-blue-700 mr-8`}
       {...props}
     />
   );
 }
 
-export function LinkButton(props) {
+export function SecondaryButton(props) {
   return (
     <button
       type="button"
-      className="text-blue-500 rounded-md font-semibold py-2 px-6 mt-4 mb-2 hover:text-blue-700 transition-colors ml-4"
+      className={`${baseButtonClass} mt-2 sm:mt-0 text-black border border-black hover:bg-gray-200`}
       {...props}
     />
   );
