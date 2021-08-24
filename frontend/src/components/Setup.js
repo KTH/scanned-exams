@@ -29,7 +29,7 @@ export default function Setup({
   return (
     <div className="container mx-auto my-8">
       <div className="">
-        <div className="mb-4">
+        <div className="mb-8">
           <StepList currentStep={currentStep}>
             <Step index={0} done={homepageCreated}>
               <StepText short="Step 1" long="1. Create an examroom homepage" />
@@ -44,9 +44,6 @@ export default function Setup({
               <StepText short="Step 4" long="4. Publish assignment" />
             </Step>
           </StepList>
-        </div>
-        <div className="text-sm text-gray-700 mt-8">
-          Step {currentStep + 1} of 4
         </div>
         {currentStep === 0 && <CreateHomePage />}
         {currentStep === 1 && <PublishCourse />}
