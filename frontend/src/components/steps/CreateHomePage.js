@@ -1,6 +1,7 @@
 import React from "react";
 import { H2, PrimaryButton, SecondaryButton, P } from "./util";
 import { useMutateCourseSetup } from "../../hooks/course";
+import { Spinner } from "../icons";
 
 export default function CreateHomePage({ onCreate, skip, courseId }) {
   const mutation = useMutateCourseSetup(courseId, "create-homepage", {
@@ -8,6 +9,10 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
       onCreate();
     },
   });
+
+  if (mutation.isError) {
+    throw mutation.error;
+  }
 
   return (
     <div>
@@ -28,10 +33,12 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
             mutation.mutate();
           }}
         >
-          {mutation.isLoading ? "Creating..." : "Use the recommended homepage"}
+          Use the recommended homepage
+          {mutation.isLoading && (
+            <Spinner className="h-5 w-5 animate-spin ml-3" />
+          )}
         </PrimaryButton>
         <SecondaryButton onClick={skip}>Skip this step</SecondaryButton>
-        <P>{mutation.isError && "An error ocurred. Try again."}</P>
       </P>
     </div>
   );

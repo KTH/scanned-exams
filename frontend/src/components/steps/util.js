@@ -11,13 +11,13 @@ export function H2(props) {
 }
 
 const baseButtonClass =
-  "block w-full sm:inline-block sm:w-auto rounded-md font-semibold py-2 px-6 transition colors";
+  "flex w-full sm:inline-flex sm:w-auto items-center rounded-md font-semibold py-2 text-base px-6 transition colors";
 
 export function PrimaryButton(props) {
   return (
     <button
       type="button"
-      className={`${baseButtonClass} text-white bg-blue-500 hover:bg-blue-700 mr-8`}
+      className={`${baseButtonClass} border border-transparent text-white bg-blue-500 hover:bg-blue-700 mr-8`}
       {...props}
     />
   );
