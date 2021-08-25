@@ -18,7 +18,10 @@ async function fetchCourse(courseId, endpoint) {
 
 async function changeCourseSetup(courseId, action) {
   const response = await window.fetch(
-    `/scanned-exams/api/courses/${courseId}/setup/${action}`
+    `/scanned-exams/api/courses/${courseId}/setup/${action}`,
+    {
+      method: "post",
+    }
   );
   const data = await response.json();
 
