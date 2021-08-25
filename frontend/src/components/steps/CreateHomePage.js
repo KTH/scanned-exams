@@ -25,8 +25,9 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
       <P>
         <em>The examroom will not be published yet</em>
       </P>
-      <P>
+      <div className="mt-8">
         <PrimaryButton
+          className="sm:w-96"
           onClick={() => {
             mutation.mutate();
           }}
@@ -36,8 +37,10 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
             <Spinner className="h-5 w-5 animate-spin ml-3" />
           )}
         </PrimaryButton>
-        <SecondaryButton onClick={skip}>Skip this step</SecondaryButton>
-      </P>
+        <SecondaryButton className="sm:w-auto" onClick={skip}>
+          Skip this step
+        </SecondaryButton>
+      </div>
     </div>
   );
 }

@@ -10,25 +10,26 @@ export function H2(props) {
   return <h2 className="font-semibold mt-4 mb-8 text-2xl" {...props} />;
 }
 
-const baseButtonClass =
-  "flex w-full sm:inline-flex sm:w-auto justify-center items-center rounded-md font-semibold py-2 text-base px-6 transition colors";
-
-export function PrimaryButton(props) {
+export function BaseButton({ className, ...props }) {
   return (
     <button
       type="button"
-      className={`${baseButtonClass} border border-transparent text-white bg-blue-500 hover:bg-blue-700 mr-8`}
+      className={`${className} flex w-full sm:inline-flex justify-center items-center rounded-md font-semibold py-2 text-base px-6 transition-colors`}
       {...props}
     />
   );
 }
 
-export function SecondaryButton(props) {
-  return (
-    <button
-      type="button"
-      className={`${baseButtonClass} mt-2 sm:mt-0 text-black border border-black hover:bg-gray-200`}
-      {...props}
-    />
-  );
-}
+export const PrimaryButton = ({ className, ...props }) => (
+  <BaseButton
+    className={`${className} border border-transparent text-white bg-blue-500 hover:bg-blue-700 mr-8`}
+    {...props}
+  />
+);
+
+export const SecondaryButton = ({ className, ...props }) => (
+  <BaseButton
+    className={`${className} mt-2 sm:mt-0 text-black border border-black hover:bg-gray-200`}
+    {...props}
+  />
+);
