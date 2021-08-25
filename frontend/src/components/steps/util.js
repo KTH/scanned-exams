@@ -20,9 +20,15 @@ export function BaseButton({ className, ...props }) {
   );
 }
 
-export const PrimaryButton = ({ className, ...props }) => (
+export const PrimaryButton = ({ className, disabled, ...props }) => (
   <BaseButton
-    className={`${className} border border-transparent text-white bg-blue-500 hover:bg-blue-700 mr-8`}
+    className={[
+      className,
+      disabled && "opacity-75",
+      !disabled && "hover:bg-blue-700",
+      "border border-transparent text-white bg-blue-500  mr-8",
+    ].join(" ")}
+    disabled={disabled}
     {...props}
   />
 );
