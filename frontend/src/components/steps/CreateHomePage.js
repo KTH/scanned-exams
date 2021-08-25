@@ -15,14 +15,12 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
   }
 
   return (
-    <div>
+    <div className="max-w-2xl">
       <H2>Prepare the homepage</H2>
       <P>
         Since this examroom will be visible for your students, it is important
-        that they can see its purpose from the homepage.
-      </P>
-      <P>
-        You can use our recommended homepage or setup the courseroom by yourself
+        that they can see its purpose from the homepage. You can use our
+        recommended homepage or setup the courseroom by yourself
       </P>
       <P>
         <em>The examroom will not be published yet</em>
