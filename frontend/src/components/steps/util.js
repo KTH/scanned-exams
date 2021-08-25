@@ -11,7 +11,7 @@ export function H2(props) {
 }
 
 const baseButtonClass =
-  "flex w-full sm:inline-flex sm:w-auto items-center rounded-md font-semibold py-2 text-base px-6 transition colors";
+  "flex w-full sm:inline-flex sm:w-auto justify-center items-center rounded-md font-semibold py-2 text-base px-6 transition colors";
 
 export function PrimaryButton(props) {
   return (
