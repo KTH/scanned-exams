@@ -40,6 +40,16 @@ router.get("/courses/:id/setup", checkAuthorization, async (req, res, next) => {
   }
 });
 
+router.post(
+  "/courses/:id/setup/create-homepage",
+  checkAuthorization,
+  async (req, res) => {
+    setTimeout(() => {
+      res.send({ message: "done!" });
+    }, 2000);
+  }
+);
+
 router.use(handleUnexpectedError);
 
 module.exports = router;
