@@ -15,6 +15,7 @@ export default function AuthenticatedApp({ courseId }) {
 
   return (
     <Setup
+      courseId={courseId}
       coursePublished={query.data.coursePublished}
       assignmentCreated={query.data.assignmentCreated}
       assignmentPublished={query.data.assignmentPublished}

@@ -16,12 +16,13 @@ export default function Setup({
   coursePublished,
   assignmentCreated,
   assignmentPublished,
+  courseId,
 }) {
   const [homepageCreated, setHomepageCreated] = React.useState(coursePublished);
 
   const currentStep = [
-    coursePublished,
     homepageCreated,
+    coursePublished,
     assignmentCreated,
     assignmentPublished,
   ].findIndex((s) => !s);
@@ -45,7 +46,12 @@ export default function Setup({
             </Step>
           </StepList>
         </div>
-        {currentStep === 0 && <CreateHomePage />}
+        {currentStep === 0 && (
+          <CreateHomePage
+            courseId={courseId}
+            onCreate={() => setHomepageCreated(true)}
+          />
+        )}
         {currentStep === 1 && <PublishCourse />}
       </div>
     </div>
