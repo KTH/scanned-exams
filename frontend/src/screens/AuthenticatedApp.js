@@ -1,5 +1,5 @@
 import React from "react";
-import { useCourseSetup } from "../hooks/course";
+import { useCourseSetup } from "../hooks/api";
 import Setup from "../components/Setup";
 
 export default function AuthenticatedApp({ courseId }) {
