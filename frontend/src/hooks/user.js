@@ -8,11 +8,15 @@ async function fetchUser() {
     return null;
   }
 
+  const data = await response.json();
+
   if (!response.ok) {
-    throw new Error("Network response was not ok");
+    const err = new Error(data.message);
+    err.status = response.status;
+    throw err;
   }
 
-  return response.json();
+  return data;
 }
 
 export function useUser() {

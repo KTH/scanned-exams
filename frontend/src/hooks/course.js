@@ -8,7 +8,7 @@ async function fetchCourse(courseId, endpoint) {
   const data = await response.json();
 
   if (!response.ok) {
-    const err = new Error(data);
+    const err = new Error(data.message);
     err.status = response.status;
     throw err;
   }
@@ -27,7 +27,7 @@ async function changeCourseSetup(courseId, action) {
   const data = await response.json();
 
   if (!response.ok) {
-    const err = new Error(data);
+    const err = new Error(data.message);
     err.status = response.status;
     throw err;
   }

@@ -19,7 +19,7 @@ async function checkAuthorization(req, res, next) {
     `Not authorized. User ${userId} in Course ${courseId} has roles: [${roles}].`
   );
 
-  return res.status(401).json({
+  return res.status(401).send({
     message: "Unauthorized: you must be teacher or examiner to use this app",
   });
 }
@@ -31,7 +31,9 @@ function handleUnexpectedError(err, req, res, next) {
     return next(err);
   }
 
-  return res.status(500).send("Unexpected error. Please contact IT support");
+  return res.status(500).send({
+    message: "Unexpected error. Please contact IT support",
+  });
 }
 
 module.exports = {
