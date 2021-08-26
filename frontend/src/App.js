@@ -6,6 +6,12 @@ import AuthenticatedApp from "./screens/AuthenticatedApp";
 function getCourseId() {
   const urlParams = new URLSearchParams(window.location.search);
 
+  if (!urlParams.has("courseId")) {
+    throw new Error(
+      "Missing URL parameter 'courseId'. This app should be launched from Canvas"
+    );
+  }
+
   return urlParams.get("courseId");
 }
 
