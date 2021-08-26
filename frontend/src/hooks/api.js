@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "react-query";
 
 async function apiClient(
   endpoint,
-  { method, ignoreNotFound, ...customConfig }
+  { method, ignoreNotFound, ...customConfig } = {}
 ) {
   const config = {
     method: method || "GET",
@@ -47,11 +47,5 @@ export function useMutateCourseSetup(courseId, action, options = {}) {
 }
 
 export function useUser() {
-  const query = useQuery("user", apiClient(`me`, { ignoreNotFound: true }));
-
-  if (query.isError) {
-    throw query.error;
-  }
-
-  return query;
+  return useQuery("user", () => apiClient(`me`, { ignoreNotFound: true }));
 }
