@@ -16,14 +16,14 @@ function getCourseId() {
 }
 
 export default function App() {
-  const query = useUser();
+  const { isLoading, data } = useUser();
   const courseId = getCourseId();
 
-  if (query.isLoading) {
+  if (isLoading) {
     return <div />;
   }
 
-  if (query.data) {
+  if (data) {
     return <AuthenticatedApp courseId={courseId} />;
   }
 
