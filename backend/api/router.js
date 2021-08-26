@@ -14,7 +14,7 @@ router.get("/me", (req, res) => {
 
   if (!userId) {
     log.info("Getting user information. User is logged out");
-    return res.status(404).send("You are logged out");
+    return res.status(404).send({ message: "You are logged out" });
   }
 
   log.info("Getting user information. User is logged in");
