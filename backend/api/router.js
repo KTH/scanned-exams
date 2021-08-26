@@ -1,6 +1,7 @@
 const express = require("express");
 const log = require("skog");
-const { handleUnexpectedError } = require("./utils");
+const { handleUnexpectedError, checkAuthorization } = require("./utils");
+const canvas = require("./canvasApiClient");
 
 const router = express.Router();
 
@@ -18,6 +19,24 @@ router.get("/me", (req, res) => {
 
   log.info("Getting user information. User is logged in");
   return res.status(200).send({ userId });
+});
+
+router.get("/courses/:id/setup", checkAuthorization, async (req, res, next) => {
+  const courseId = req.params.id;
+
+  try {
+    const ladokId = await canvas.getExaminationLadokId(courseId);
+    const course = await canvas.getCourse(courseId);
+    const assignment = await canvas.getValidAssignment(courseId, ladokId);
+
+    res.send({
+      coursePublished: course.workflow_state === "available",
+      assignmentCreated: assignment != null,
+      assignmentPublished: assignment?.published || false,
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.use(handleUnexpectedError);
