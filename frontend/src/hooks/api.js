@@ -47,7 +47,7 @@ export function useMutateCourseSetup(courseId, action, options = {}) {
 }
 
 export function useUser() {
-  const query = apiClient(`me`, { ignoreNotFound: true });
+  const query = useQuery("user", apiClient(`me`, { ignoreNotFound: true }));
 
   if (query.isError) {
     throw query.error;
