@@ -1,5 +1,6 @@
 const express = require("express");
 const log = require("skog");
+const { handleUnexpectedError } = require("./utils");
 
 const router = express.Router();
 
@@ -19,4 +20,5 @@ router.get("/me", (req, res) => {
   return res.status(200).send({ userId });
 });
 
+router.use(handleUnexpectedError);
 module.exports = router;
