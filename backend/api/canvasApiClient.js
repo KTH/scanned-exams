@@ -10,13 +10,6 @@ const canvas = new Canvas(
   process.env.CANVAS_API_ADMIN_TOKEN
 );
 
-/** Get data from one canvas course */
-async function getCourse(courseId) {
-  const { body } = await canvas.get(`courses/${courseId}`);
-
-  return body;
-}
-
 /** Get the Ladok UID of the examination linked with a canvas course */
 async function getExaminationLadokId(courseId) {
   const sections = await canvas.list(`courses/${courseId}/sections`).toArray();
@@ -209,7 +202,6 @@ async function getAuthorizationData(courseId, userId) {
 }
 
 module.exports = {
-  getCourse,
   getExaminationLadokId,
   getValidAssignment,
   createAssignment,
