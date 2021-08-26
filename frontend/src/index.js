@@ -9,14 +9,22 @@ import FullPageError from "./components/FullPageError";
 import reportWebVitals from "./reportWebVitals";
 
 const queryClient = new QueryClient();
+
+// By default, react-query does a request to the backend every time the window
+// is focused (i.e. it listens to events "visibilitychange" and "focus")
+//
+// However, Scanned Exams runs inside an <iframe> so we don't want to perform a
+// request when the user clicks outside/inside the <iframe>.
+//
+// Therefore we have implemented our own "onfocus" handler where we only listen
+// to "visibilitychange" events
+// Read more: https://react-query.tanstack.com/guides/window-focus-refetching
 focusManager.setEventListener((handleFocus) => {
-  // Listen only to visibillitychange
   if (typeof window !== "undefined" && window.addEventListener) {
     window.addEventListener("visibilitychange", handleFocus, false);
   }
 
   return () => {
-    // Be sure to unsubscribe if a new handler is set
     window.removeEventListener("visibilitychange", handleFocus);
   };
 });
