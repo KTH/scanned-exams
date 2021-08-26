@@ -8,7 +8,18 @@ import App from "./App";
 import FullPageError from "./components/FullPageError";
 import reportWebVitals from "./reportWebVitals";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry(failureCount, error) {
+        if (failureCount > 3 || error?.status === 401) {
+          return false;
+        }
+        return true;
+      },
+    },
+  },
+});
 
 // By default, react-query does a request to the backend every time the window
 // is focused (i.e. it listens to events "visibilitychange" and "focus")

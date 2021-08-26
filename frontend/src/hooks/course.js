@@ -5,12 +5,12 @@ async function fetchCourse(courseId, endpoint) {
     `/scanned-exams/api/courses/${courseId}/${endpoint}`
   );
 
-  if (response.status === 401) {
-    throw new Error("You must be teacher or examiner to use this app");
-  }
+  const data = await response.json();
 
   if (!response.ok) {
-    throw new Error("Something wrong happened");
+    const err = new Error(data);
+    err.status = response.status;
+    throw err;
   }
 
   return response.json();
@@ -23,22 +23,21 @@ async function changeCourseSetup(courseId, action) {
       method: "post",
     }
   );
+
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data);
+    const err = new Error(data);
+    err.status = response.status;
+    throw err;
   }
 
   return data;
 }
 
 export function useCourseSetup(courseId) {
-  return useQuery(
-    ["course", courseId, "setup"],
-    () => fetchCourse(courseId, "setup"),
-    {
-      retry: false,
-    }
+  return useQuery(["course", courseId, "setup"], () =>
+    fetchCourse(courseId, "setup")
   );
 }
 
