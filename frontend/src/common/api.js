@@ -24,18 +24,21 @@ async function apiClient(
   return data;
 }
 
+/** Fetches the API to get information about the setup of a given course */
 export function useCourseSetup(courseId) {
   return useQuery(["course", courseId, "setup"], () =>
     apiClient(`courses/${courseId}/setup`)
   );
 }
 
+/** Fetches the API to get information about the exams of a given course */
 export function useCourseExams(courseId) {
   return useQuery(["course", courseId, "exams"], () =>
     apiClient(`courses/${courseId}/exams`)
   );
 }
 
+/** Performs one action to change the setup of a course */
 export function useMutateCourseSetup(courseId, action, options = {}) {
   return useMutation(
     () =>
@@ -46,6 +49,11 @@ export function useMutateCourseSetup(courseId, action, options = {}) {
   );
 }
 
+/**
+ * Fetches the API to get information about the current user.
+ *
+ * If the user is logged out, field "data" will be null
+ */
 export function useUser() {
   return useQuery("user", () => apiClient(`me`, { ignoreNotFound: true }));
 }
