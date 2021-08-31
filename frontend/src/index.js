@@ -5,7 +5,7 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import "./index.css";
 import App from "./App";
-import FullPageError from "./components/FullPageError";
+import FullPageError from "./common/FullPageError";
 import reportWebVitals from "./reportWebVitals";
 
 const queryClient = new QueryClient({

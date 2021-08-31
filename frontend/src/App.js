@@ -1,7 +1,7 @@
 import React from "react";
-import { useUser } from "./hooks/api";
-import Welcome from "./screens/Welcome";
-import AuthenticatedApp from "./screens/AuthenticatedApp";
+import { useUser } from "./common/api";
+import UnauthenticatedApp from "./features/unauthenticated-app/UnauthenticatedApp";
+import AuthenticatedApp from "./features/authenticated-app/AuthenticatedApp";
 
 function getCourseId() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -27,5 +27,5 @@ export default function App() {
     return <AuthenticatedApp courseId={courseId} />;
   }
 
-  return <Welcome courseId={courseId} />;
+  return <UnauthenticatedApp courseId={courseId} />;
 }

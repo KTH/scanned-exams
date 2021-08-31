@@ -1,6 +1,6 @@
 import React from "react";
-import { useCourseSetup } from "../hooks/api";
-import Setup from "../components/Setup";
+import { useCourseSetup } from "../../common/api";
+import Setup from "../setup-course/SetupScreen";
 
 export default function AuthenticatedApp({ courseId }) {
   const query = useCourseSetup(courseId);
