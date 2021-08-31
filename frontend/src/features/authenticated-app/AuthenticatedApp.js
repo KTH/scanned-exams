@@ -1,6 +1,6 @@
 import React from "react";
 import { useCourseSetup } from "../../common/api";
-import Setup from "../setup-course/SetupScreen";
+import SetupScreen from "../setup-course/SetupScreen";
 
 export default function AuthenticatedApp({ courseId }) {
   const query = useCourseSetup(courseId);
@@ -14,7 +14,7 @@ export default function AuthenticatedApp({ courseId }) {
   }
 
   return (
-    <Setup
+    <SetupScreen
       courseId={courseId}
       coursePublished={query.data.coursePublished}
       assignmentCreated={query.data.assignmentCreated}

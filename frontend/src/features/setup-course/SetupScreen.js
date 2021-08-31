@@ -12,7 +12,7 @@ function StepText({ long, short }) {
   );
 }
 
-export default function Setup({
+export default function SetupScreen({
   coursePublished,
   assignmentCreated,
   assignmentPublished,
