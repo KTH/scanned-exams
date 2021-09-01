@@ -9,7 +9,7 @@
     "format": "prettier --write .",
     "test:lint": "eslint *.js api/**/*.js auth/**/*.js",
     "test:format": "prettier --check .",
-    "test": "npm run test:lint && npm run test:format && jest"
+    "test": "npm run test:lint && npm run test:format && jest --passWithNoTests"
   },
   "repository": {
     "type": "git",
