@@ -17,6 +17,29 @@ async function getCourse(courseId) {
   return body;
 }
 
+/** Creates a "good-looking" homepage in Canvas */
+async function createHomepage(courseId) {
+  await canvas.requestUrl(`courses/${courseId}/front_page`, "PUT", {
+    wiki_page: {
+      body: "Hello. This is a nice and beautiful home page!",
+    },
+  });
+  return canvas.requestUrl(`courses/${courseId}`, "PUT", {
+    course: {
+      default_view: "wiki",
+    },
+  });
+}
+
+/** Publish a course */
+async function publishCourse(courseId) {
+  return canvas.requestUrl(`courses/${courseId}`, "PUT", {
+    course: {
+      event: "offer",
+    },
+  });
+}
+
 /** Get the Ladok UID of the examination linked with a canvas course */
 async function getExaminationLadokId(courseId) {
   const sections = await canvas.list(`courses/${courseId}/sections`).toArray();
@@ -80,6 +103,19 @@ async function createAssignment(courseId, ladokId) {
       },
     })
     .then((r) => r.body);
+}
+
+/** Publish an assignment */
+async function publishAssignment(courseId, assignmentId) {
+  return canvas.requestUrl(
+    `courses/${courseId}/assignments/${assignmentId}`,
+    "PUT",
+    {
+      assignment: {
+        published: true,
+      },
+    }
+  );
 }
 
 async function unlockAssignment(courseId, assignmentId) {
@@ -210,9 +246,12 @@ async function getAuthorizationData(courseId, userId) {
 
 module.exports = {
   getCourse,
+  publishCourse,
+  createHomepage,
   getExaminationLadokId,
   getValidAssignment,
   createAssignment,
+  publishAssignment,
   unlockAssignment,
   lockAssignment,
   hasSubmission,
