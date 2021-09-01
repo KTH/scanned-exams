@@ -21,7 +21,12 @@ async function getCourse(courseId) {
 async function createHomepage(courseId) {
   await canvas.requestUrl(`courses/${courseId}/front_page`, "PUT", {
     wiki_page: {
-      body: "Hello. This is a nice and beautiful home page!",
+      // To make this page, use the Rich Content Editor in Canvas (https://kth.test.instructure.com/courses/30347/pages/welcome-to-the-exam/edit)
+      // Then copy the HTML code:
+      body: `<p>Welcome to the Canvas page for the exam results</p>
+      <p>This course will be used to grade your exams digitally. This means that, after your exams are scanned, they will be uploaded in this Canvas course</p>
+      <p>&nbsp;</p>
+      <p>Once your exam has been graded, you will be able to see the grades and teachers feedback under "Grades".</p>`,
     },
   });
   return canvas.requestUrl(`courses/${courseId}`, "PUT", {
