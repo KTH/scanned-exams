@@ -9,7 +9,7 @@
     "format": "prettier --write .",
     "test:lint": "eslint *.js api/**/*.js auth/**/*.js",
     "test:format": "prettier --check .",
-    "test": "npm run test:lint && npm run test:format && jest"
+    "test": "npm run test:lint && npm run test:format && jest --passWithNoTests"
   },
   "repository": {
     "type": "git",
@@ -30,10 +30,8 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "formdata-node": "^2.5.0",
-    "gm": "^1.23.1",
     "got": "^11.8.2",
     "openid-client": "^4.6.0",
-    "pdfkit": "^0.12.0",
     "pino": "^6.11.2",
     "skog": "^2.1.0"
   },

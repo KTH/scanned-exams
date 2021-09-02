@@ -2,7 +2,6 @@
 
 ## Getting started (short version)
 
-1. Install ImageMagick or GraphicsMagick in your computer.
 1. Copy the `.env.in` to `.env`
 1. Open the newly created `.env` and add the relevant environmental variables
 1. Create a directory called `certs`.
@@ -45,4 +44,4 @@
 
 ### Tenta API
 
-This application makes requests to
+This application makes requests to the Windream API to fetch scanned exams, and then imports them into Canvas as submissions.
