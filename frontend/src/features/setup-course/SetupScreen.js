@@ -1,6 +1,7 @@
 import React from "react";
 import { Step, StepList } from "./StepList";
 import CreateHomePage from "./steps/CreateHomePage";
+import Dummy from "./steps/Dummy";
 import PublishCourse from "./steps/PublishCourse";
 
 function StepText({ long, short }) {
@@ -53,6 +54,9 @@ export default function SetupScreen({
           />
         )}
         {currentStep === 1 && <PublishCourse />}
+
+        <div>A dummy component!!</div>
+        <Dummy courseId={courseId} />
       </div>
     </div>
   );
