@@ -1,6 +1,7 @@
 import React from "react";
 import { useCourseSetup } from "../../common/api";
 import SetupScreen from "../setup-course/SetupScreen";
+import UploadScreen from "../upload-exams/UploadScreen";
 
 export default function AuthenticatedApp({ courseId }) {
   const query = useCourseSetup(courseId);
@@ -11,6 +12,14 @@ export default function AuthenticatedApp({ courseId }) {
 
   if (query.isError) {
     throw query.error;
+  }
+
+  if (
+    query.data.coursePublished &&
+    query.data.assignmentCreated &&
+    query.data.assignmentCreated
+  ) {
+    return <UploadScreen />;
   }
 
   return (
