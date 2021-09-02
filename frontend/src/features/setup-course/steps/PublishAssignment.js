@@ -1,7 +1,7 @@
 import React from "react";
 import { H2, PrimaryButton, P } from "./util";
 
-export default function PublishCourse({ onNext, courseId }) {
+export default function CreateAssignment({ onNext, courseId }) {
   const [stateLoading, setLoading] = React.useState(false);
   const [stateSucess, setSuccess] = React.useState(false);
 
@@ -15,7 +15,7 @@ export default function PublishCourse({ onNext, courseId }) {
 
   return (
     <div>
-      <H2>Publish the examroom</H2>
+      <H2>Publish Assignment</H2>
       <P>Now its time to publish the examroom</P>
       <P>
         <PrimaryButton
@@ -24,7 +24,7 @@ export default function PublishCourse({ onNext, courseId }) {
           waiting={stateLoading}
           success={stateSucess}
         >
-          Publish examroom
+          Publish Assignment
         </PrimaryButton>
       </P>
     </div>
