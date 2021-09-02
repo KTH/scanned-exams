@@ -1,7 +1,6 @@
 import React from "react";
 import { H2, PrimaryButton, SecondaryButton, P } from "./util";
 import { useMutateCourseSetup } from "../../../common/api";
-import { Check, Spinner } from "../icons";
 
 export default function CreateHomePage({ onCreate, skip, courseId }) {
   const mutation = useMutateCourseSetup(courseId, "create-homepage", {
@@ -30,12 +29,10 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
           className="sm:w-96"
           onClick={mutation.mutate}
           disabled={mutation.isLoading || mutation.isSuccess}
+          waiting={mutation.isLoading}
+          success={mutation.isSuccess}
         >
           Use the recommended homepage
-          {mutation.isLoading && (
-            <Spinner className="h-5 w-5 animate-spin ml-3" />
-          )}
-          {mutation.isSuccess && <Check className="h-5 w-5 ml-3" />}
         </PrimaryButton>
         <SecondaryButton className="sm:w-auto" onClick={skip}>
           Skip this step
