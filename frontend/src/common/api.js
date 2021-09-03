@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 async function apiClient(
   endpoint,
@@ -40,12 +40,20 @@ export function useCourseExams(courseId) {
 
 /** Performs one action to change the setup of a course */
 export function useMutateCourseSetup(courseId, action, options = {}) {
+  const client = useQueryClient();
+
   return useMutation(
     () =>
       apiClient(`courses/${courseId}/setup/${action}`, {
         method: "POST",
       }),
-    options
+    {
+      ...options,
+      onSuccess() {
+        client.invalidateQueries(["course", courseId, "setup"]);
+        options.onSuccess?.();
+      },
+    }
   );
 }
 

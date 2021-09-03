@@ -42,10 +42,89 @@ router.get("/courses/:id/setup", checkAuthorization, async (req, res, next) => {
 router.post(
   "/courses/:id/setup/create-homepage",
   checkAuthorization,
-  async (req, res) => {
-    setTimeout(() => {
-      res.send({ message: "done!" });
-    }, 2000);
+  async (req, res, next) => {
+    try {
+      const courseId = req.params.id;
+      await canvas.createHomepage(courseId);
+
+      res.send({
+        message: "done!",
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.post(
+  "/courses/:id/setup/publish-course",
+  checkAuthorization,
+  async (req, res, next) => {
+    try {
+      const courseId = req.params.id;
+      await canvas.publishCourse(courseId);
+
+      res.send({
+        message: "done!",
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.post(
+  "/courses/:id/setup/create-assignment",
+  checkAuthorization,
+  async (req, res, next) => {
+    try {
+      const courseId = req.params.id;
+      const ladokId = await canvas.getExaminationLadokId(courseId);
+      const existingAssignment = await canvas.getValidAssignment(
+        courseId,
+        ladokId
+      );
+
+      if (existingAssignment) {
+        return res.send({
+          message: "The assignment already exists",
+        });
+      }
+
+      await canvas.createAssignment(courseId, ladokId);
+
+      return res.send({
+        message: "done!",
+      });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+router.post(
+  "/courses/:id/setup/publish-assignment",
+  checkAuthorization,
+  async (req, res, next) => {
+    try {
+      const courseId = req.params.id;
+      const ladokId = await canvas.getExaminationLadokId(courseId);
+      const assignment = await canvas.getValidAssignment(courseId, ladokId);
+
+      if (!assignment) {
+        return res.status(400).send({
+          message: "There is no valid assignment that can be published",
+        });
+      }
+
+      await canvas.publishAssignment(courseId, assignment.id);
+
+      return res.send({
+        message: "done!",
+      });
+    } catch (err) {
+      return next(err);
+    }
   }
 );
 
