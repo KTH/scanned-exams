@@ -17,6 +17,34 @@ async function getCourse(courseId) {
   return body;
 }
 
+/** Creates a "good-looking" homepage in Canvas */
+async function createHomepage(courseId) {
+  await canvas.requestUrl(`courses/${courseId}/front_page`, "PUT", {
+    wiki_page: {
+      // To make this page, use the Rich Content Editor in Canvas (https://kth.test.instructure.com/courses/30347/pages/welcome-to-the-exam/edit)
+      // Then copy the HTML code:
+      body: `<p>Welcome to the Canvas page for the exam results</p>
+      <p>This course will be used to grade your exams digitally. This means that, after your exams are scanned, they will be uploaded in this Canvas course</p>
+      <p>&nbsp;</p>
+      <p>Once your exam has been graded, you will be able to see the grades and teachers feedback under "Grades".</p>`,
+    },
+  });
+  return canvas.requestUrl(`courses/${courseId}`, "PUT", {
+    course: {
+      default_view: "wiki",
+    },
+  });
+}
+
+/** Publish a course */
+async function publishCourse(courseId) {
+  return canvas.requestUrl(`courses/${courseId}`, "PUT", {
+    course: {
+      event: "offer",
+    },
+  });
+}
+
 /** Get the Ladok UID of the examination linked with a canvas course */
 async function getExaminationLadokId(courseId) {
   const sections = await canvas.list(`courses/${courseId}/sections`).toArray();
@@ -80,6 +108,19 @@ async function createAssignment(courseId, ladokId) {
       },
     })
     .then((r) => r.body);
+}
+
+/** Publish an assignment */
+async function publishAssignment(courseId, assignmentId) {
+  return canvas.requestUrl(
+    `courses/${courseId}/assignments/${assignmentId}`,
+    "PUT",
+    {
+      assignment: {
+        published: true,
+      },
+    }
+  );
 }
 
 async function unlockAssignment(courseId, assignmentId) {
@@ -210,9 +251,12 @@ async function getAuthorizationData(courseId, userId) {
 
 module.exports = {
   getCourse,
+  publishCourse,
+  createHomepage,
   getExaminationLadokId,
   getValidAssignment,
   createAssignment,
+  publishAssignment,
   unlockAssignment,
   lockAssignment,
   hasSubmission,
