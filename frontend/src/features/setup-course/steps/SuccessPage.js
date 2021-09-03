@@ -1,7 +1,7 @@
 import React from "react";
 import { H2, P } from "./util";
 
-export default function SuccessPage({ onNext, courseId }) {
+export default function SuccessPage({ courseId }) {
   return (
     <div>
       <H2>Well played!</H2>
