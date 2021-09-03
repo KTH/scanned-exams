@@ -1,5 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
+export class ApiError extends Error {
+  constructor({ type, statusCode, message, details }) {
+    super(message);
+    this.type = type;
+    this.statusCode = statusCode;
+    this.details = details;
+  }
+}
+
 async function apiClient(
   endpoint,
   { method, ignoreNotFound, ...customConfig } = {}
@@ -15,10 +24,16 @@ async function apiClient(
     return null;
   }
 
-  if (!response.ok) {
-    const err = new Error(data.message);
-    err.status = response.status;
-    throw err;
+  if (!response.ok || data.error) {
+    if (typeof data.error === "object") {
+      // Throw API specific errors
+      throw new ApiError({
+        ...data.error, // Apply the error object as is (see error.js in backend)
+      });
+    } else {
+      // Throw general errors
+      throw new Error(data.message);
+    }
   }
 
   return data;
