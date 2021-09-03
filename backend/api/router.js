@@ -1,6 +1,7 @@
 const express = require("express");
 const log = require("skog");
-const { handleUnexpectedError, checkAuthorization } = require("./utils");
+const { errorHandler, EndpointSpecificError } = require("./error");
+const { checkAuthorization } = require("./utils");
 const canvas = require("./canvasApiClient");
 
 const router = express.Router();
@@ -47,12 +48,19 @@ router.post(
       const courseId = req.params.id;
       await canvas.createHomepage(courseId);
 
-      res.send({
-        message: "done!",
-      });
+      return next(
+        new EndpointSpecificError({
+          type: "dev_test_error",
+          statusCode: 400,
+          message: "Testing forced errors for dev.",
+        })
+      );
     } catch (err) {
       next(err);
     }
+    return res.send({
+      message: "done!",
+    });
   }
 );
 
@@ -86,9 +94,13 @@ router.post(
       );
 
       if (existingAssignment) {
-        return res.send({
-          message: "The assignment already exists",
-        });
+        return next(
+          new EndpointSpecificError({
+            type: "assignment_exists",
+            statusCode: 409,
+            message: "The assignment already exists",
+          })
+        );
       }
 
       await canvas.createAssignment(courseId, ladokId);
@@ -112,9 +124,13 @@ router.post(
       const assignment = await canvas.getValidAssignment(courseId, ladokId);
 
       if (!assignment) {
-        return res.status(400).send({
-          message: "There is no valid assignment that can be published",
-        });
+        return next(
+          new EndpointSpecificError({
+            type: "assignment_not_found",
+            statusCode: 404,
+            message: "There is no valid assignment that can be published",
+          })
+        );
       }
 
       await canvas.publishAssignment(courseId, assignment.id);
@@ -128,5 +144,5 @@ router.post(
   }
 );
 
-router.use(handleUnexpectedError);
+router.use(errorHandler);
 module.exports = router;
