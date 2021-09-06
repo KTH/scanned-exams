@@ -1,12 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
-// Helper function to check input params without importing entire assert package
-function assert(truthy, errorMsg) {
-  if (!truthy) {
-    throw Error(errorMsg);
-  }
-}
-
 async function apiClient(
   endpoint,
   { method, ignoreNotFound, ...customConfig } = {}
@@ -47,23 +40,6 @@ export function useCourseExams(courseId) {
 
 /** Performs one action to change the setup of a course */
 export function useMutateCourseSetup(courseId, action, options = {}) {
-  // 1. Check input params
-  assert(courseId != null, "Param courseId is null or undefined");
-  assert(
-    [
-      "create-homepage",
-      "publish-course",
-      "create-assignment",
-      "publish-assignment",
-    ].indexOf(action) >= 0,
-    "Passed action param is not a valid option."
-  );
-  assert(
-    options.onSuccess === undefined || typeof options.onSuccess === "function",
-    "The callback 'onSuccess' in param options must be a function."
-  );
-
-  // 2. Perform action
   const client = useQueryClient();
 
   return useMutation(
