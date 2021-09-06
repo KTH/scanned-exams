@@ -15,25 +15,12 @@ function StepText({ long, short }) {
 }
 
 /**
- * Return index of first item that is false
- * @param {Bool} homepageCreated
- * @param {Bool} coursePublished
- * @param {Bool} assignmentCreated
- * @param {Bool} assignmentPublished
+ * Return index of first item that evaluates to false
+ * @param {Array} arr List of truthy expressions/variables
  * @returns
  */
-function getCurrentStepIndex(
-  homepageCreated,
-  coursePublished,
-  assignmentCreated,
-  assignmentPublished
-) {
-  return [
-    homepageCreated, // 0
-    coursePublished, // 1
-    assignmentCreated, // 2
-    assignmentPublished, // 3
-  ].findIndex((s) => !s);
+function getIndexOfFirstFalse(arr) {
+  return arr.findIndex((s) => !s);
 }
 
 export default function SetupScreen({
@@ -45,12 +32,12 @@ export default function SetupScreen({
   const [homepageCreated, setHomepageCreated] = React.useState(coursePublished);
 
   // The
-  const currentStep = getCurrentStepIndex(
-    homepageCreated,
-    coursePublished,
-    assignmentCreated,
-    assignmentPublished
-  );
+  const currentStep = getIndexOfFirstFalse([
+    homepageCreated, //     0
+    coursePublished, //     1
+    assignmentCreated, //   2
+    assignmentPublished, // 3
+  ]);
 
   return (
     <div className="container mx-auto my-8">
