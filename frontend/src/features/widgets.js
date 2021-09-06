@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React from "react";
-import { Check, Spinner } from "../icons";
+import { Check, Spinner } from "./icons";
 
 export function P(props) {
   return <p className="mt-6" {...props} />;
@@ -67,4 +67,17 @@ export const SecondaryButton = ({ className, ...props }) => (
     className={`${className} mt-2 sm:mt-0 text-black border border-black hover:bg-gray-200`}
     {...props}
   />
+);
+
+export const LoadingPage = ({ className, children, ...props }) => (
+  <div
+    className={[
+      className,
+      "flex flex-col flex-auto justify-center items-center h-72",
+    ].join(" ")}
+    {...props}
+  >
+    <Spinner className="w-8 h-8 animate-spin m-8" />
+    {children}
+  </div>
 );

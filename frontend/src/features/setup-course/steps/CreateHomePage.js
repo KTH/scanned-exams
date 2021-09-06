@@ -1,5 +1,5 @@
 import React from "react";
-import { H2, PrimaryButton, SecondaryButton, P } from "./util";
+import { H2, PrimaryButton, SecondaryButton, P } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
 export default function CreateHomePage({ onCreate, skip, courseId }) {

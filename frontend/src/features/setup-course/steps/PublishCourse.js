@@ -1,5 +1,5 @@
 import React from "react";
-import { H2, PrimaryButton, P } from "./util";
+import { H2, PrimaryButton, P } from "../../widgets";
 
 export default function PublishCourse({ onNext, courseId }) {
   const [stateLoading, setLoading] = React.useState(false);
