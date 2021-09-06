@@ -1,6 +1,6 @@
 import React from "react";
 import { useCourseSetup } from "../../common/api";
-import SetupScreen from "../setup-course/SetupScreen";
+import SetupFlow from "../setup-course/SetupFlow";
 import UploadScreen from "../upload-exams/UploadScreen";
 import { LoadingPage } from "../widgets";
 
@@ -22,14 +22,14 @@ export default function AuthenticatedApp({ courseId }) {
     query.data.assignmentCreated
   ) {
     return <UploadScreen />;
+    return (
+      <SetupFlow
+        courseId={courseId}
+        coursePublished={query.data.coursePublished}
+        assignmentCreated={query.data.assignmentCreated}
+        assignmentPublished={query.data.assignmentPublished}
+      />
+    );
   }
 
-  return (
-    <SetupScreen
-      courseId={courseId}
-      coursePublished={query.data.coursePublished}
-      assignmentCreated={query.data.assignmentCreated}
-      assignmentPublished={query.data.assignmentPublished}
-    />
-  );
 }
