@@ -9,7 +9,9 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
     },
   });
 
-  if (mutation.isError) {
+  const { mutate, isLoading, isSuccess, isError } = mutation;
+
+  if (isError) {
     throw mutation.error;
   }
 
@@ -27,10 +29,10 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
       <div className="mt-8">
         <PrimaryButton
           className="sm:w-96"
-          onClick={mutation.mutate}
-          disabled={mutation.isLoading || mutation.isSuccess}
-          waiting={mutation.isLoading}
-          success={mutation.isSuccess}
+          onClick={mutate}
+          disabled={isLoading || isSuccess}
+          waiting={isLoading}
+          success={isSuccess}
         >
           Use the recommended homepage
         </PrimaryButton>

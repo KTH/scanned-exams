@@ -1,17 +1,19 @@
 import React from "react";
 import { H2, PrimaryButton, P } from "../../widgets";
+import { useMutateCourseSetup } from "../../../common/api";
 
 export default function CreateAssignment({ onNext, courseId }) {
-  const [stateLoading, setLoading] = React.useState(false);
-  const [stateSucess, setSuccess] = React.useState(false);
-
-  const didClick = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setSuccess(true);
+  const mutation = useMutateCourseSetup(courseId, "publish-assignment", {
+    onSuccess() {
       setTimeout(onNext, 500);
-    }, 1000);
-  };
+    },
+  });
+
+  const { mutate, isLoading, isSuccess, isError } = mutation;
+
+  if (isError) {
+    throw mutation.error;
+  }
 
   return (
     <div>
@@ -20,9 +22,10 @@ export default function CreateAssignment({ onNext, courseId }) {
       <P>
         <PrimaryButton
           className="sm:w-96"
-          onClick={didClick}
-          waiting={stateLoading}
-          success={stateSucess}
+          onClick={mutate}
+          disabled={isLoading || isSuccess}
+          waiting={isLoading}
+          success={isSuccess}
         >
           Publish Assignment
         </PrimaryButton>
