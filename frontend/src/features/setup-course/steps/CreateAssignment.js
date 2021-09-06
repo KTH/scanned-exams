@@ -18,7 +18,10 @@ export default function CreateAssignment({ onNext, courseId }) {
   return (
     <div>
       <H2>Create Assignment</H2>
-      <P>At this step the actual assignment is created.</P>
+      <P>
+        We need to create an assignment which exams will be imported to. You can
+        leave the setup and edit the assignment once it has been created.
+      </P>
       <P>
         <PrimaryButton
           className="sm:w-96"

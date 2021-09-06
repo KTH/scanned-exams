@@ -17,11 +17,8 @@ export default function PublishCourse({ onNext, courseId }) {
 
   return (
     <div>
-      <H2>Publish the examroom</H2>
-      <P>
-        You are about to publish this course. This step is required for you to
-        create an assignment.
-      </P>
+      <H2>Publish the exam room</H2>
+      <P>Now the exam room is ready to be published.</P>
       <P>
         <PrimaryButton
           className="sm:w-96"
@@ -30,7 +27,7 @@ export default function PublishCourse({ onNext, courseId }) {
           waiting={isLoading}
           success={isSuccess}
         >
-          Publish examroom
+          Publish exam room
         </PrimaryButton>
       </P>
     </div>
