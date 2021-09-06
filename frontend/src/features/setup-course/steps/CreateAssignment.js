@@ -2,12 +2,8 @@ import React from "react";
 import { H2, PrimaryButton, P } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
-export default function CreateAssignment({ onNext, courseId }) {
-  const mutation = useMutateCourseSetup(courseId, "create-assignment", {
-    onSuccess() {
-      setTimeout(onNext, 500);
-    },
-  });
+export default function CreateAssignment({ courseId }) {
+  const mutation = useMutateCourseSetup(courseId, "create-assignment");
 
   const { mutate, isLoading, isSuccess, isError } = mutation;
 

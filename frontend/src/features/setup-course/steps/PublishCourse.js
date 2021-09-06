@@ -2,12 +2,8 @@ import React from "react";
 import { H2, PrimaryButton, P } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
-export default function PublishCourse({ onNext, courseId }) {
-  const mutation = useMutateCourseSetup(courseId, "publish-course", {
-    onSuccess() {
-      setTimeout(onNext, 500);
-    },
-  });
+export default function PublishCourse({ courseId }) {
+  const mutation = useMutateCourseSetup(courseId, "publish-course");
 
   const { mutate, isLoading, isSuccess, isError } = mutation;
 
