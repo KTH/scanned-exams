@@ -22,7 +22,6 @@ export default function CreateAssignment({ courseId }) {
         <PrimaryButton
           className="sm:w-96"
           onClick={mutate}
-          disabled={isLoading || isSuccess}
           waiting={isLoading}
           success={isSuccess}
         >

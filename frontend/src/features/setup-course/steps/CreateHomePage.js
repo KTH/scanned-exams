@@ -30,7 +30,6 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
         <PrimaryButton
           className="sm:w-96"
           onClick={mutate}
-          disabled={isLoading || isSuccess}
           waiting={isLoading}
           success={isSuccess}
         >
