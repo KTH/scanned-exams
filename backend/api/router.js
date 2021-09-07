@@ -128,5 +128,43 @@ router.post(
   }
 );
 
+// return the list of exams
+router.get("/courses/:id/exams", (req, res) => {
+  res.send([
+    {
+      id: "", // Exam ID: Windream id
+      student: {
+        name: "",
+      },
+
+      // new = exist in Windream but not in Canvas
+      // pending = is being imported to Canvas
+      // imported = exists in Canvas yay
+      // error = something happened when trying to import it to Canvas
+      status: "new | pending | imported | error",
+      error: {
+        type: "___",
+        message: "_____",
+      },
+    },
+  ]);
+});
+
+// Get the import process status
+router.get("/courses/:id/import/status", (req, res) => {
+  res.send({
+    status: "idle | working",
+    working: {
+      total: 100,
+      progress: 10,
+    },
+  });
+});
+
+// Start the import process
+router.post("/courses/:id/import/start", (req, res) => {
+  //
+  // body = [id, id, id]
+});
 router.use(handleUnexpectedError);
 module.exports = router;
