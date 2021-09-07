@@ -53,16 +53,19 @@ async function examList({ courseCode, examDate, examCode }) {
   const list = [];
 
   for (const result of body.documentSearchResults) {
-    const keyValue = result.documentIndiceses.find(
-      (di) => di.index === "s_uid"
-    );
+    // Helper function to get the value of the attribute called "index"
+    // we have written it because they are in an array instead of an object
+    const getValue = (index) =>
+      result.documentIndiceses.find((di) => di.index === index)?.value;
 
-    if (keyValue && keyValue.value) {
-      list.push({
-        fileId: result.fileId,
-        userId: keyValue.value,
-      });
-    }
+    list.push({
+      fileId: result.fileId,
+      student: {
+        id: getValue("s_uid"),
+        firstName: getValue("s_firstname"),
+        lastName: getValue("s_lastname"),
+      },
+    });
   }
 
   return list;

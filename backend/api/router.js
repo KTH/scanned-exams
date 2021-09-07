@@ -2,6 +2,8 @@ const express = require("express");
 const log = require("skog");
 const { handleUnexpectedError, checkAuthorization } = require("./utils");
 const canvas = require("./canvasApiClient");
+const ladok = require("./ladokApiClient");
+const tentaApi = require("./tentaApiClient");
 
 const router = express.Router();
 
@@ -129,42 +131,53 @@ router.post(
 );
 
 // return the list of exams
-router.get("/courses/:id/exams", (req, res) => {
-  res.send([
-    {
-      id: "", // Exam ID: Windream id
-      student: {
-        name: "",
-      },
+router.get("/courses/:id/exams", checkAuthorization, async (req, res) => {
+  const courseId = req.params.id;
+  const ladokId = await canvas.getExaminationLadokId(courseId);
+  const { activities, examDate } = await ladok.getAktivitetstillfalle(ladokId);
 
+  const allExams = [];
+  for (const { courseCode, examCode } of activities) {
+    allExams.push(
+      // eslint-disable-next-line no-await-in-loop
+      ...(await tentaApi.examList({ courseCode, examCode, examDate }))
+    );
+  }
+
+  res.send(
+    allExams.map((exam) => ({
+      id: exam.fileId,
+      student: exam.student,
+      // TODO: Check Canvas and the queue
       // new = exist in Windream but not in Canvas
       // pending = is being imported to Canvas
       // imported = exists in Canvas yay
       // error = something happened when trying to import it to Canvas
-      status: "new | pending | imported | error",
-      error: {
-        type: "___",
-        message: "_____",
-      },
-    },
-  ]);
+      status: "new",
+
+      // error: {
+      //       type: "___",
+      //       message: "_____",
+      //     },
+    }))
+  );
 });
 
 // Get the import process status
 router.get("/courses/:id/import/status", (req, res) => {
   res.send({
-    status: "idle | working",
-    working: {
-      total: 100,
-      progress: 10,
-    },
+    status: "idle",
+    // working: {
+    // total: 100,
+    // progress: 10,
+    // },
   });
 });
 
 // Start the import process
 router.post("/courses/:id/import/start", (req, res) => {
-  //
   // body = [id, id, id]
+  res.status(418).send({});
 });
 router.use(handleUnexpectedError);
 module.exports = router;
