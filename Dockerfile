@@ -22,7 +22,6 @@ RUN npm ci --production --unsafe-perm
 
 FROM node:14-alpine AS production
 WORKDIR /usr/src/app
-RUN apk add graphicsmagick ghostscript
 COPY --from=frontend /usr/src/app/frontend/build frontend/build
 COPY --from=backend /usr/src/app/backend/node_modules backend/node_modules
 COPY . .
