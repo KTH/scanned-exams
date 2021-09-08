@@ -1,7 +1,13 @@
 const express = require("express");
 const log = require("skog");
 const { handleUnexpectedError, checkAuthorization } = require("./utils");
-const canvas = require("./canvasApiClient");
+const {
+  getSetupStatus,
+  createAssignment,
+  createHomepage,
+  publishAssignment,
+  publishCourse,
+} = require("./setupCourse");
 
 const router = express.Router();
 
@@ -21,55 +27,35 @@ router.get("/me", (req, res) => {
   return res.status(200).send({ userId });
 });
 
-router.get("/courses/:id/setup", checkAuthorization, async (req, res, next) => {
-  const courseId = req.params.id;
-
-  try {
-    const ladokId = await canvas.getExaminationLadokId(courseId);
-    const course = await canvas.getCourse(courseId);
-    const assignment = await canvas.getValidAssignment(courseId, ladokId);
-
-    res.send({
-      coursePublished: course.workflow_state === "available",
-      assignmentCreated: assignment != null,
-      assignmentPublished: assignment?.published || false,
-    });
-  } catch (err) {
-    next(err);
-  }
+router.get("/courses/:id/setup", checkAuthorization, (req, res, next) => {
+  getSetupStatus(req.params.id)
+    .then((setupStatus) => {
+      res.send(setupStatus);
+    })
+    .catch(next);
 });
 
 router.post(
   "/courses/:id/setup/create-homepage",
   checkAuthorization,
-  async (req, res, next) => {
-    try {
-      const courseId = req.params.id;
-      await canvas.createHomepage(courseId);
-
-      res.send({
-        message: "done!",
-      });
-    } catch (err) {
-      next(err);
-    }
+  (req, res, next) => {
+    createHomepage(req.params.id)
+      .then(() => {
+        res.send({
+          message: "done!",
+        });
+      })
+      .catch(next);
   }
 );
 
 router.post(
   "/courses/:id/setup/publish-course",
   checkAuthorization,
-  async (req, res, next) => {
-    try {
-      const courseId = req.params.id;
-      await canvas.publishCourse(courseId);
-
-      res.send({
-        message: "done!",
-      });
-    } catch (err) {
-      next(err);
-    }
+  (req, res, next) => {
+    publishCourse(req.params.id)
+      .then(() => res.send({ message: "done!" }))
+      .catch(next);
   }
 );
 
@@ -77,28 +63,13 @@ router.post(
   "/courses/:id/setup/create-assignment",
   checkAuthorization,
   async (req, res, next) => {
-    try {
-      const courseId = req.params.id;
-      const ladokId = await canvas.getExaminationLadokId(courseId);
-      const existingAssignment = await canvas.getValidAssignment(
-        courseId,
-        ladokId
-      );
-
-      if (existingAssignment) {
-        return res.send({
-          message: "The assignment already exists",
+    createAssignment(req.params.id)
+      .then(() => {
+        res.send({
+          message: "done!",
         });
-      }
-
-      await canvas.createAssignment(courseId, ladokId);
-
-      return res.send({
-        message: "done!",
-      });
-    } catch (err) {
-      return next(err);
-    }
+      })
+      .catch(next);
   }
 );
 
@@ -106,25 +77,13 @@ router.post(
   "/courses/:id/setup/publish-assignment",
   checkAuthorization,
   async (req, res, next) => {
-    try {
-      const courseId = req.params.id;
-      const ladokId = await canvas.getExaminationLadokId(courseId);
-      const assignment = await canvas.getValidAssignment(courseId, ladokId);
-
-      if (!assignment) {
-        return res.status(400).send({
-          message: "There is no valid assignment that can be published",
+    publishAssignment(req.params.id)
+      .then(() => {
+        res.send({
+          message: "done!",
         });
-      }
-
-      await canvas.publishAssignment(courseId, assignment.id);
-
-      return res.send({
-        message: "done!",
-      });
-    } catch (err) {
-      return next(err);
-    }
+      })
+      .catch(next);
   }
 );
 
