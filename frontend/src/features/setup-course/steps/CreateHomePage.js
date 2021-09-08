@@ -1,5 +1,5 @@
 import React from "react";
-import { H2, PrimaryButton, SecondaryButton, P } from "./util";
+import { H2, PrimaryButton, SecondaryButton, P } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
 export default function CreateHomePage({ onCreate, skip, courseId }) {
@@ -9,7 +9,9 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
     },
   });
 
-  if (mutation.isError) {
+  const { mutate, isLoading, isSuccess, isError } = mutation;
+
+  if (isError) {
     throw mutation.error;
   }
 
@@ -17,9 +19,9 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
     <div className="max-w-2xl">
       <H2>Prepare the homepage</H2>
       <P>
-        Since this examroom will be visible for your students, it is important
-        that they can see its purpose from the homepage. You can use our
-        recommended homepage or setup the courseroom by yourself
+        The exam room will be visible for your students, it is important that
+        they can see its purpose from the homepage. You can use our recommended
+        homepage or setup the courseroom by yourself
       </P>
       <P>
         <em>The examroom will not be published yet</em>
@@ -27,10 +29,9 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
       <div className="mt-8">
         <PrimaryButton
           className="sm:w-96"
-          onClick={mutation.mutate}
-          disabled={mutation.isLoading || mutation.isSuccess}
-          waiting={mutation.isLoading}
-          success={mutation.isSuccess}
+          onClick={mutate}
+          waiting={isLoading}
+          success={isSuccess}
         >
           Use the recommended homepage
         </PrimaryButton>

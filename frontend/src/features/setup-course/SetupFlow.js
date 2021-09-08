@@ -4,7 +4,6 @@ import CreateHomePage from "./steps/CreateHomePage";
 import PublishCourse from "./steps/PublishCourse";
 import CreateAssignment from "./steps/CreateAssignment";
 import PublishAssignment from "./steps/PublishAssignment";
-import SuccessPage from "./steps/SuccessPage";
 
 function StepText({ long, short }) {
   return (
@@ -15,6 +14,15 @@ function StepText({ long, short }) {
   );
 }
 
+/**
+ * Return index of first item that evaluates to false
+ * @param {Array} arr List of truthy expressions/variables
+ * @returns
+ */
+function getIndexOfFirstFalse(arr) {
+  return arr.findIndex((s) => !s);
+}
+
 export default function SetupScreen({
   coursePublished,
   assignmentCreated,
@@ -23,30 +31,29 @@ export default function SetupScreen({
 }) {
   const [homepageCreated, setHomepageCreated] = React.useState(coursePublished);
 
-  const currentStep = [
-    homepageCreated,
-    coursePublished,
-    assignmentCreated,
-    assignmentPublished,
-  ].findIndex((s) => !s);
-
-  const [fakeStep, setFakeStep] = React.useState(0);
+  // The
+  const currentStep = getIndexOfFirstFalse([
+    homepageCreated, //     0
+    coursePublished, //     1
+    assignmentCreated, //   2
+    assignmentPublished, // 3
+  ]);
 
   return (
     <div className="container mx-auto my-8">
       <div className="">
         <div className="mb-8">
-          <StepList currentStep={fakeStep || currentStep}>
+          <StepList currentStep={currentStep}>
             <Step index={0} done={homepageCreated}>
               <StepText short="Step 1" long="1. Prepare the homepage" />
             </Step>
-            <Step index={1} done={coursePublished || fakeStep > 1}>
+            <Step index={1} done={coursePublished}>
               <StepText short="Step 2" long="2. Publish examroom" />
             </Step>
-            <Step index={2} done={assignmentCreated || fakeStep > 2}>
+            <Step index={2} done={assignmentCreated}>
               <StepText short="Step 3" long="3. Prepare the assignment" />
             </Step>
-            <Step index={3} done={assignmentPublished || fakeStep > 3}>
+            <Step index={3} done={assignmentPublished}>
               <StepText short="Step 4" long="4. Publish assignment" />
             </Step>
           </StepList>
@@ -57,19 +64,9 @@ export default function SetupScreen({
             onCreate={() => setHomepageCreated(true)}
           />
         )}
-        {fakeStep === 0 && currentStep === 1 && (
-          <PublishCourse courseId={courseId} onNext={() => setFakeStep(2)} />
-        )}
-        {fakeStep === 2 && (
-          <CreateAssignment courseId={courseId} onNext={() => setFakeStep(3)} />
-        )}
-        {fakeStep === 3 && (
-          <PublishAssignment
-            courseId={courseId}
-            onNext={() => setFakeStep(4)}
-          />
-        )}
-        {fakeStep === 4 && <SuccessPage courseId={courseId} />}
+        {currentStep === 1 && <PublishCourse courseId={courseId} />}
+        {currentStep === 2 && <CreateAssignment courseId={courseId} />}
+        {currentStep === 3 && <PublishAssignment courseId={courseId} />}
       </div>
     </div>
   );
