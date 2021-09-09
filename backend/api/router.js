@@ -4,6 +4,7 @@ const { handleUnexpectedError, checkAuthorization } = require("./utils");
 const canvas = require("./canvasApiClient");
 const ladok = require("./ladokApiClient");
 const tentaApi = require("./tentaApiClient");
+const importQueue = require("./importQueue");
 
 const router = express.Router();
 
@@ -190,10 +191,7 @@ router.get("/courses/:id/exams", async (req, res) => {
     });
   }
 
-  let examsInImportQueue = [];
-  // TODO: Fetch exams from import queue
-  examsInImportQueue = [];
-
+  const examsInImportQueue = importQueue.getEntries(courseId);
   const listOfExamsToHandle = allExams.map((exam) => {
     // 1. Check if student assignment is found in Canvas
     const foundInCanvas = allExamsInCanvas.find(
