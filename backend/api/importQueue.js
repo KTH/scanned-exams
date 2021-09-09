@@ -3,7 +3,7 @@
 //   courseId,
 //   status: pending / imported
 // }
-const DUMMY_QUEUE = [];
+let DUMMY_QUEUE = [];
 
 async function getFirstPending() {
   return DUMMY_QUEUE.find((entry) => entry.status === "pending");
@@ -11,18 +11,6 @@ async function getFirstPending() {
 
 async function getEntries(courseId) {
   return DUMMY_QUEUE.filter((entry) => entry.courseId === courseId);
-}
-
-async function queueExamsForImport(courseId, fileIds) {
-  // 1. Remove all "imported" exams
-  // TODO: check that fileIds is actually an array
-  fileIds.forEach((fileId) => {
-    DUMMY_QUEUE.push({
-      courseId,
-      fileId,
-      status: "pending",
-    });
-  });
 }
 
 async function getStatus(courseId) {
@@ -43,6 +31,27 @@ async function getStatus(courseId) {
       progress: importedExams.length,
     },
   };
+}
+
+async function queueExamsForImport(courseId, fileIds) {
+  if ((await getStatus(courseId)) === "working") {
+    // TODO: propagate an error to the client
+    return;
+  }
+
+  // Clean queue: remove all "imported" exams
+  DUMMY_QUEUE = DUMMY_QUEUE.filter(
+    (e) => e.courseId === courseId && e.status === "imported"
+  );
+
+  // TODO: check that fileIds is actually an array
+  fileIds.forEach((fileId) => {
+    DUMMY_QUEUE.push({
+      courseId,
+      fileId,
+      status: "pending",
+    });
+  });
 }
 
 async function markAsImported(fileId) {
