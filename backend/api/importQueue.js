@@ -4,7 +4,10 @@ const log = require("skog");
 const { MONGODB_CONNECTION_STRING } = process.env;
 const DB_QUEUE_NAME = "import_queue";
 
-const dbClient = new MongoClient(MONGODB_CONNECTION_STRING);
+const dbClient = new MongoClient(MONGODB_CONNECTION_STRING, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 /* eslint max-classes-per-file: off */
 
@@ -92,8 +95,7 @@ async function getEntriesFromQueue(courseId) {
 
     const cursor = collImportQueue.find({ courseId });
 
-    // Return cursor to allow paging etc.
-    return cursor;
+    return await cursor.toArray();
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
@@ -111,10 +113,17 @@ async function addEntryToQueue(entry) {
     const collImportQueue = db.collection(DB_QUEUE_NAME);
 
     // Add entry
-    const outp = await collImportQueue.insertOne(entry.toJSON());
+    const res = await collImportQueue.insertOne({
+      _id: entry.fileId,
+      ...(entry.toJSON ? entry.toJSON() : entry),
+    });
 
-    // Return typed object
-    return new QueueEntry(outp);
+    if (res.acknowledged) {
+      // Return typed object
+      return entry instanceof QueueEntry ? entry : new QueueEntry(entry);
+    }
+    // TODO: Should we check reason?
+    throw Error("Could not insert entry into queue");
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
