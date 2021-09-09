@@ -191,7 +191,7 @@ router.get("/courses/:id/exams", async (req, res) => {
     });
   }
 
-  const examsInImportQueue = importQueue.getEntries(courseId);
+  const examsInImportQueue = await importQueue.getEntries(courseId);
   const listOfExamsToHandle = allExams.map((exam) => {
     // 1. Check if student assignment is found in Canvas
     const foundInCanvas = allExamsInCanvas.find(
@@ -266,7 +266,7 @@ router.get("/courses/:id/import/status", async (req, res) => {
 router.post("/courses/:id/import/start", async (req, res) => {
   const courseId = req.params.id;
 
-  await importQueue.addExams(courseId, req.body);
+  await importQueue.queueExamsForImport(courseId, req.body);
 
   res.status(200).send({
     message: "done!",
