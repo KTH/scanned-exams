@@ -197,7 +197,7 @@ router.get("/courses/:id/exams", async (req, res) => {
     const foundInCanvas = allExamsInCanvas.find(
       (examInCanvas) =>
         examInCanvas.workflow_state !== "unsubmitted" &&
-        examInCanvas.user?.sis_user_id !== exam.student?.id
+        examInCanvas.user?.sis_user_id === exam.student?.id
     );
 
     const foundInQueue = examsInImportQueue.find(
