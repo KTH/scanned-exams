@@ -229,11 +229,8 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
         name: `${studentKthId}.pdf`,
       }
     );
-    console.log("Slot", slot);
 
     const { body: uploadedFile } = await sendFile(slot, content);
-
-    console.log("Uploaded file", uploadedFile);
 
     await canvas.requestUrl(
       `courses/${courseId}/assignments/${assignment.id}/submissions/`,
