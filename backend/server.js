@@ -26,7 +26,6 @@ const apiRouter = require("./api/router");
 const authRouter = require("./auth/router");
 const monitor = require("./monitor");
 
-const PORT = 4000;
 const server = express();
 
 server.set("trust proxy", 1);
@@ -125,7 +124,3 @@ server.use(
 
 server.get("/scanned-exams/_monitor", monitor);
 module.exports = server;
-
-server.listen(PORT, () => {
-  log.info(`App listening on port ${PORT}`);
-});

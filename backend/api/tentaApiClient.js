@@ -1,5 +1,6 @@
 const got = require("got");
 const log = require("skog");
+const { Readable } = require("stream");
 
 const client = got.extend({
   prefixUrl: process.env.TENTA_API_URL,
@@ -75,19 +76,21 @@ async function examList({ courseCode, examDate, examCode }) {
   return list;
 }
 
-/** Download the exam with ID "fileId". Returns its content as a Buffer */
+/** Download the exam with ID "fileId". Returns its content as a ReadableStream */
 async function downloadExam(fileId) {
   log.info(`Downloading file ${fileId}...`);
   const { body } = await client(`windream/file/${fileId}/true`, {
     responseType: "json",
   });
 
-  const examDateTime = getValueFromList(body.wd.objectIndeceses, "e_date");
+  const examDateTime = getValueFromList(body.wdFile.objectIndiceses, "e_date");
   const examDate = examDateTime.split("T")[0];
 
   return {
-    content: Buffer.from(body.wdFile.fileAsBase64.toString("utf-8"), "base64"),
-    studentKthId: getValueFromList(body.wdFile.objectIndeceses, "s_uid"),
+    content: Readable.from(
+      Buffer.from(body.wdFile.fileAsBase64.toString("utf-8"), "base64")
+    ),
+    studentKthId: getValueFromList(body.wdFile.objectIndiceses, "s_uid"),
     examDate,
   };
 }

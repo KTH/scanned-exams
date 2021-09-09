@@ -180,7 +180,7 @@ async function sendFile({ upload_url, upload_params }, content) {
     }
   }
 
-  form.append("attachment", content);
+  form.append("attachment", content, upload_params.filename);
 
   return got.post({
     url: upload_url,
@@ -215,22 +215,28 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
     );
 
     const ladokId = await getExaminationLadokId(courseId);
-    const assignmentId = await getValidAssignment(courseId, ladokId);
-    await unlockAssignment(courseId, assignmentId);
+    const assignment = await getValidAssignment(courseId, ladokId);
+    log.info(
+      `Upload Exam: unlocking assignment ${assignment.id} in course ${courseId}`
+    );
+    await unlockAssignment(courseId, assignment.id);
 
     // TODO: will return a 400 if the course is unpublished
     const { body: slot } = await canvas.requestUrl(
-      `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}/files`,
+      `courses/${courseId}/assignments/${assignment.id}/submissions/${user.id}/files`,
       "POST",
       {
         name: `${studentKthId}.pdf`,
       }
     );
+    console.log("Slot", slot);
 
     const { body: uploadedFile } = await sendFile(slot, content);
 
+    console.log("Uploaded file", uploadedFile);
+
     await canvas.requestUrl(
-      `courses/${courseId}/assignments/${assignmentId}/submissions/`,
+      `courses/${courseId}/assignments/${assignment.id}/submissions/`,
       "POST",
       {
         submission: {
@@ -243,7 +249,7 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
       }
     );
 
-    await lockAssignment(courseId, assignmentId);
+    await lockAssignment(courseId, assignment.id);
   } catch (err) {
     if (err.response?.statusCode === 404) {
       log.warn(`User ${studentKthId} is missing in Canvas course ${courseId}`);
