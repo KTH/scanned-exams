@@ -253,20 +253,24 @@ router.get("/courses/:id/exams", async (req, res) => {
 });
 
 // Get the import process status
-router.get("/courses/:id/import/status", (req, res) => {
+router.get("/courses/:id/import/status", async (req, res) => {
+  const { status, working } = await importQueue.getStatus(req.params.id);
+
   res.send({
-    status: "idle",
-    // working: {
-    // total: 100,
-    // progress: 10,
-    // },
+    status,
+    working,
   });
 });
 
 // Start the import process
-router.post("/courses/:id/import/start", (req, res) => {
-  // body = [id, id, id]
-  res.status(418).send({});
+router.post("/courses/:id/import/start", async (req, res) => {
+  const courseId = req.params.id;
+
+  await importQueue.addExams(courseId, req.body);
+
+  res.status(200).send({
+    message: "done!",
+  });
 });
 
 router.use(handleUnexpectedError);
