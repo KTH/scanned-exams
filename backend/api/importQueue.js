@@ -34,7 +34,7 @@ async function getStatus(courseId) {
     (entry) => entry.courseId === courseId && entry.status === "imported"
   );
 
-  const status = pendingExams > 0 ? "working" : "idle";
+  const status = pendingExams.length > 0 ? "working" : "idle";
 
   return {
     status,
