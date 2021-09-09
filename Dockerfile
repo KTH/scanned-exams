@@ -25,7 +25,7 @@ RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
 COPY ["backend/package.json", "package.json"]
 COPY ["backend/package-lock.json", "package-lock.json"]
 
-#ENV MONGOMS_SYSTEM_BINARY=
+ENV MONGOMS_SYSTEM_BINARY=/usr/bin/mongod
 RUN npm ci --production --unsafe-perm
 
 FROM node:14-alpine AS production
