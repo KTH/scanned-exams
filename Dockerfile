@@ -14,6 +14,7 @@ RUN npm run build
 
 FROM node:14 AS backend
 WORKDIR /usr/src/app/backend
+RUN apk add "mongodb=4.0.5-r0"
 
 COPY ["backend/package.json", "package.json"]
 COPY ["backend/package-lock.json", "package-lock.json"]
