@@ -17,8 +17,8 @@ WORKDIR /usr/src/app/backend
 
 # Installing Mongodb on Debian (buster)
 # https://docs.mongodb.com/v4.2/tutorial/install-mongodb-on-debian/
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add - \
-  && echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list \
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add - \
+  && echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list \
   && apt-get update \
   && apt-get install -y mongodb-org
 
