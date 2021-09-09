@@ -31,6 +31,7 @@ describe("Import queue", () => {
     // const DBG_DB = await db.collection(DB_QUEUE_NAME).find({}).toArray();
     // Perform tear down here
     await db.collection(DB_QUEUE_NAME).deleteMany({});
+    dbClient.close();
   });
 
   it("should add one entry to queue", async () => {
