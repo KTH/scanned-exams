@@ -12,7 +12,7 @@ RUN npm ci --unsafe-perm
 COPY frontend .
 RUN npm run build
 
-FROM kthse/kth-nodejs:16.0.0 AS backend
+FROM node:14 AS backend
 WORKDIR /usr/src/app/backend
 
 COPY ["backend/package.json", "package.json"]
