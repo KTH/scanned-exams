@@ -4,7 +4,6 @@ const os = require("os");
 const path = require("path");
 const canvas = require("./canvasApiClient");
 const tentaApi = require("./tentaApiClient");
-const maskFile = require("./maskFile");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
 
 // Key for `allStatus` is course ID
@@ -28,18 +27,14 @@ async function importOneExam(
     path.join(os.tmpdir(), "scanned-exams-")
   );
   const unmaskedFile = path.resolve(tempDir, "unmasked.pdf");
-  const maskedFile = path.resolve(tempDir, "masked.pdf");
   const startDate = new Date();
 
   log.info(`Student ${userId}. Downloading`);
   await tentaApi.downloadExam(fileId, unmaskedFile);
   const downloadEnd = new Date();
 
-  await maskFile(unmaskedFile, maskedFile);
-  const maskEnd = new Date();
-
   log.info(`Student ${userId}. Uploading`);
-  await canvas.uploadExam(maskedFile, {
+  await canvas.uploadExam(unmaskedFile, {
     courseId,
     assignmentId,
     userId,
@@ -49,8 +44,6 @@ async function importOneExam(
 
   log.info(`Student ${userId}. Finish importing exam`, {
     download_time: downloadEnd.getTime() - startDate.getTime(),
-    masking_time: maskEnd.getTime() - downloadEnd.getTime(),
-    upload_time: uploadEnd.getTime() - maskEnd.getTime(),
     total_time: uploadEnd.getTime() - startDate.getTime(),
   });
 

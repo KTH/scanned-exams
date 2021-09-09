@@ -1,30 +1,28 @@
 import React from "react";
-import { H2, PrimaryButton, P } from "./util";
+import { H2, PrimaryButton, P } from "../../widgets";
+import { useMutateCourseSetup } from "../../../common/api";
 
-export default function PublishCourse({ onNext, courseId }) {
-  const [stateLoading, setLoading] = React.useState(false);
-  const [stateSucess, setSuccess] = React.useState(false);
+export default function PublishCourse({ courseId }) {
+  const mutation = useMutateCourseSetup(courseId, "publish-course");
 
-  const didClick = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setSuccess(true);
-      setTimeout(onNext, 500);
-    }, 1000);
-  };
+  const { mutate, isLoading, isSuccess, isError } = mutation;
+
+  if (isError) {
+    throw mutation.error;
+  }
 
   return (
     <div>
-      <H2>Publish the examroom</H2>
-      <P>Now its time to publish the examroom</P>
+      <H2>Publish the exam room</H2>
+      <P>Now the exam room is ready to be published.</P>
       <P>
         <PrimaryButton
           className="sm:w-96"
-          onClick={didClick}
-          waiting={stateLoading}
-          success={stateSucess}
+          onClick={mutate}
+          waiting={isLoading}
+          success={isSuccess}
         >
-          Publish examroom
+          Publish exam room
         </PrimaryButton>
       </P>
     </div>

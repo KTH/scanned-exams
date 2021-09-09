@@ -1,33 +1,40 @@
 import React from "react";
 import { useCourseSetup } from "../../common/api";
-import SetupScreen from "../setup-course/SetupScreen";
+import SetupFlow from "../setup-course/SetupFlow";
 import UploadScreen from "../upload-exams/UploadScreen";
+import { LoadingPage } from "../widgets";
+
+function isSetupRequired(courseSetup) {
+  return !(
+    courseSetup.coursePublished &&
+    courseSetup.assignmentCreated &&
+    courseSetup.assignmentPublished
+  );
+}
 
 export default function AuthenticatedApp({ courseId }) {
   const query = useCourseSetup(courseId);
 
-  if (query.isLoading) {
-    return <div>Loading...</div>;
+  const { isLoading, isError } = query;
+
+  if (isLoading) {
+    return <LoadingPage>Loading...</LoadingPage>;
   }
 
-  if (query.isError) {
+  if (isError) {
     throw query.error;
   }
 
-  if (
-    query.data.coursePublished &&
-    query.data.assignmentCreated &&
-    query.data.assignmentCreated
-  ) {
-    return <UploadScreen />;
+  if (isSetupRequired(query.data)) {
+    return (
+      <SetupFlow
+        courseId={courseId}
+        coursePublished={query.data.coursePublished}
+        assignmentCreated={query.data.assignmentCreated}
+        assignmentPublished={query.data.assignmentPublished}
+      />
+    );
   }
-
-  return (
-    <SetupScreen
-      courseId={courseId}
-      coursePublished={query.data.coursePublished}
-      assignmentCreated={query.data.assignmentCreated}
-      assignmentPublished={query.data.assignmentPublished}
-    />
-  );
+  // When setup is complete we show the assignment import view
+  return <UploadScreen />;
 }
