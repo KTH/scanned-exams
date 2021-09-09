@@ -23,7 +23,9 @@ router.get("/me", (req, res) => {
   return res.status(200).send({ userId });
 });
 
-router.get("/courses/:id/setup", checkAuthorization, async (req, res, next) => {
+router.use("/courses/:id", checkAuthorization);
+
+router.get("/courses/:id/setup", async (req, res, next) => {
   const courseId = req.params.id;
 
   try {
@@ -41,94 +43,78 @@ router.get("/courses/:id/setup", checkAuthorization, async (req, res, next) => {
   }
 });
 
-router.post(
-  "/courses/:id/setup/create-homepage",
-  checkAuthorization,
-  async (req, res, next) => {
-    try {
-      const courseId = req.params.id;
-      await canvas.createHomepage(courseId);
+router.post("/courses/:id/setup/create-homepage", async (req, res, next) => {
+  try {
+    const courseId = req.params.id;
+    await canvas.createHomepage(courseId);
 
-      res.send({
-        message: "done!",
-      });
-    } catch (err) {
-      next(err);
-    }
+    res.send({
+      message: "done!",
+    });
+  } catch (err) {
+    next(err);
   }
-);
+});
 
-router.post(
-  "/courses/:id/setup/publish-course",
-  checkAuthorization,
-  async (req, res, next) => {
-    try {
-      const courseId = req.params.id;
-      await canvas.publishCourse(courseId);
+router.post("/courses/:id/setup/publish-course", async (req, res, next) => {
+  try {
+    const courseId = req.params.id;
+    await canvas.publishCourse(courseId);
 
-      res.send({
-        message: "done!",
-      });
-    } catch (err) {
-      next(err);
-    }
+    res.send({
+      message: "done!",
+    });
+  } catch (err) {
+    next(err);
   }
-);
+});
 
-router.post(
-  "/courses/:id/setup/create-assignment",
-  checkAuthorization,
-  async (req, res, next) => {
-    try {
-      const courseId = req.params.id;
-      const ladokId = await canvas.getExaminationLadokId(courseId);
-      const existingAssignment = await canvas.getValidAssignment(
-        courseId,
-        ladokId
-      );
+router.post("/courses/:id/setup/create-assignment", async (req, res, next) => {
+  try {
+    const courseId = req.params.id;
+    const ladokId = await canvas.getExaminationLadokId(courseId);
+    const existingAssignment = await canvas.getValidAssignment(
+      courseId,
+      ladokId
+    );
 
-      if (existingAssignment) {
-        return res.send({
-          message: "The assignment already exists",
-        });
-      }
-
-      await canvas.createAssignment(courseId, ladokId);
-
+    if (existingAssignment) {
       return res.send({
-        message: "done!",
+        message: "The assignment already exists",
       });
-    } catch (err) {
-      return next(err);
     }
+
+    await canvas.createAssignment(courseId, ladokId);
+
+    return res.send({
+      message: "done!",
+    });
+  } catch (err) {
+    return next(err);
   }
-);
+});
 
-router.post(
-  "/courses/:id/setup/publish-assignment",
-  checkAuthorization,
-  async (req, res, next) => {
-    try {
-      const courseId = req.params.id;
-      const ladokId = await canvas.getExaminationLadokId(courseId);
-      const assignment = await canvas.getValidAssignment(courseId, ladokId);
+router.post("/courses/:id/setup/publish-assignment", async (req, res, next) => {
+  try {
+    const courseId = req.params.id;
+    const ladokId = await canvas.getExaminationLadokId(courseId);
+    const assignment = await canvas.getValidAssignment(courseId, ladokId);
 
-      if (!assignment) {
-        return res.status(400).send({
-          message: "There is no valid assignment that can be published",
-        });
-      }
-
-      await canvas.publishAssignment(courseId, assignment.id);
-
-      return res.send({
-        message: "done!",
+    if (!assignment) {
+      return res.status(400).send({
+        message: "There is no valid assignment that can be published",
       });
-    } catch (err) {
-      return next(err);
     }
+
+    await canvas.publishAssignment(courseId, assignment.id);
+
+    return res.send({
+      message: "done!",
+    });
+  } catch (err) {
+    return next(err);
   }
-);
+});
 
 function _generateSummaryOfImportQueue(listOfExams) {
   const summary = {
@@ -151,153 +137,139 @@ function _generateSummaryOfImportQueue(listOfExams) {
  * - Canvas is source of truth regarding if a submitted exam is truly imported
  * - the internal import queue keeps state of pending and last performed import
  */
-router.get(
-  "/courses/:id/exams",
-  /* checkAuthorization, */ async (req, res) => {
-    const courseId = req.params.id;
+router.get("/courses/:id/exams", async (req, res) => {
+  const courseId = req.params.id;
 
-    let ladokId;
-    try {
-      ladokId = await canvas.getExaminationLadokId(courseId);
-    } catch (e) {
-      // TODO: Change to new error handling standard
-      return res.status(404).send({
-        error: {
-          type: "course_id_not_found",
-          message: `The provided course id [${courseId}] is not found.`,
-        },
-      });
-    }
-
-    let aktivitetstillfalle;
-    try {
-      aktivitetstillfalle = await ladok.getAktivitetstillfalle(ladokId);
-    } catch (e) {
-      // TODO: Change to new error handling standard
-      return res.status(404).send({
-        error: {
-          type: "ladok_id_not_valid",
-          message: `The provided ladok id [${ladokId}] is not valid.`,
-        },
-      });
-    }
-    const { activities, examDate } = aktivitetstillfalle;
-
-    const allExams = [];
-    for (const { courseCode, examCode } of activities) {
-      allExams.push(
-        // eslint-disable-next-line no-await-in-loop
-        ...(await tentaApi.examList({ courseCode, examCode, examDate }))
-      );
-    }
-
-    let allExamsInCanvas = [];
-    try {
-      // Find all exam submissions in Canvas
-      allExamsInCanvas = await canvas.getAssignmentSubmissions(
-        courseId,
-        ladokId
-      );
-    } catch (e) {
-      // TODO: Change to new error handling standard
-      return res.status(400).send({
-        error: {
-          type: "failed_fetching_submissions",
-          message: `The submissions for course id [${courseId}] could not be fetched.`,
-          details: e,
-        },
-      });
-    }
-
-    let examsInImportQueue = [];
-    // TODO: Fetch exams from import queue
-    examsInImportQueue = [];
-
-    const listOfExamsToHandle = allExams.map((exam) => {
-      // 1. Check if student assignment is found in Canvas
-      const foundInCanvas = allExamsInCanvas.find(
-        (examInCanvas) =>
-          examInCanvas.workflow_state !== "unsubmitted" &&
-          examInCanvas.user?.sis_user_id !== exam.student?.id
-      );
-
-      const foundInQueue = examsInImportQueue.find(
-        (examInQueue) => examInQueue.fileId === exam.fileId
-      );
-
-      // Figure out status and optional error details for each exam
-      let status = "new";
-      let errorDetails;
-      if (foundInCanvas) {
-        status = "imported";
-      } else if (foundInQueue) {
-        switch (foundInQueue.status) {
-          case "pending":
-            status = "pending";
-            break;
-          case "error":
-            errorDetails = foundInQueue.error;
-            break;
-          case "imported":
-            // It was marked imported but not found in Canvas
-            // Allow user to retry import
-            status = "new";
-            break;
-          default:
-            status = foundInQueue.status;
-            errorDetails = foundInQueue.error;
-        }
-      }
-
-      return {
-        id: exam.fileId,
-        student: exam.student,
-        // new = exist in Windream but not in Canvas or our import queue
-        // pending = exists in our import queue but  has not been marked imported
-        // imported = marked successfully imported to Canvas by the import functions
-        // error = something happened when trying to import it to Canvas according to the import function
-        status,
-        error: errorDetails,
-        // error: {
-        //       type: "___",
-        //       message: "_____",
-        //     },
-      };
-    });
-
-    const summary = _generateSummaryOfImportQueue(listOfExamsToHandle);
-
-    return res.send({
-      result: listOfExamsToHandle,
-      summary,
+  let ladokId;
+  try {
+    ladokId = await canvas.getExaminationLadokId(courseId);
+  } catch (e) {
+    // TODO: Change to new error handling standard
+    return res.status(404).send({
+      error: {
+        type: "course_id_not_found",
+        message: `The provided course id [${courseId}] is not found.`,
+      },
     });
   }
-);
+
+  let aktivitetstillfalle;
+  try {
+    aktivitetstillfalle = await ladok.getAktivitetstillfalle(ladokId);
+  } catch (e) {
+    // TODO: Change to new error handling standard
+    return res.status(404).send({
+      error: {
+        type: "ladok_id_not_valid",
+        message: `The provided ladok id [${ladokId}] is not valid.`,
+      },
+    });
+  }
+  const { activities, examDate } = aktivitetstillfalle;
+
+  const allExams = [];
+  for (const { courseCode, examCode } of activities) {
+    allExams.push(
+      // eslint-disable-next-line no-await-in-loop
+      ...(await tentaApi.examList({ courseCode, examCode, examDate }))
+    );
+  }
+
+  let allExamsInCanvas = [];
+  try {
+    // Find all exam submissions in Canvas
+    allExamsInCanvas = await canvas.getAssignmentSubmissions(courseId, ladokId);
+  } catch (e) {
+    // TODO: Change to new error handling standard
+    return res.status(400).send({
+      error: {
+        type: "failed_fetching_submissions",
+        message: `The submissions for course id [${courseId}] could not be fetched.`,
+        details: e,
+      },
+    });
+  }
+
+  let examsInImportQueue = [];
+  // TODO: Fetch exams from import queue
+  examsInImportQueue = [];
+
+  const listOfExamsToHandle = allExams.map((exam) => {
+    // 1. Check if student assignment is found in Canvas
+    const foundInCanvas = allExamsInCanvas.find(
+      (examInCanvas) =>
+        examInCanvas.workflow_state !== "unsubmitted" &&
+        examInCanvas.user?.sis_user_id !== exam.student?.id
+    );
+
+    const foundInQueue = examsInImportQueue.find(
+      (examInQueue) => examInQueue.fileId === exam.fileId
+    );
+
+    // Figure out status and optional error details for each exam
+    let status = "new";
+    let errorDetails;
+    if (foundInCanvas) {
+      status = "imported";
+    } else if (foundInQueue) {
+      switch (foundInQueue.status) {
+        case "pending":
+          status = "pending";
+          break;
+        case "error":
+          errorDetails = foundInQueue.error;
+          break;
+        case "imported":
+          // It was marked imported but not found in Canvas
+          // Allow user to retry import
+          status = "new";
+          break;
+        default:
+          status = foundInQueue.status;
+          errorDetails = foundInQueue.error;
+      }
+    }
+
+    return {
+      id: exam.fileId,
+      student: exam.student,
+      // new = exist in Windream but not in Canvas or our import queue
+      // pending = exists in our import queue but  has not been marked imported
+      // imported = marked successfully imported to Canvas by the import functions
+      // error = something happened when trying to import it to Canvas according to the import function
+      status,
+      error: errorDetails,
+      // error: {
+      //       type: "___",
+      //       message: "_____",
+      //     },
+    };
+  });
+
+  const summary = _generateSummaryOfImportQueue(listOfExamsToHandle);
+
+  return res.send({
+    result: listOfExamsToHandle,
+    summary,
+  });
+});
 
 // Get the import process status
-router.get(
-  "/courses/:id/import/status",
-  /* checkAuthorization, */
-  (req, res) => {
-    res.send({
-      status: "idle",
-      // working: {
-      // total: 100,
-      // progress: 10,
-      // },
-    });
-  }
-);
+router.get("/courses/:id/import/status", (req, res) => {
+  res.send({
+    status: "idle",
+    // working: {
+    // total: 100,
+    // progress: 10,
+    // },
+  });
+});
 
 // Start the import process
-router.post(
-  "/courses/:id/import/start",
-  /* checkAuthorization, */
-  (req, res) => {
-    // body = [id, id, id]
-    res.status(418).send({});
-  }
-);
+router.post("/courses/:id/import/start", (req, res) => {
+  // body = [id, id, id]
+  res.status(418).send({});
+});
 
 router.use(handleUnexpectedError);
 module.exports = router;
