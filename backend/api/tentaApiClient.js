@@ -1,4 +1,3 @@
-const fs = require("fs");
 const got = require("got");
 const log = require("skog");
 
@@ -13,6 +12,14 @@ async function getVersion() {
   const { body } = await client("Version");
 
   return body;
+}
+
+/**
+ * Given a list of [index, value] and an "index", returns the value associated
+ * with such index
+ */
+function getValueFromList(list, key) {
+  return list.find((di) => di.index === key)?.value;
 }
 
 /** Get a list of all exam files for a given exam */
@@ -55,15 +62,12 @@ async function examList({ courseCode, examDate, examCode }) {
   for (const result of body.documentSearchResults) {
     // Helper function to get the value of the attribute called "index"
     // we have written it because they are in an array instead of an object
-    const getValue = (index) =>
-      result.documentIndiceses.find((di) => di.index === index)?.value;
-
     list.push({
       fileId: result.fileId,
       student: {
-        id: getValue("s_uid"),
-        firstName: getValue("s_firstname"),
-        lastName: getValue("s_lastname"),
+        id: getValueFromList(result.documentIndiceses, "s_uid"),
+        firstName: getValueFromList(result.documentIndiceses, "s_firstname"),
+        lastName: getValueFromList(result.documentIndiceses, "s_lastname"),
       },
     });
   }
@@ -71,18 +75,21 @@ async function examList({ courseCode, examDate, examCode }) {
   return list;
 }
 
-/** Download the exam with ID "fileId" to the given "filePath" */
-async function downloadExam(fileId, filePath) {
+/** Download the exam with ID "fileId". Returns its content as a Buffer */
+async function downloadExam(fileId) {
   log.info(`Downloading file ${fileId}...`);
   const { body } = await client(`windream/file/${fileId}/true`, {
     responseType: "json",
   });
 
-  const download = Buffer.from(
-    body.wdFile.fileAsBase64.toString("utf-8"),
-    "base64"
-  );
-  await fs.promises.writeFile(filePath, download);
+  const examDateTime = getValueFromList(body.wd.objectIndeceses, "e_date");
+  const examDate = examDateTime.split("T")[0];
+
+  return {
+    content: Buffer.from(body.wdFile.fileAsBase64.toString("utf-8"), "base64"),
+    studentKthId: getValueFromList(body.wdFile.objectIndeceses, "s_uid"),
+    examDate,
+  };
 }
 
 module.exports = {
