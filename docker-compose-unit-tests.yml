@@ -1,10 +1,10 @@
-version: "3"
+version: "3.4"
 services:
   web:
-    build: .
-    target: backend
-    # image: $LOCAL_IMAGE_ID
+    build:
+      context: .
+      dockerfile: Dockerfile_backend_test
     # Mount and run tests.
     volumes:
       - ./tests:/tests
-    command: ["sh", "-c", "cd backend && npm install && npm test"]
+    command: ["sh", "-c", "npm run test:api"]
