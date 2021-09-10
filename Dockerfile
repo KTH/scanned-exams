@@ -12,20 +12,12 @@ RUN npm ci --unsafe-perm
 COPY frontend .
 RUN npm run build
 
-FROM node:14-buster AS backend
+FROM node:14 AS backend
 WORKDIR /usr/src/app/backend
-
-# Installing Mongodb on Debian (buster)
-# https://docs.mongodb.com/v4.2/tutorial/install-mongodb-on-debian/
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add - \
-  && echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list \
-  && apt-get update \
-  && apt-get install -y mongodb-org
 
 COPY ["backend/package.json", "package.json"]
 COPY ["backend/package-lock.json", "package-lock.json"]
 
-ENV MONGOMS_SYSTEM_BINARY=/usr/bin/mongod
 RUN npm ci --production --unsafe-perm
 
 FROM node:14-alpine AS production

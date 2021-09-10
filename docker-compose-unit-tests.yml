@@ -2,6 +2,7 @@ version: "3"
 services:
   web:
     build: .
+    target: backend
     # image: $LOCAL_IMAGE_ID
     # Mount and run tests.
     volumes:
