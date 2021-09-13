@@ -105,6 +105,25 @@ async function getEntriesFromQueue(courseId) {
   return null;
 }
 
+async function getEntryFromQueue(fileId) {
+  try {
+    // Open collection
+    const conn = await dbClient.connect();
+    const db = conn.db();
+    const collImportQueue = db.collection(DB_QUEUE_NAME);
+
+    const doc = await collImportQueue.findOne({ fileId });
+
+    return new QueueEntry(doc);
+  } catch (err) {
+    // TODO: Handle errors
+    log.error({ err });
+  } finally {
+    await dbClient.close();
+  }
+  return null;
+}
+
 async function addEntryToQueue(entry) {
   try {
     // Open collection
@@ -182,30 +201,43 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
     const collImportQueue = db.collection(DB_QUEUE_NAME);
 
     // Perform update
-    const tmpOld = collImportQueue.findOne({ fileId: entry.fileId });
+    const tmpOld = await collImportQueue.findOne({ fileId: entry.fileId });
     if (tmpOld) {
       const entryObj = new QueueEntry(tmpOld);
       entryObj.status = status;
       switch (status) {
         case "pending":
           entryObj.importStartedAt = new Date();
+          entryObj.error = null;
           break;
         case "imported":
           entryObj.importSuccessAt = new Date();
+          entryObj.error = null;
           break;
         case "error":
           entryObj.lastErrorAt = new Date();
-          entryObj.error = errorDetails;
+          entryObj.error = errorDetails || {
+            type: "error",
+            message: "An error occured but no details were provided.",
+          };
           break;
         default: // noop
       }
-      const tmpNew = await collImportQueue.replaceOne(
-        { _id: entryObj._id },
+
+      const res = await collImportQueue.replaceOne(
+        { fileId: entryObj.fileId },
         entryObj
       );
+      if (!res.acknowledged) {
+        throw Error(`Update import queue didn't get acknowledge from Mongodb.`);
+      }
+
+      if (res.matchedCount < 1) {
+        throw Error(`Entry ${entry.fileId} in import queue not found.`);
+      }
 
       // Return updated object
-      return new QueueEntry(tmpNew);
+      return new QueueEntry(entryObj);
     }
 
     return null;
@@ -220,6 +252,8 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
 
 module.exports = {
   QueueEntry,
+  QueueStatus,
+  getEntryFromQueue,
   getEntriesFromQueue,
   addEntryToQueue,
   updateStatusOfEntryInQueue,
