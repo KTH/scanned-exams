@@ -51,6 +51,23 @@ describe("Import queue", () => {
     expect(typedEntry.status).toBe("new");
   });
 
+  it("should not add entry with same fileId twice", async () => {
+    const entry = {
+      fileId: "file1",
+      courseId: "mainTestCourse",
+      userKthId: "u23z456",
+    };
+
+    let err;
+    try {
+      await addEntryToQueue(entry);
+    } catch (e) {
+      err = e;
+    }
+
+    expect(err).toBeInstanceOf(Error);
+  });
+
   it("should list only entries with correct courseId", async () => {
     const entry = {
       fileId: "file2",

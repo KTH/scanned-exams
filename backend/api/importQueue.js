@@ -9,6 +9,17 @@ const dbClient = new MongoClient(MONGODB_CONNECTION_STRING, {
   useUnifiedTopology: true,
 });
 
+/**
+ * For runtime input param testing
+ * @param {bool|function} test Test case that should return true
+ * @param {string} msg Error message
+ */
+function assert(test, msg) {
+  if ((typeof test === "function" && !test()) || !test) {
+    throw Error(msg);
+  }
+}
+
 /* eslint max-classes-per-file: off */
 
 class QueueEntry {
@@ -124,7 +135,16 @@ async function getEntryFromQueue(fileId) {
   return null;
 }
 
+/**
+ * Add an entry to the import queue
+ * If an entry exists with given fileId, an error will be thrown.
+ * @param {Object} entry This is a QueueEntry like object
+ * @returns QueueEntry
+ */
 async function addEntryToQueue(entry) {
+  assert(typeof entry.fileId === "string", "Param entry is missing fileId");
+  assert(typeof entry.courseId === "string", "Param entry is missing courseId");
+
   try {
     // Open collection
     const conn = await dbClient.connect();
@@ -144,12 +164,12 @@ async function addEntryToQueue(entry) {
     // TODO: Should we check reason?
     throw Error("Could not insert entry into queue");
   } catch (err) {
-    // TODO: Handle errors
-    log.error({ err });
+    throw Error(
+      `Add to queue failed becuase entry exist for this fileId '${entry.fileId}'`
+    );
   } finally {
     await dbClient.close();
   }
-  return null;
 }
 
 async function getStatusFromQueue(courseId) {
