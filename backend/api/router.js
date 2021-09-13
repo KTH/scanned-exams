@@ -42,105 +42,93 @@ router.get("/courses/:id/setup", async (req, res, next) => {
   }
 });
 
-router.post(
-  "/courses/:id/setup/create-homepage",
-  async (req, res, next) => {
-    try {
-      const courseId = req.params.id;
-      await canvas.createHomepage(courseId);
+router.post("/courses/:id/setup/create-homepage", async (req, res, next) => {
+  try {
+    const courseId = req.params.id;
+    await canvas.createHomepage(courseId);
 
+    return next(
+      new EndpointError({
+        type: "dev_test_error",
+        statusCode: 400,
+        message: "Testing forced errors for dev.",
+      })
+    );
+  } catch (err) {
+    next(err);
+  }
+  return res.send({
+    message: "done!",
+  });
+});
+
+router.post("/courses/:id/setup/publish-course", async (req, res, next) => {
+  try {
+    const courseId = req.params.id;
+    await canvas.publishCourse(courseId);
+
+    res.send({
+      message: "done!",
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/courses/:id/setup/create-assignment", async (req, res, next) => {
+  try {
+    const courseId = req.params.id;
+    const ladokId = await canvas.getExaminationLadokId(courseId);
+    const existingAssignment = await canvas.getValidAssignment(
+      courseId,
+      ladokId
+    );
+
+    if (existingAssignment) {
       return next(
         new EndpointError({
-          type: "dev_test_error",
-          statusCode: 400,
-          message: "Testing forced errors for dev.",
+          type: "assignment_exists",
+          statusCode: 409,
+          message: "The assignment already exists",
         })
       );
-    } catch (err) {
-      next(err);
     }
+
+    await canvas.createAssignment(courseId, ladokId);
+
     return res.send({
       message: "done!",
     });
+  } catch (err) {
+    return next(err);
   }
-);
+});
 
-router.post(
-  "/courses/:id/setup/publish-course",
-  async (req, res, next) => {
-    try {
-      const courseId = req.params.id;
-      await canvas.publishCourse(courseId);
+router.post("/courses/:id/setup/publish-assignment", async (req, res, next) => {
+  try {
+    const courseId = req.params.id;
+    const ladokId = await canvas.getExaminationLadokId(courseId);
+    const assignment = await canvas.getValidAssignment(courseId, ladokId);
 
-      res.send({
-        message: "done!",
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
-);
-
-router.post(
-  "/courses/:id/setup/create-assignment",
-  async (req, res, next) => {
-    try {
-      const courseId = req.params.id;
-      const ladokId = await canvas.getExaminationLadokId(courseId);
-      const existingAssignment = await canvas.getValidAssignment(
-        courseId,
-        ladokId
+    if (!assignment) {
+      return next(
+        new EndpointError({
+          type: "assignment_not_found",
+          statusCode: 404,
+          message: "There is no valid assignment that can be published",
+        })
       );
-
-      if (existingAssignment) {
-        return next(
-          new EndpointError({
-            type: "assignment_exists",
-            statusCode: 409,
-            message: "The assignment already exists",
-          })
-        );
-      }
-
-      await canvas.createAssignment(courseId, ladokId);
-
-      return res.send({
-        message: "done!",
-      });
-    } catch (err) {
-      return next(err);
     }
+
+    await canvas.publishAssignment(courseId, assignment.id);
+
+    return res.send({
+      message: "done!",
+    });
+  } catch (err) {
+    return next(err);
   }
-);
-
-router.post(
-  "/courses/:id/setup/publish-assignment",
-  async (req, res, next) => {
-    try {
-      const courseId = req.params.id;
-      const ladokId = await canvas.getExaminationLadokId(courseId);
-      const assignment = await canvas.getValidAssignment(courseId, ladokId);
-
-      if (!assignment) {
-        return next(
-          new EndpointError({
-            type: "assignment_not_found",
-            statusCode: 404,
-            message: "There is no valid assignment that can be published",
-          })
-        );
-      }
-
-      await canvas.publishAssignment(courseId, assignment.id);
-
-      return res.send({
-        message: "done!",
-      });
-    } catch (err) {
-      return next(err);
-    }
-  }
-);
+});
 
 router.use(errorHandler);
 module.exports = router;
