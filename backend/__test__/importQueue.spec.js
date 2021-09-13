@@ -155,4 +155,28 @@ describe("Import queue", () => {
     expect(statusSummary).toBeInstanceOf(QueueStatus);
     expect(statusSummary.status).toBe("working");
   });
+
+  it("should allow return 'idle' when all 'pending' imports change state to 'imported'", async () => {
+    let statusSummary;
+    const entry = {
+      fileId: "status1",
+      courseId: "321",
+      userKthId: "u3433z456",
+    };
+
+    await addEntryToQueue(entry);
+
+    statusSummary = await getStatusFromQueue(entry.courseId);
+    expect(statusSummary.status).toBe("idle");
+
+    await updateStatusOfEntryInQueue(entry, "pending");
+
+    statusSummary = await getStatusFromQueue(entry.courseId);
+    expect(statusSummary.status).toBe("working");
+
+    await updateStatusOfEntryInQueue(entry, "imported");
+
+    statusSummary = await getStatusFromQueue(entry.courseId);
+    expect(statusSummary.status).toBe("idle");
+  });
 });
