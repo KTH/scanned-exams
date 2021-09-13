@@ -1,6 +1,6 @@
 const express = require("express");
 const log = require("skog");
-const { errorHandler, EndpointSpecificError } = require("./error");
+const { errorHandler, EndpointError } = require("./error");
 const { checkAuthorization } = require("./utils");
 const canvas = require("./canvasApiClient");
 
@@ -49,7 +49,7 @@ router.post(
       await canvas.createHomepage(courseId);
 
       return next(
-        new EndpointSpecificError({
+        new EndpointError({
           type: "dev_test_error",
           statusCode: 400,
           message: "Testing forced errors for dev.",
@@ -95,7 +95,7 @@ router.post(
 
       if (existingAssignment) {
         return next(
-          new EndpointSpecificError({
+          new EndpointError({
             type: "assignment_exists",
             statusCode: 409,
             message: "The assignment already exists",
@@ -125,7 +125,7 @@ router.post(
 
       if (!assignment) {
         return next(
-          new EndpointSpecificError({
+          new EndpointError({
             type: "assignment_not_found",
             statusCode: 404,
             message: "There is no valid assignment that can be published",
