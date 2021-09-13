@@ -1,5 +1,5 @@
 import React from "react";
-import { H2, PrimaryButton, SecondaryButton, P } from "./util";
+import { H2, PrimaryButton, SecondaryButton, P } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
 export default function CreateHomePage({ onCreate, skip, courseId }) {
@@ -9,7 +9,7 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
     },
   });
 
-  const { isLoading, isSuccess, isError, error } = mutation;
+  const { mutate, isLoading, isSuccess, isError, error } = mutation;
 
   return (
     <div className="max-w-2xl">
@@ -18,7 +18,7 @@ export default function CreateHomePage({ onCreate, skip, courseId }) {
         renderContent({
           isLoading,
           isSuccess,
-          onAction: () => mutation.mutate(),
+          onAction: () => mutate(),
           onSkip: () => skip(),
         })}
       {isError &&
@@ -34,9 +34,9 @@ function renderContent({ isLoading, isSuccess, onAction, onSkip }) {
   return (
     <>
       <P>
-        Since this examroom will be visible for your students, it is important
-        that they can see its purpose from the homepage. You can use our
-        recommended homepage or setup the courseroom by yourself
+        The exam room will be visible for your students, it is important that
+        they can see its purpose from the homepage. You can use our recommended
+        homepage or setup the courseroom by yourself
       </P>
       <P>
         <em>The examroom will not be published yet</em>
@@ -45,7 +45,6 @@ function renderContent({ isLoading, isSuccess, onAction, onSkip }) {
         <PrimaryButton
           className="sm:w-96"
           onClick={onAction}
-          disabled={isLoading || isSuccess}
           waiting={isLoading}
           success={isSuccess}
         >
