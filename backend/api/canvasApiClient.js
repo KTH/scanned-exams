@@ -233,20 +233,12 @@ async function uploadExam(
   }
 }
 
-async function getAuthorizationData(courseId, userId) {
+async function getRoles(courseId, userId) {
   const enrollments = await canvas
     .list(`courses/${courseId}/enrollments`, { user_id: userId })
     .toArray();
 
-  const roles = enrollments.map((enr) => enr.role_id);
-
-  const TEACHER = 4;
-  const EXAMINER = 10;
-
-  return {
-    authorized: roles.includes(TEACHER) || roles.includes(EXAMINER),
-    roles,
-  };
+  return enrollments.map((enr) => enr.role_id);
 }
 
 module.exports = {
@@ -261,5 +253,5 @@ module.exports = {
   lockAssignment,
   hasSubmission,
   uploadExam,
-  getAuthorizationData,
+  getRoles,
 };
