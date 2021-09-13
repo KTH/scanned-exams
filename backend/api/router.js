@@ -1,10 +1,12 @@
 const express = require("express");
 const log = require("skog");
 const { errorHandler, EndpointError } = require("./error");
-const { checkAuthorization } = require("./utils");
 const canvas = require("./canvasApiClient");
+const { checkAuthorizationMiddleware } = require("./permission");
 
 const router = express.Router();
+
+router.use("/courses/:id", checkAuthorizationMiddleware);
 
 /**
  * Returns data from the logged in user.
@@ -22,7 +24,7 @@ router.get("/me", (req, res) => {
   return res.status(200).send({ userId });
 });
 
-router.get("/courses/:id/setup", checkAuthorization, async (req, res, next) => {
+router.get("/courses/:id/setup", async (req, res, next) => {
   const courseId = req.params.id;
 
   try {
@@ -42,7 +44,6 @@ router.get("/courses/:id/setup", checkAuthorization, async (req, res, next) => {
 
 router.post(
   "/courses/:id/setup/create-homepage",
-  checkAuthorization,
   async (req, res, next) => {
     try {
       const courseId = req.params.id;
@@ -66,7 +67,6 @@ router.post(
 
 router.post(
   "/courses/:id/setup/publish-course",
-  checkAuthorization,
   async (req, res, next) => {
     try {
       const courseId = req.params.id;
@@ -83,7 +83,6 @@ router.post(
 
 router.post(
   "/courses/:id/setup/create-assignment",
-  checkAuthorization,
   async (req, res, next) => {
     try {
       const courseId = req.params.id;
@@ -116,7 +115,6 @@ router.post(
 
 router.post(
   "/courses/:id/setup/publish-assignment",
-  checkAuthorization,
   async (req, res, next) => {
     try {
       const courseId = req.params.id;
