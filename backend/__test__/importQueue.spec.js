@@ -40,8 +40,8 @@ describe("Import queue", () => {
 
   it("should add one entry to queue", async () => {
     const entry = {
-      fileId: "123",
-      courseId: "123",
+      fileId: "file1",
+      courseId: "mainTestCourse",
       userKthId: "u23z456",
     };
 
@@ -53,7 +53,7 @@ describe("Import queue", () => {
 
   it("should list only entries with correct courseId", async () => {
     const entry = {
-      fileId: "f123",
+      fileId: "file2",
       courseId: "listTest123",
       userKthId: "u23z456",
     };
@@ -65,7 +65,7 @@ describe("Import queue", () => {
   });
 
   it("should provide status summary of queue ('idle')", async () => {
-    const statusSummary = await getStatusFromQueue("123");
+    const statusSummary = await getStatusFromQueue("mainTestCourse");
 
     expect(statusSummary).toBeInstanceOf(QueueStatus);
     expect(statusSummary.status).toBe("idle");
@@ -73,8 +73,8 @@ describe("Import queue", () => {
 
   it("should allow updating status of entry in queue to 'pending'", async () => {
     const entry = {
-      fileId: "pend123",
-      courseId: "123",
+      fileId: "pendinfFile1",
+      courseId: "mainTestCourse",
       userKthId: "u233z456",
     };
 
@@ -92,8 +92,8 @@ describe("Import queue", () => {
 
   it("should allow updating status of entry in queue to 'imported'", async () => {
     const entry = {
-      fileId: "imp123",
-      courseId: "123",
+      fileId: "importedFile1",
+      courseId: "mainTestCourse",
       userKthId: "u133z456",
     };
 
@@ -110,8 +110,8 @@ describe("Import queue", () => {
 
   it("should allow updating status of entry in queue to 'error' w/o details", async () => {
     const entry = {
-      fileId: "err123",
-      courseId: "123",
+      fileId: "errorFile1",
+      courseId: "mainTestCourse",
       userKthId: "u333z456",
     };
 
@@ -129,8 +129,8 @@ describe("Import queue", () => {
 
   it("should allow updating status of entry in queue to 'error' with details", async () => {
     const entry = {
-      fileId: "err2123",
-      courseId: "123",
+      fileId: "errorFile2",
+      courseId: "mainTestCourse",
       userKthId: "u3433z456",
     };
 
@@ -150,7 +150,7 @@ describe("Import queue", () => {
   });
 
   it("should provide status summary of queue ('working')", async () => {
-    const statusSummary = await getStatusFromQueue("123");
+    const statusSummary = await getStatusFromQueue("mainTestCourse");
 
     expect(statusSummary).toBeInstanceOf(QueueStatus);
     expect(statusSummary.status).toBe("working");
@@ -159,8 +159,8 @@ describe("Import queue", () => {
   it("should allow return 'idle' when all 'pending' imports change state to 'imported'", async () => {
     let statusSummary;
     const entry = {
-      fileId: "status1",
-      courseId: "321",
+      fileId: "statusFile1",
+      courseId: "statusTestCourse",
       userKthId: "u3433z456",
     };
 
