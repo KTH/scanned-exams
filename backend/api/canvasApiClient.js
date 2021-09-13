@@ -4,6 +4,7 @@ const fs = require("fs");
 const got = require("got");
 const log = require("skog");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
+const { EndpointError } = require("./error");
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,
@@ -234,6 +235,23 @@ async function uploadExam(
 }
 
 async function getRoles(courseId, userId) {
+  if (!courseId) {
+    throw new EndpointError({
+      type: "missing_argument",
+      statusCode: 400,
+      message: "Missing argument [courseId]",
+    });
+  }
+
+  if (!userId) {
+    throw new EndpointError({
+      type: "missing_argument",
+      statusCode: 400,
+      message: "Missing argument [userId]",
+    });
+  }
+
+  // TODO: error handling for non-existent courseId or userId
   const enrollments = await canvas
     .list(`courses/${courseId}/enrollments`, { user_id: userId })
     .toArray();
