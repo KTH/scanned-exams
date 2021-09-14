@@ -2,6 +2,7 @@
 require("dotenv").config();
 
 const { expect } = require("@jest/globals");
+const { setupRecorder } = require("nock-record");
 const { MongoClient } = require("mongodb");
 const processQueueEntry = require("../api/processQueueEntry");
 const { getEntryFromQueue } = require("../api/importQueue");
@@ -12,6 +13,14 @@ const { getEntryFromQueue } = require("../api/importQueue");
  * calls to Canvas and LADOK
  *
  */
+
+// Nock HTTP-Call Recording
+// Changin mode affects the mode used for nock
+// record = record and store fixtures for all calls
+// dryrun = use existing fixtures and do real calls when they are missing
+const record = setupRecorder({
+  mode: process.env.NOCK_RECORD === "TRUE" ? "record" : "dryrun",
+});
 
 const { MONGODB_CONNECTION_STRING } = process.env;
 // TODO: Consider using env-var (sync with importQueue.js)
@@ -40,7 +49,11 @@ describe("Import endpoint", () => {
     // TODO: Remove exams imported to Canvas
   });
 
-  it("should add one entry to queue", async () => {
+  it("should import single exam", async () => {
+    const { completeRecording, assertScopesFinished } = await record(
+      "importSingleExam"
+    );
+
     // 1. call import endpoint handler with fileId
     // courseId: 30872
     // fileId: 1140871
@@ -66,7 +79,10 @@ describe("Import endpoint", () => {
     // TODO:
     // expect(entryImported.status).toBe("imported");
 
-    // 3. (teardown) remove file from canvas
+    // Complete recording
+    completeRecording();
+    assertScopesFinished();
+
     expect(true).toBe(true);
   });
 });
