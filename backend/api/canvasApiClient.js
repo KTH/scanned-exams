@@ -4,6 +4,7 @@ const fs = require("fs");
 const got = require("got");
 const log = require("skog");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
+const { EndpointError } = require("./error");
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,
@@ -233,20 +234,29 @@ async function uploadExam(
   }
 }
 
-async function getAuthorizationData(courseId, userId) {
+async function getRoles(courseId, userId) {
+  if (!courseId) {
+    throw new EndpointError({
+      type: "missing_argument",
+      statusCode: 400,
+      message: "Missing argument [courseId]",
+    });
+  }
+
+  if (!userId) {
+    throw new EndpointError({
+      type: "missing_argument",
+      statusCode: 400,
+      message: "Missing argument [userId]",
+    });
+  }
+
+  // TODO: error handling for non-existent courseId or userId
   const enrollments = await canvas
     .list(`courses/${courseId}/enrollments`, { user_id: userId })
     .toArray();
 
-  const roles = enrollments.map((enr) => enr.role_id);
-
-  const TEACHER = 4;
-  const EXAMINER = 10;
-
-  return {
-    authorized: roles.includes(TEACHER) || roles.includes(EXAMINER),
-    roles,
-  };
+  return enrollments.map((enr) => enr.role_id);
 }
 
 module.exports = {
@@ -261,5 +271,5 @@ module.exports = {
   lockAssignment,
   hasSubmission,
   uploadExam,
-  getAuthorizationData,
+  getRoles,
 };
