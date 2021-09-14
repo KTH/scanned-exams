@@ -135,6 +135,23 @@ async function getEntryFromQueue(fileId) {
   return null;
 }
 
+async function removeFinishedEntries(courseId) {
+  try {
+    const conn = await dbClient.connect();
+    const db = conn.db();
+    const collImportQueue = db.collection(DB_QUEUE_NAME);
+
+    collImportQueue.deleteMany({
+      courseId,
+      status: {
+        $in: ["imported", "error"],
+      },
+    });
+  } catch (err) {
+    throw new Error("Error removing finished entries");
+  }
+}
+
 /**
  * Add an entry to the import queue
  * If an entry exists with given fileId, an error will be thrown.
@@ -306,4 +323,5 @@ module.exports = {
   updateStatusOfEntryInQueue,
   getStatusFromQueue,
   getFirstPendingFromQueue,
+  removeFinishedEntries,
 };
