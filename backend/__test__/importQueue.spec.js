@@ -12,6 +12,13 @@ const {
   // getStatusFromQueue,
 } = require("../api/importQueue");
 
+/**
+ *
+ * NOTE: These test are quick and dirty
+ * TODO: Make sure tests don't rely on running in order
+ *
+ */
+
 const { MONGODB_CONNECTION_STRING } = process.env;
 // TODO: Consider using env-var (sync with importQueue.js)
 const DB_QUEUE_NAME = "import_queue";
