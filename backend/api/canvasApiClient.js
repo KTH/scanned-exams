@@ -2,7 +2,17 @@ const Canvas = require("@kth/canvas-api");
 const FormData = require("formdata-node").default;
 const got = require("got");
 const log = require("skog");
+const { assert } = require("./utils");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
+
+assert(
+  process.env.CANVAS_API_URL !== undefined,
+  "This app requires env-var CANVAS_API_URL to start."
+);
+assert(
+  process.env.CANVAS_API_ADMIN_TOKEN !== undefined,
+  "This app requires env-var CANVAS_API_ADMIN_TOKEN to start."
+);
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,

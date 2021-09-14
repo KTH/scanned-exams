@@ -1,5 +1,6 @@
 const { MongoClient } = require("mongodb");
 const log = require("skog");
+const { assert } = require("./utils");
 
 const { MONGODB_CONNECTION_STRING } = process.env;
 const DB_QUEUE_NAME = "import_queue";
@@ -8,17 +9,6 @@ const dbClient = new MongoClient(MONGODB_CONNECTION_STRING, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
-
-/**
- * For runtime input param testing
- * @param {bool|function} test Test case that should return true
- * @param {string} msg Error message
- */
-function assert(test, msg) {
-  if ((typeof test === "function" && !test()) || !test) {
-    throw Error(msg);
-  }
-}
 
 /* eslint max-classes-per-file: off */
 
@@ -125,7 +115,9 @@ async function getEntryFromQueue(fileId) {
 
     const doc = await collImportQueue.findOne({ fileId });
 
-    return new QueueEntry(doc);
+    if (doc) {
+      return new QueueEntry(doc);
+    }
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });

@@ -36,7 +36,19 @@ function handleUnexpectedError(err, req, res, next) {
   });
 }
 
+/**
+ * For runtime input param testing
+ * @param {bool|function} test Test case that should return true
+ * @param {string} msg Error message
+ */
+function assert(test, msg) {
+  if ((typeof test === "function" && !test()) || !test) {
+    throw Error(msg);
+  }
+}
+
 module.exports = {
   checkAuthorization,
   handleUnexpectedError,
+  assert,
 };

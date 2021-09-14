@@ -1,5 +1,19 @@
 const log = require("skog");
 const got = require("got");
+const { assert } = require("./utils");
+
+assert(
+  process.env.LADOK_API_BASEURL !== undefined,
+  "This app requires env-var LADOK_API_BASEURL to start."
+);
+assert(
+  process.env.LADOK_API_PFX_BASE64 !== undefined,
+  "This app requires env-var LADOK_API_PFX_BASE64 to start."
+);
+assert(
+  process.env.LADOK_API_PFX_PASSPHRASE !== undefined,
+  "This app requires env-var LADOK_API_PFX_PASSPHRASE to start."
+);
 
 const ladokGot = got.extend({
   prefixUrl: process.env.LADOK_API_BASEURL,
