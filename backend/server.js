@@ -125,7 +125,3 @@ server.use(
 
 server.get("/scanned-exams/_monitor", monitor);
 module.exports = server;
-
-server.listen(PORT, () => {
-  log.info(`App listening on port ${PORT}`);
-});
