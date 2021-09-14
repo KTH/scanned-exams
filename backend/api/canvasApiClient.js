@@ -80,6 +80,22 @@ async function getValidAssignment(courseId, ladokId) {
   );
 }
 
+async function getAssignmentSubmissions(courseId, ladokId) {
+  // API docs https://canvas.instructure.com/doc/api/submissions.html
+  // GET /api/v1/courses/:course_id/assignments/:assignment_id/submissions
+  // ?include=user (to get user obj wth kth id)
+  const assignment = await getValidAssignment(courseId, ladokId);
+
+  const submissions = await canvas
+    .list(
+      `courses/${courseId}/assignments/${assignment.id}/submissions`,
+      { include: "user" } // include user obj with kth id
+    )
+    .toArray();
+
+  return submissions;
+}
+
 async function createAssignment(courseId, ladokId) {
   const examination = await getAktivitetstillfalle(ladokId);
 
@@ -255,6 +271,7 @@ module.exports = {
   createHomepage,
   getExaminationLadokId,
   getValidAssignment,
+  getAssignmentSubmissions,
   createAssignment,
   publishAssignment,
   unlockAssignment,
