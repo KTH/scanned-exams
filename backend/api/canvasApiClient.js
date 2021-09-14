@@ -1,6 +1,5 @@
 const Canvas = require("@kth/canvas-api");
 const FormData = require("formdata-node").default;
-const fs = require("fs");
 const got = require("got");
 const log = require("skog");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
@@ -81,6 +80,22 @@ async function getValidAssignment(courseId, ladokId) {
   );
 }
 
+async function getAssignmentSubmissions(courseId, ladokId) {
+  // API docs https://canvas.instructure.com/doc/api/submissions.html
+  // GET /api/v1/courses/:course_id/assignments/:assignment_id/submissions
+  // ?include=user (to get user obj wth kth id)
+  const assignment = await getValidAssignment(courseId, ladokId);
+
+  const submissions = await canvas
+    .list(
+      `courses/${courseId}/assignments/${assignment.id}/submissions`,
+      { include: "user" } // include user obj with kth id
+    )
+    .toArray();
+
+  return submissions;
+}
+
 async function createAssignment(courseId, ladokId) {
   const examination = await getAktivitetstillfalle(ladokId);
 
@@ -156,7 +171,7 @@ async function lockAssignment(courseId, assignmentId) {
 }
 
 // eslint-disable-next-line camelcase
-async function sendFile({ upload_url, upload_params }, filePath) {
+async function sendFile({ upload_url, upload_params }, content) {
   const form = new FormData();
 
   // eslint-disable-next-line camelcase
@@ -166,7 +181,7 @@ async function sendFile({ upload_url, upload_params }, filePath) {
     }
   }
 
-  form.append("attachment", fs.createReadStream(filePath));
+  form.append("attachment", content, upload_params.filename);
 
   return got.post({
     url: upload_url,
@@ -194,26 +209,32 @@ async function hasSubmission({ courseId, assignmentId, userId }) {
   }
 }
 
-async function uploadExam(
-  filePath,
-  { courseId, assignmentId, userId, examDate }
-) {
+async function uploadExam(content, { courseId, studentKthId, examDate }) {
   try {
-    const { body: user } = await canvas.get(`users/sis_user_id:${userId}`);
+    const { body: user } = await canvas.get(
+      `users/sis_user_id:${studentKthId}`
+    );
+
+    const ladokId = await getExaminationLadokId(courseId);
+    const assignment = await getValidAssignment(courseId, ladokId);
+    log.info(
+      `Upload Exam: unlocking assignment ${assignment.id} in course ${courseId}`
+    );
+    await unlockAssignment(courseId, assignment.id);
 
     // TODO: will return a 400 if the course is unpublished
     const { body: slot } = await canvas.requestUrl(
-      `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}/files`,
+      `courses/${courseId}/assignments/${assignment.id}/submissions/${user.id}/files`,
       "POST",
       {
-        name: `${userId}.pdf`,
+        name: `${studentKthId}.pdf`,
       }
     );
 
-    const { body: uploadedFile } = await sendFile(slot, filePath);
+    const { body: uploadedFile } = await sendFile(slot, content);
 
     await canvas.requestUrl(
-      `courses/${courseId}/assignments/${assignmentId}/submissions/`,
+      `courses/${courseId}/assignments/${assignment.id}/submissions/`,
       "POST",
       {
         submission: {
@@ -225,9 +246,11 @@ async function uploadExam(
         },
       }
     );
+
+    await lockAssignment(courseId, assignment.id);
   } catch (err) {
     if (err.response?.statusCode === 404) {
-      log.warn(`User ${userId} is missing in Canvas course ${courseId}`);
+      log.warn(`User ${studentKthId} is missing in Canvas course ${courseId}`);
     } else {
       throw err;
     }
@@ -265,6 +288,7 @@ module.exports = {
   createHomepage,
   getExaminationLadokId,
   getValidAssignment,
+  getAssignmentSubmissions,
   createAssignment,
   publishAssignment,
   unlockAssignment,
