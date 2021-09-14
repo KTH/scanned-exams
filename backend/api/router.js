@@ -130,22 +130,6 @@ router.post(
   }
 );
 
-function _generateSummaryOfImportQueue(listOfExams) {
-  const summary = {
-    new: 0,
-    pending: 0,
-    errors: 0,
-    total: 0,
-  };
-  listOfExams.forEach((exam) => {
-    summary.total++;
-    if (summary[exam.status] !== undefined) {
-      summary[exam.status]++;
-    }
-  });
-  return summary;
-}
-
 /**
  * return the list of exams
  * - Canvas is source of truth regarding if a submitted exam is truly imported
@@ -265,7 +249,13 @@ router.get(
       };
     });
 
-    const summary = _generateSummaryOfImportQueue(listOfExamsToHandle);
+    // TODO: Fix this stub when we know want frontend wants, needs a method in import  queue
+    const summary = {
+      new: 0,
+      pending: 0,
+      errors: 0,
+      total: 0,
+    };
 
     return res.send({
       result: listOfExamsToHandle,
