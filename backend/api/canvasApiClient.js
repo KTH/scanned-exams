@@ -2,8 +2,19 @@ const Canvas = require("@kth/canvas-api");
 const FormData = require("formdata-node").default;
 const got = require("got");
 const log = require("skog");
-const { assert } = require("./utils");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
+// const { assert } = require("./utils");
+
+/**
+ * For runtime input param testing
+ * @param {bool|function} test Test case that should return true
+ * @param {string} msg Error message
+ */
+function assert(test, msg) {
+  if ((typeof test === "function" && !test()) || !test) {
+    throw Error(msg);
+  }
+}
 
 assert(
   process.env.CANVAS_API_URL !== undefined,

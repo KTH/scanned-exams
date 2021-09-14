@@ -1,6 +1,17 @@
 const log = require("skog");
 const got = require("got");
-const { assert } = require("./utils");
+// const { assert } = require("./utils");
+
+/**
+ * For runtime input param testing
+ * @param {bool|function} test Test case that should return true
+ * @param {string} msg Error message
+ */
+function assert(test, msg) {
+  if ((typeof test === "function" && !test()) || !test) {
+    throw Error(msg);
+  }
+}
 
 assert(
   process.env.LADOK_API_BASEURL !== undefined,
