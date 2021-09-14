@@ -145,6 +145,10 @@ async function addEntryToQueue(entry) {
   assert(typeof entry.fileId === "string", "Param entry is missing fileId");
   assert(typeof entry.courseId === "string", "Param entry is missing courseId");
 
+  // Type object to get defaults
+  const typedEntry =
+    entry instanceof QueueEntry ? entry : new QueueEntry(entry);
+
   try {
     // Open collection
     const conn = await dbClient.connect();
@@ -153,19 +157,19 @@ async function addEntryToQueue(entry) {
 
     // Add entry
     const res = await collImportQueue.insertOne({
-      _id: entry.fileId,
-      ...(entry.toJSON ? entry.toJSON() : entry),
+      _id: typedEntry.fileId,
+      ...typedEntry.toJSON(),
     });
 
     if (res.acknowledged) {
       // Return typed object
-      return entry instanceof QueueEntry ? entry : new QueueEntry(entry);
+      return typedEntry;
     }
     // TODO: Should we check reason?
     throw Error("Could not insert entry into queue");
   } catch (err) {
     throw Error(
-      `Add to queue failed becuase entry exist for this fileId '${entry.fileId}'`
+      `Add to queue failed becuase entry exist for this fileId '${typedEntry.fileId}'`
     );
   } finally {
     await dbClient.close();
@@ -223,20 +227,20 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
     // Perform update
     const tmpOld = await collImportQueue.findOne({ fileId: entry.fileId });
     if (tmpOld) {
-      const entryObj = new QueueEntry(tmpOld);
-      entryObj.status = status;
+      const typedEntry = new QueueEntry(tmpOld);
+      typedEntry.status = status;
       switch (status) {
         case "pending":
-          entryObj.importStartedAt = new Date();
-          entryObj.error = null;
+          typedEntry.importStartedAt = new Date();
+          typedEntry.error = null;
           break;
         case "imported":
-          entryObj.importSuccessAt = new Date();
-          entryObj.error = null;
+          typedEntry.importSuccessAt = new Date();
+          typedEntry.error = null;
           break;
         case "error":
-          entryObj.lastErrorAt = new Date();
-          entryObj.error = errorDetails || {
+          typedEntry.lastErrorAt = new Date();
+          typedEntry.error = errorDetails || {
             type: "error",
             message: "An error occured but no details were provided.",
           };
@@ -245,8 +249,8 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
       }
 
       const res = await collImportQueue.replaceOne(
-        { fileId: entryObj.fileId },
-        entryObj
+        { fileId: typedEntry.fileId },
+        typedEntry
       );
       if (!res.acknowledged) {
         throw Error(`Update import queue didn't get acknowledge from Mongodb.`);
@@ -257,7 +261,7 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
       }
 
       // Return updated object
-      return new QueueEntry(entryObj);
+      return new QueueEntry(typedEntry);
     }
 
     return null;
