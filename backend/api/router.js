@@ -12,6 +12,7 @@ const {
   addEntryToQueue,
   removeFinishedEntries,
 } = require("./importQueue");
+const { getSetupStatus } = require("./setupCourse");
 
 const router = express.Router();
 
@@ -37,15 +38,8 @@ router.get("/courses/:id/setup", async (req, res, next) => {
   const courseId = req.params.id;
 
   try {
-    const ladokId = await canvas.getExaminationLadokId(courseId);
-    const course = await canvas.getCourse(courseId);
-    const assignment = await canvas.getValidAssignment(courseId, ladokId);
-
-    res.send({
-      coursePublished: course.workflow_state === "available",
-      assignmentCreated: assignment != null,
-      assignmentPublished: assignment?.published || false,
-    });
+    const status = await getSetupStatus(courseId);
+    res.send(status);
   } catch (err) {
     next(err);
   }
