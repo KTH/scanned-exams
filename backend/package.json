@@ -9,7 +9,7 @@
     "format": "prettier --write .",
     "test:lint": "eslint *.js api/**/*.js auth/**/*.js",
     "test:format": "prettier --check .",
-    "test:api": "jest",
+    "test:api": "jest --runInBand",
     "test": "npm run test:lint && npm run test:api"
   },
   "repository": {
