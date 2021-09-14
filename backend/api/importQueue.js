@@ -274,6 +274,29 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
   return null;
 }
 
+async function getFirstPendingFromQueue() {
+  try {
+    // Open collection
+    const conn = await dbClient.connect();
+    const db = conn.db();
+    const collImportQueue = db.collection(DB_QUEUE_NAME);
+
+    const doc = await collImportQueue.findOne({ status: "pending" });
+
+    if (!doc) {
+      return null;
+    }
+
+    return new QueueEntry(doc);
+  } catch (err) {
+    // TODO: Handle errors
+    log.error({ err });
+  } finally {
+    await dbClient.close();
+  }
+  return null;
+}
+
 module.exports = {
   QueueEntry,
   QueueStatus,
@@ -282,4 +305,5 @@ module.exports = {
   addEntryToQueue,
   updateStatusOfEntryInQueue,
   getStatusFromQueue,
+  getFirstPendingFromQueue,
 };
