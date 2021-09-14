@@ -8,6 +8,7 @@ const {
   addEntryToQueue,
   updateStatusOfEntryInQueue,
   getStatusFromQueue,
+  getFirstPendingFromQueue,
   // updateStatusOfEntryInQueue,
   // getStatusFromQueue,
 } = require("../api/importQueue");
@@ -222,5 +223,78 @@ describe("Import queue", () => {
 
     statusSummary = await getStatusFromQueue(entry.courseId);
     expect(statusSummary.status).toBe("idle");
+  });
+});
+
+describe("Get first element from queue", () => {
+  let connection;
+  let db;
+
+  beforeEach(async () => {
+    connection = await dbClient.connect();
+    db = await connection.db();
+  });
+
+  afterEach(async () => {
+    // Perform tear down here
+    await db.collection(DB_QUEUE_NAME).deleteMany({});
+    dbClient.close();
+  });
+
+  it("should return null if nothing is enqueued", async () => {
+    const typedEntry = await getFirstPendingFromQueue();
+    expect(typedEntry).toBeNull();
+  });
+
+  it("should return null if there is no `pending` element", async () => {
+    const entry1 = {
+      fileId: "statusFile1",
+      courseId: "statusTestCourse",
+      userKthId: "u3433z456",
+      status: "success",
+    };
+
+    await addEntryToQueue(entry1);
+    const typedEntry = await getFirstPendingFromQueue();
+    expect(typedEntry).toBeNull();
+  });
+
+  it("should return the first element if something is enqueued", async () => {
+    const entry1 = {
+      fileId: "statusFile1",
+      courseId: "statusTestCourse",
+      userKthId: "u3433z456",
+      status: "pending",
+    };
+
+    await addEntryToQueue(entry1);
+    const typedEntry = await getFirstPendingFromQueue();
+    expect(typedEntry).toBeInstanceOf(QueueEntry);
+    expect(typedEntry.fileId).toBe(entry1.fileId);
+    expect(typedEntry.courseId).toBe(entry1.courseId);
+  });
+
+  it("should return the first `pending` element", async () => {
+    const entry1 = {
+      fileId: "statusFile1",
+      courseId: "statusTestCourse",
+      userKthId: "u3433z456",
+      status: "pending",
+    };
+
+    const entry2 = {
+      fileId: "statusFile2",
+      courseId: "statusTestCourse",
+      userKthId: "u3433z456",
+      status: "pending",
+    };
+
+    await addEntryToQueue(entry1);
+    await addEntryToQueue(entry2);
+    await updateStatusOfEntryInQueue(entry1, "success");
+
+    const typedEntry = await getFirstPendingFromQueue();
+    expect(typedEntry).toBeInstanceOf(QueueEntry);
+    expect(typedEntry.fileId).toBe(entry2.fileId);
   });
 });

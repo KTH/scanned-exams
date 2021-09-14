@@ -4,8 +4,8 @@
   "description": "Backend of the Scanned Exams service. Application integrated into the Canvas LMS that download paper exams from the 'Tenta API' and uploads them into Canvas",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server-https.js | pino-pretty -e options,response",
-    "debug": "node --inspect-brk server-https.js",
+    "start": "nodemon app-https.js | pino-pretty -e options,response",
+    "debug": "node --inspect-brk app-https.js",
     "format": "prettier --write .",
     "test:lint": "eslint *.js api/**/*.js auth/**/*.js",
     "test:format": "prettier --check .",
