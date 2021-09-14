@@ -35,7 +35,7 @@ module.exports = async function processQueueEntry() {
         fileId: examToBeImported.fileId,
         courseId: examToBeImported.courseId,
       });
-      await updateStatusOfEntryInQueue(examToBeImported, "success");
+      await updateStatusOfEntryInQueue(examToBeImported, "imported");
     } catch (err) {
       await updateStatusOfEntryInQueue(examToBeImported, "error", {
         type: "import_error",
