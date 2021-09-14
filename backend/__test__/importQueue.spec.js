@@ -59,15 +59,22 @@ describe("Import queue", () => {
   });
 
   it("should not add entry with same fileId twice", async () => {
-    const entry = {
-      fileId: "file1",
+    const entry1 = {
+      fileId: "twice1",
+      courseId: "mainTestCourse",
+      userKthId: "u23z456",
+    };
+    const entry2 = {
+      fileId: "twice1",
       courseId: "mainTestCourse",
       userKthId: "u23z456",
     };
 
+    await addEntryToQueue(entry1);
+
     let err;
     try {
-      await addEntryToQueue(entry);
+      await addEntryToQueue(entry2);
     } catch (e) {
       err = e;
     }
@@ -76,12 +83,25 @@ describe("Import queue", () => {
   });
 
   it("should list only entries with correct courseId", async () => {
+    const entry1 = {
+      fileId: "filter1",
+      courseId: "mainTestCourse",
+      userKthId: "u23z456",
+    };
+    await addEntryToQueue(entry1);
+
+    const entry2 = {
+      fileId: "filter2",
+      courseId: "mainTestCourse",
+      userKthId: "u23z456",
+    };
+    await addEntryToQueue(entry2);
+
     const entry = {
-      fileId: "file2",
+      fileId: "filter3",
       courseId: "listTest123",
       userKthId: "u23z456",
     };
-
     await addEntryToQueue(entry);
     const entries = await getEntriesFromQueue(entry.courseId);
 
@@ -97,7 +117,7 @@ describe("Import queue", () => {
 
   it("should allow updating status of entry in queue to 'pending'", async () => {
     const entry = {
-      fileId: "pendinfFile1",
+      fileId: "pendingFile1",
       courseId: "mainTestCourse",
       userKthId: "u233z456",
     };
