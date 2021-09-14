@@ -3,6 +3,7 @@
 const canvas = require("./canvasApiClient");
 const { EndpointError } = require("./error");
 
+/** Get setup status of a Canvas course given its ID */
 async function getSetupStatus(courseId) {
   const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
 
