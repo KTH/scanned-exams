@@ -46,6 +46,11 @@ describe("Import queue", () => {
     dbClient.close();
   });
 
+  it("should return null when not found in queue", async () => {
+    const entry = await getEntryFromQueue("noop");
+    expect(entry).toBe(null);
+  });
+
   it("should add one entry to queue", async () => {
     const entry = {
       fileId: "file1",
