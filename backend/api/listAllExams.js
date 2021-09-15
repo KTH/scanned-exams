@@ -7,8 +7,10 @@ const { getEntriesFromQueue } = require("./importQueue");
 const { EndpointError } = require("./error");
 
 /**
- * Get the "ladokId" of a given course. It throws in case the course
- * has no valid ladok IDs
+ * Get the "ladokId" that is associated with a given course. It throws in case
+ * the course is not a valid "exam room"
+ *
+ * Note: this function does not check if the returned ladok ID exists in Ladok.
  */
 async function getLadokId(courseId) {
   const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
@@ -36,6 +38,34 @@ async function getLadokId(courseId) {
   }
 
   return ladokIds[0];
+}
+
+/** Returns a list of scanned exams (i.e. in Windream) given its ladokId */
+async function listScannedExams(courseId, ladokId) {
+  const aktivitetstillfalle = await ladok
+    .getAktivitetstillfalle(ladokId)
+    .catch(() => {
+      throw new EndpointError({
+        type: "invalid_activity",
+        message: `The course [${courseId}] is associated with a not valid Ladok activitestillfälle [${ladokId}]`,
+        details: {
+          courseId,
+          ladokId,
+        },
+      });
+    });
+
+  const { activities, examDate } = aktivitetstillfalle;
+
+  const allScannedExams = [];
+  for (const { courseCode, examCode } of activities) {
+    allScannedExams.push(
+      // eslint-disable-next-line no-await-in-loop
+      ...(await tentaApi.examList({ courseCode, examCode, examDate }))
+    );
+  }
+
+  return allScannedExams;
 }
 
 /**
@@ -72,29 +102,7 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
 
 async function listAllExams(courseId) {
   const ladokId = await getLadokId(courseId);
-  const aktivitetstillfalle = await ladok
-    .getAktivitetstillfalle(ladokId)
-    .catch(() => {
-      throw new EndpointError({
-        type: "invalid_activity",
-        message: `The course [${courseId}] is associated with a not valid Ladok activitestillfälle [${ladokId}]`,
-        details: {
-          courseId,
-          ladokId,
-        },
-      });
-    });
-
-  const { activities, examDate } = aktivitetstillfalle;
-
-  const allScannedExams = [];
-  for (const { courseCode, examCode } of activities) {
-    allScannedExams.push(
-      // eslint-disable-next-line no-await-in-loop
-      ...(await tentaApi.examList({ courseCode, examCode, examDate }))
-    );
-  }
-
+  const allScannedExams = await listScannedExams(courseId, ladokId);
   const studentsWithExamsInCanvas = await listStudentsWithExamsInCanvas(
     courseId,
     ladokId
