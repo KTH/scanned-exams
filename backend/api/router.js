@@ -1,14 +1,10 @@
 const express = require("express");
 const log = require("skog");
 const { errorHandler } = require("./error");
-const canvas = require("./canvasApiClient");
-const ladok = require("./ladokApiClient");
-const tentaApi = require("./tentaApiClient");
 
 const { checkAuthorizationMiddleware } = require("./permission");
 const {
   getStatusFromQueue,
-  getEntriesFromQueue,
   addEntryToQueue,
   removeFinishedEntries,
 } = require("./importQueue");
@@ -19,6 +15,7 @@ const {
   createSpecialAssignment,
   publishSpecialAssignment,
 } = require("./setupCourse");
+const { listAllExams } = require("./importExams");
 
 const router = express.Router();
 
@@ -102,125 +99,17 @@ router.post("/courses/:id/setup/publish-assignment", async (req, res, next) => {
  * - Canvas is source of truth regarding if a submitted exam is truly imported
  * - the internal import queue keeps state of pending and last performed import
  */
-router.get("/courses/:id/exams", async (req, res) => {
-  const courseId = req.params.id;
-
-  let ladokId;
+router.get("/courses/:id/exams", async (req, res, next) => {
   try {
-    ladokId = await canvas.getExaminationLadokId(courseId);
-  } catch (e) {
-    // TODO: Change to new error handling standard
-    return res.status(404).send({
-      error: {
-        type: "course_id_not_found",
-        message: `The provided course id [${courseId}] is not found.`,
-      },
+    const { result, summary } = await listAllExams(req.params.id);
+
+    return res.send({
+      result,
+      summary,
     });
+  } catch (err) {
+    return next(err);
   }
-
-  let aktivitetstillfalle;
-  try {
-    aktivitetstillfalle = await ladok.getAktivitetstillfalle(ladokId);
-  } catch (e) {
-    // TODO: Change to new error handling standard
-    return res.status(404).send({
-      error: {
-        type: "ladok_id_not_valid",
-        message: `The provided ladok id [${ladokId}] is not valid.`,
-      },
-    });
-  }
-  const { activities, examDate } = aktivitetstillfalle;
-
-  const allExams = [];
-  for (const { courseCode, examCode } of activities) {
-    allExams.push(
-      // eslint-disable-next-line no-await-in-loop
-      ...(await tentaApi.examList({ courseCode, examCode, examDate }))
-    );
-  }
-
-  let allExamsInCanvas = [];
-  try {
-    // Find all exam submissions in Canvas
-    allExamsInCanvas = await canvas.getAssignmentSubmissions(courseId, ladokId);
-  } catch (e) {
-    // TODO: Change to new error handling standard
-    return res.status(400).send({
-      error: {
-        type: "failed_fetching_submissions",
-        message: `The submissions for course id [${courseId}] could not be fetched.`,
-        details: e,
-      },
-    });
-  }
-
-  const examsInImportQueue = await getEntriesFromQueue(courseId);
-
-  const listOfExamsToHandle = allExams.map((exam) => {
-    // 1. Check if student assignment is found in Canvas
-    const foundInCanvas = allExamsInCanvas.find(
-      (examInCanvas) =>
-        examInCanvas.workflow_state !== "unsubmitted" &&
-        examInCanvas.user?.sis_user_id !== exam.student?.id
-    );
-
-    const foundInQueue = examsInImportQueue.find(
-      (examInQueue) => examInQueue.fileId === exam.fileId
-    );
-
-    // Figure out status and optional error details for each exam
-    let status = "new";
-    let errorDetails;
-    if (foundInCanvas) {
-      status = "imported";
-    } else if (foundInQueue) {
-      switch (foundInQueue.status) {
-        case "pending":
-          status = "pending";
-          break;
-        case "error":
-          errorDetails = foundInQueue.error;
-          break;
-        case "imported":
-          // It was marked imported but not found in Canvas
-          // Allow user to retry import
-          status = "new";
-          break;
-        default:
-          status = foundInQueue.status;
-          errorDetails = foundInQueue.error;
-      }
-    }
-
-    return {
-      id: exam.fileId,
-      student: exam.student,
-      // new = exist in Windream but not in Canvas or our import queue
-      // pending = exists in our import queue but  has not been marked imported
-      // imported = marked successfully imported to Canvas by the import functions
-      // error = something happened when trying to import it to Canvas according to the import function
-      status,
-      error: errorDetails,
-      // error: {
-      //       type: "___",
-      //       message: "_____",
-      //     },
-    };
-  });
-
-  // TODO: Fix this stub when we know want frontend wants, needs a method in import  queue
-  const summary = {
-    new: 0,
-    pending: 0,
-    errors: 0,
-    total: 0,
-  };
-
-  return res.send({
-    result: listOfExamsToHandle,
-    summary,
-  });
 });
 
 // Get the import process status
