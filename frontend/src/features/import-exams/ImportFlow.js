@@ -1,6 +1,7 @@
 import React from "react";
 import { Step, StepList } from "../StepList";
 import { H2, PrimaryButton, SecondaryButton, P } from "../widgets";
+import PrepareImport from "./steps/prepareImport";
 
 function StepText({ long, short }) {
   return (
@@ -11,51 +12,30 @@ function StepText({ long, short }) {
   );
 }
 
-/**
- * Return index of first item that evaluates to false
- * @param {Array} arr List of truthy expressions/variables
- * @returns
- */
-function getIndexOfFirstFalse(arr) {
-  return arr.findIndex((s) => !s);
-}
-
-export default function SetupScreen({
-  coursePublished,
-  assignmentCreated,
-  assignmentPublished,
-  courseId,
-}) {
-  const [homepageCreated, setHomepageCreated] = React.useState(coursePublished);
-
+export default function ImportScreen({ courseId }) {
   const [fakeStep, setFakeStep] = React.useState(0);
-
-  // The
-  const currentStep = getIndexOfFirstFalse([
-    homepageCreated, //     0
-    coursePublished, //     1
-    assignmentCreated, //   2
-    assignmentPublished, // 3
-  ]);
 
   return (
     <div className="container mx-auto my-8">
       <div className="">
         <div className="mb-8">
           <StepList currentStep={fakeStep}>
-            <Step index={0} done={fakeStep > 0 || homepageCreated}>
+            <Step index={0} done={fakeStep > 0}>
               <StepText short="Step 1" long="1. Import" />
             </Step>
-            <Step index={1} done={fakeStep > 1 || coursePublished}>
+            <Step index={1} done={fakeStep > 1}>
               <StepText short="Step 2" long="2. Resolve Issues" />
             </Step>
-            <Step index={2} done={fakeStep > 2 || assignmentCreated}>
+            <Step index={2} done={fakeStep > 2}>
               <StepText short="Step 3" long="3. Verify Result" />
             </Step>
           </StepList>
         </div>
         {fakeStep === 0 && (
-          <DummyPage title="Import" onNext={() => setFakeStep(fakeStep + 1)} />
+          <PrepareImport
+            courseId={courseId}
+            onNext={() => setFakeStep(fakeStep + 1)}
+          />
         )}
         {fakeStep === 1 && (
           <DummyPage

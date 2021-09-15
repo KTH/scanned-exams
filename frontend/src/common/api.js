@@ -9,7 +9,7 @@ export class ApiError extends Error {
   }
 }
 
-async function apiClient(
+export async function apiClient(
   endpoint,
   { method, ignoreNotFound, ...customConfig } = {}
 ) {
@@ -43,6 +43,13 @@ async function apiClient(
 export function useCourseSetup(courseId) {
   return useQuery(["course", courseId, "setup"], () =>
     apiClient(`courses/${courseId}/setup`)
+  );
+}
+
+/** Fetches the API to get information about the setup of a given course */
+export function useCourseImportStatus(courseId) {
+  return useQuery(["course", courseId, "import", "status"], () =>
+    apiClient(`courses/${courseId}/import/status`)
   );
 }
 

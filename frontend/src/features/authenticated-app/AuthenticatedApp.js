@@ -36,5 +36,5 @@ export default function AuthenticatedApp({ courseId }) {
     );
   }
   // When setup is complete we show the assignment import view
-  return <ImportFlow />;
+  return <ImportFlow courseId={courseId} />;
 }
