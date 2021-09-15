@@ -38,6 +38,38 @@ async function getLadokId(courseId) {
   return ladokIds[0];
 }
 
+/**
+ * Returns a list of students (KTH IDs) that has an exam in Canvas
+ */
+async function listStudentsWithExamsInCanvas(courseId, ladokId) {
+  const assignment = await canvas
+    .getValidAssignment(courseId, ladokId)
+    .then((result) => {
+      if (!result) {
+        throw new EndpointError({
+          type: "not_setup_course",
+          message: `The course [${courseId}] has no valid assignment for scanned exams. Probably is not setup correctly`,
+          details: {
+            courseId,
+            ladokId,
+          },
+        });
+      } else {
+        return result;
+      }
+    });
+
+  const submissions = await canvas.getAssignmentSubmissions(
+    courseId,
+    assignment.id
+  );
+
+  // Filter-out submissions without exams or without KTH ID
+  return submissions
+    .filter((s) => s.workflow_state !== "unsubmitted" || !s.user?.sis_user_id)
+    .map((submission) => submission.user?.sis_user_id);
+}
+
 async function listAllExams(courseId) {
   const ladokId = await getLadokId(courseId);
   const aktivitetstillfalle = await ladok
@@ -63,34 +95,21 @@ async function listAllExams(courseId) {
     );
   }
 
-  const allExamsInCanvas = await canvas
-    .getAssignmentSubmissions(courseId, ladokId)
-    .catch(() => {
-      throw new EndpointError({
-        type: "failed_fetching_submissions",
-        message: `Cannot fetch submissions for course id [${courseId}]`,
-        details: {
-          courseId,
-          ladokId,
-        },
-      });
-    });
-
+  const studentsWithExamsInCanvas = await listStudentsWithExamsInCanvas(
+    courseId,
+    ladokId
+  );
   const examsInImportQueue = await getEntriesFromQueue(courseId);
 
   const listOfExamsToHandle = allScannedExams.map((exam) => {
-    // 1. Check if student assignment is found in Canvas
-    const foundInCanvas = allExamsInCanvas.find(
-      (examInCanvas) =>
-        examInCanvas.workflow_state !== "unsubmitted" &&
-        examInCanvas.user?.sis_user_id !== exam.student?.id
+    const foundInCanvas = studentsWithExamsInCanvas.find(
+      (s) => s === exam.student?.id
     );
 
     const foundInQueue = examsInImportQueue.find(
       (examInQueue) => examInQueue.fileId === exam.fileId
     );
 
-    // Figure out status and optional error details for each exam
     let status = "new";
     let errorDetails;
     if (foundInCanvas) {
@@ -117,16 +136,8 @@ async function listAllExams(courseId) {
     return {
       id: exam.fileId,
       student: exam.student,
-      // new = exist in Windream but not in Canvas or our import queue
-      // pending = exists in our import queue but  has not been marked imported
-      // imported = marked successfully imported to Canvas by the import functions
-      // error = something happened when trying to import it to Canvas according to the import function
       status,
       error: errorDetails,
-      // error: {
-      //       type: "___",
-      //       message: "_____",
-      //     },
     };
   });
 
