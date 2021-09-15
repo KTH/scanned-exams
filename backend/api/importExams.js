@@ -34,11 +34,13 @@ async function getLadokId(courseId) {
       },
     });
   }
+
+  return ladokIds[0];
 }
 
 async function listAllExams(courseId) {
   const ladokId = await getLadokId(courseId);
-  const aktivitetstillfalle = ladok
+  const aktivitetstillfalle = await ladok
     .getAktivitetstillfalle(ladokId)
     .catch(() => {
       throw new EndpointError({

@@ -31,6 +31,8 @@ async function getLadokId(courseId) {
       },
     });
   }
+
+  return ladokIds[0];
 }
 
 /** Get setup status of a Canvas course given its ID */
