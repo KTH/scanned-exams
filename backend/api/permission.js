@@ -28,6 +28,8 @@ async function checkPermissionsMiddleware(req, res, next) {
   await checkPermissions(courseId, userId).catch(next);
 
   log.debug(`Authorized. User ${userId} in course ${courseId}`);
+
+  next();
 }
 
 module.exports = {
