@@ -2,7 +2,7 @@ const express = require("express");
 const log = require("skog");
 const { errorHandler } = require("./error");
 
-const { checkAuthorizationMiddleware } = require("./permission");
+const { checkPermissionsMiddleware } = require("./permission");
 const {
   getStatusFromQueue,
   addEntryToQueue,
@@ -19,7 +19,7 @@ const { listAllExams } = require("./listAllExams");
 
 const router = express.Router();
 
-router.use("/courses/:id", checkAuthorizationMiddleware);
+router.use("/courses/:id", checkPermissionsMiddleware);
 
 /**
  * Returns data from the logged in user.
