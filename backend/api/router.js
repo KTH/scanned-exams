@@ -15,7 +15,7 @@ const {
   createSpecialAssignment,
   publishSpecialAssignment,
 } = require("./setupCourse");
-const { listAllExams } = require("./importExams");
+const { listAllExams } = require("./listAllExams");
 
 const router = express.Router();
 
