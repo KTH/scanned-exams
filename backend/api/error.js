@@ -11,6 +11,7 @@ class EndpointError extends Error {
   // Errors that must be handled by frontend
   constructor({ type, statusCode, message, details }) {
     super(message);
+    this.name = "EndpointError";
     this.type = type;
     this.statusCode = statusCode;
     this.details = details;
