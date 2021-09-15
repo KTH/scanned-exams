@@ -10,6 +10,7 @@
     "test:lint": "eslint *.js api/**/*.js auth/**/*.js",
     "test:format": "prettier --check .",
     "test:api": "jest --runInBand",
+    "record:test:api": "NOCK_RECORD=TRUE jest --runInBand",
     "test": "npm run test:lint && npm run test:api"
   },
   "repository": {
