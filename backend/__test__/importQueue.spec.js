@@ -1,5 +1,5 @@
 // We need some env-vars for canvasApiClient.js to import
-require("dotenv").config();
+// require("dotenv").config();
 
 const { expect } = require("@jest/globals");
 const { MongoClient } = require("mongodb");

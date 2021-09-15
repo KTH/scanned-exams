@@ -1,35 +1,12 @@
 const log = require("skog");
 const got = require("got");
-// const { assert } = require("./utils");
-
-/**
- * For runtime input param testing
- * @param {bool|function} test Test case that should return true
- * @param {string} msg Error message
- */
-function assert(test, msg) {
-  if ((typeof test === "function" && !test()) || !test) {
-    throw Error(msg);
-  }
-}
-
-assert(
-  process.env.LADOK_API_BASEURL !== undefined,
-  "This app requires env-var LADOK_API_BASEURL to start."
-);
-assert(
-  process.env.LADOK_API_PFX_BASE64 !== undefined,
-  "This app requires env-var LADOK_API_PFX_BASE64 to start."
-);
-assert(
-  process.env.LADOK_API_PFX_PASSPHRASE !== undefined,
-  "This app requires env-var LADOK_API_PFX_PASSPHRASE to start."
-);
 
 const ladokGot = got.extend({
   prefixUrl: process.env.LADOK_API_BASEURL,
   https: {
-    pfx: Buffer.from(process.env.LADOK_API_PFX_BASE64, "base64"),
+    pfx: process.env.LADOK_API_PFX_BASE64
+      ? Buffer.from(process.env.LADOK_API_PFX_BASE64, "base64")
+      : "",
     passphrase: process.env.LADOK_API_PFX_PASSPHRASE,
   },
   headers: {

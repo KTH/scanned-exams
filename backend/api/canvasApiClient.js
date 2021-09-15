@@ -3,27 +3,6 @@ const FormData = require("formdata-node").default;
 const got = require("got");
 const log = require("skog");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
-// const { assert } = require("./utils");
-
-/**
- * For runtime input param testing
- * @param {bool|function} test Test case that should return true
- * @param {string} msg Error message
- */
-function assert(test, msg) {
-  if ((typeof test === "function" && !test()) || !test) {
-    throw Error(msg);
-  }
-}
-
-assert(
-  process.env.CANVAS_API_URL !== undefined,
-  "This app requires env-var CANVAS_API_URL to start."
-);
-assert(
-  process.env.CANVAS_API_ADMIN_TOKEN !== undefined,
-  "This app requires env-var CANVAS_API_ADMIN_TOKEN to start."
-);
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,
