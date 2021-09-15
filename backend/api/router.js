@@ -1,6 +1,6 @@
 const express = require("express");
 const log = require("skog");
-const { errorHandler } = require("./error");
+const { errorHandler, EndpointError } = require("./error");
 
 const { checkPermissionsMiddleware } = require("./permission");
 const {
@@ -126,10 +126,10 @@ router.post("/courses/:id/import/start", async (req, res) => {
   const { status } = await getStatusFromQueue(courseId);
 
   if (status !== "idle") {
-    // TODO: move it to the error handler
-    return res.status(400).send({
+    throw new EndpointError({
+      type: "queue_not_idle",
       message: "Can't start import if there are pending jobs",
-      code: "queue_not_idle",
+      statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
     });
   }
 
