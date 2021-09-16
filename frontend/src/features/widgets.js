@@ -64,7 +64,7 @@ export const PrimaryButton = ({ className, disabled, ...props }) => (
 
 export const SecondaryButton = ({ className, ...props }) => (
   <BaseButton
-    className={`${className} mt-2 sm:mt-0 text-black border border-black hover:bg-gray-200`}
+    className={`${className} mt-2 sm:mt-0 text-black border border-black hover:bg-gray-200  mr-8`}
     {...props}
   />
 );
