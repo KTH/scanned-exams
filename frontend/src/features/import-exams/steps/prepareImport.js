@@ -19,15 +19,23 @@ const cssInfoBox =
   "bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6";
 
 export default function PrepareImport({ onNext, courseId }) {
-  const [fakeStatus, setFakeStatus] = React.useState("idle");
+  const [queueStatus, setQueueStatus] = React.useState("idle");
 
   // Get status of import worker
-  const queryStatus = useCourseImportStatus(courseId);
-  const { data: dataStatus, isError: statusError } = queryStatus;
+  useCourseImportStatus(courseId, {
+    onSuccess(status) {
+      setQueueStatus(status);
+    },
+  });
+  // TODO: Handle errors?
 
   // Get exams available to import
   const queryExams = useCourseExams(courseId);
-  const { data: dataExams, isLoading, isError } = queryExams;
+  const {
+    data: dataExams,
+    isLoading: examsLoading,
+    isError: examsError,
+  } = queryExams;
   const examsToImport = dataExams?.result.filter(
     (exam) => exam.status === "new"
   );
@@ -36,7 +44,7 @@ export default function PrepareImport({ onNext, courseId }) {
   const startImportMutation = useMutateImportStart(courseId, examsToImport, {
     onSuccess({ status }) {
       // status lets us know if the queue is working or still idle
-      setFakeStatus(status);
+      setQueueStatus(status);
     },
   });
   const {
@@ -44,31 +52,26 @@ export default function PrepareImport({ onNext, courseId }) {
     isLoading: startImportLoading,
     isError: startImportError,
   } = startImportMutation;
-  // TODO: Handle error (queue is working 'startImportError')
+  // TODO: Handle error queue is busy
 
-  if (isLoading) {
+  if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
   const nrofExamsToImport = examsToImport?.length || 0;
 
-  if (/* dataStatus?.status */ fakeStatus === "working") {
+  if (queueStatus === "working") {
     return (
       <div className="max-w-2xl">
         <H2>Import in progress...</H2>
-        <P>
-          Importing <b>{nrofExamsToImport} exams</b>.
-        </P>
         <div className="mt-8">
-          <SummaryTable summary={{ availableRecords: nrofExamsToImport }} />
+          <SummaryTable />
         </div>
         <div className="mt-8">
           <ProgressBar
             courseId={courseId}
             defaultTotal={nrofExamsToImport}
-            onDone={() => {
-              setFakeStatus("idle");
-            }}
+            onDone={onNext}
           />
         </div>
       </div>
@@ -100,32 +103,43 @@ export default function PrepareImport({ onNext, courseId }) {
         <SummaryTable summary={{ availableRecords: nrofExamsToImport }} />
       </div>
       <div className="mt-8">
-        <PrimaryButton
-          className="sm:w-96"
-          waiting={startImportLoading}
-          onClick={doStartImport}
-        >
-          Start import!
-        </PrimaryButton>
+        {nrofExamsToImport > 0 && (
+          <PrimaryButton
+            className="sm:w-96"
+            waiting={startImportLoading}
+            onClick={doStartImport}
+          >
+            Start import!
+          </PrimaryButton>
+        )}
+        <SecondaryButton className="sm:w-auto" onClick={onNext}>
+          Next
+        </SecondaryButton>
       </div>
     </div>
   );
 }
 
 function ProgressBar({ courseId, defaultTotal, onDone }) {
+  const [cancel, setCancel] = React.useState(false);
   const [total, setTotal] = React.useState(defaultTotal);
   const [progress, setProgress] = React.useState(0);
 
-  // Ping backend to get
-  useInterval(async () => {
-    const { working } = await apiClient(`courses/${courseId}/import/status`);
-    // setTotal(working.total);
-    // setProgress(working.progress);
-    setProgress(progress + 1);
+  // Ping backend to get status of current import
+  useInterval(
+    async () => {
+      const { working } = await apiClient(`courses/${courseId}/import/status`);
+      setTotal(working.total);
+      setProgress(working.progress);
 
-    // We are done, inform the parent
-    if (progress >= total) onDone();
-  }, PROGRESS_REFRESH_INTERVAL);
+      // We are done, inform the parent
+      if (working.progress >= working.total) {
+        setCancel(true);
+        onDone();
+      }
+    },
+    cancel ? null : PROGRESS_REFRESH_INTERVAL
+  );
 
   const perc = Math.round((progress / total) * 100);
   return (
@@ -149,10 +163,12 @@ function SummaryTable({ summary }) {
   return (
     <table className="table-auto">
       <tbody>
-        <tr>
-          <td className="p-1 pl-0">Records to import:</td>
-          <td className="p-1 pl-2">{summary.availableRecords}</td>
-        </tr>
+        {summary && (
+          <tr>
+            <td className="p-1 pl-0">Records to import:</td>
+            <td className="p-1 pl-2">{summary.availableRecords}</td>
+          </tr>
+        )}
         <tr>
           <td className="p-1 pl-0">Type:</td>
           <td className="p-1 pl-2">Scanned exams</td>
