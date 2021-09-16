@@ -3,6 +3,7 @@ import {
   apiClient,
   useCourseImportStatus,
   useCourseExams,
+  useMutateImportStart,
 } from "../../../common/api";
 import { useInterval } from "../../../common/useHooks";
 import {
@@ -24,11 +25,26 @@ export default function PrepareImport({ onNext, courseId }) {
   const queryStatus = useCourseImportStatus(courseId);
   const { data: dataStatus, isError: statusError } = queryStatus;
 
+  // Get exams available to import
   const queryExams = useCourseExams(courseId);
   const { data: dataExams, isLoading, isError } = queryExams;
   const examsToImport = dataExams?.result.filter(
     (exam) => exam.status === "new"
   );
+
+  // Hoook to start import
+  const startImportMutation = useMutateImportStart(courseId, examsToImport, {
+    onSuccess({ status }) {
+      // status lets us know if the queue is working or still idle
+      setFakeStatus(status);
+    },
+  });
+  const {
+    mutate: doStartImport,
+    isLoading: startImportLoading,
+    isError: startImportError,
+  } = startImportMutation;
+  // TODO: Handle error (queue is working 'startImportError')
 
   if (isLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
@@ -50,7 +66,9 @@ export default function PrepareImport({ onNext, courseId }) {
           <ProgressBar
             courseId={courseId}
             defaultTotal={nrofExamsToImport}
-            onDone={() => {setFakeStatus("idle")}}
+            onDone={() => {
+              setFakeStatus("idle");
+            }}
           />
         </div>
       </div>
@@ -84,7 +102,8 @@ export default function PrepareImport({ onNext, courseId }) {
       <div className="mt-8">
         <PrimaryButton
           className="sm:w-96"
-          onClick={() => setFakeStatus("working")}
+          waiting={startImportLoading}
+          onClick={doStartImport}
         >
           Start import!
         </PrimaryButton>
@@ -114,7 +133,7 @@ function ProgressBar({ courseId, defaultTotal, onDone }) {
       <div className="relative pt-1 mb-1">
         <div className="overflow-hidden h-4 text-xs flex rounded bg-blue-200">
           <div
-            style={{ width: `${perc}%` }}
+            style={{ width: `${perc}%`, transition: "width 1.5s" }}
             className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
           />
         </div>

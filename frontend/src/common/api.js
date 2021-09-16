@@ -79,6 +79,27 @@ export function useMutateCourseSetup(courseId, action, options = {}) {
   );
 }
 
+/** Start an import */
+export function useMutateImportStart(courseId, examsToImport, options = {}) {
+  const client = useQueryClient();
+
+  return useMutation(
+    () =>
+      apiClient(`courses/${courseId}/import/start`, {
+        method: "POST",
+        body: examsToImport,
+      }),
+    {
+      ...options,
+      // Passes status object from API as data to callback
+      onSuccess(data) {
+        client.invalidateQueries(["course", courseId, "setup"]);
+        options.onSuccess?.(data);
+      },
+    }
+  );
+}
+
 /**
  * Fetches the API to get information about the current user.
  *
