@@ -23,8 +23,10 @@ function useInterval(callback, delay) {
 
     const id = setInterval(() => savedCallback.current(), delay);
 
+    // eslint-disable-next-line consistent-return
     return () => clearInterval(id);
   }, [delay]);
 }
 
+// eslint-disable-next-line import/prefer-default-export
 export { useInterval };
