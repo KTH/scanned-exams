@@ -1,7 +1,9 @@
 import React from "react";
 import { Step, StepList } from "../StepList";
 import { H2, PrimaryButton, SecondaryButton, P } from "../widgets";
-import PrepareImport from "./steps/prepareImport";
+import PrepareImport from "./steps/PrepareImport";
+import ResolveIIssues from "./steps/ResolveIssues";
+import VerifyResults from "./steps/VerifyResults";
 
 function StepText({ long, short }) {
   return (
@@ -38,40 +40,19 @@ export default function ImportScreen({ courseId }) {
           />
         )}
         {fakeStep === 1 && (
-          <DummyPage
-            title="Resolve Issues"
+          <ResolveIIssues
+            courseId={courseId}
             onNext={() => setFakeStep(fakeStep + 1)}
             onPrev={() => setFakeStep(fakeStep - 1)}
           />
         )}
         {fakeStep === 2 && (
-          <DummyPage
-            title="Verify Result"
+          <VerifyResults
+            courseId={courseId}
             onPrev={() => setFakeStep(fakeStep - 1)}
           />
         )}
       </div>
-    </div>
-  );
-}
-
-function DummyPage({ title, onPrev, onNext }) {
-  return (
-    <div>
-      <H2>{title}</H2>
-      <P>This is a placeholder page.</P>
-      <P>
-        {onPrev && (
-          <SecondaryButton className="sm:w-auto" onClick={onPrev}>
-            Prev
-          </SecondaryButton>
-        )}
-        {onNext && (
-          <PrimaryButton className="sm:w-96" onClick={onNext}>
-            Next
-          </PrimaryButton>
-        )}
-      </P>
     </div>
   );
 }

@@ -2,6 +2,9 @@
 import React from "react";
 import { Check, Spinner } from "./icons";
 
+export const cssInfoBox =
+  "bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6";
+
 export function P(props) {
   return <p className="mt-6" {...props} />;
 }

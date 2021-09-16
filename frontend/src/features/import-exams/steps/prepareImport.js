@@ -12,11 +12,10 @@ import {
   PrimaryButton,
   SecondaryButton,
   P,
+  cssInfoBox,
 } from "../../widgets";
 
 const PROGRESS_REFRESH_INTERVAL = 1000;
-const cssInfoBox =
-  "bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6";
 
 export default function PrepareImport({ onNext, courseId }) {
   const [queueStatus, setQueueStatus] = React.useState("idle");
