@@ -61,15 +61,16 @@ export function useCourseSetup(courseId) {
 
 /** Fetches the API to get information about the setup of a given course */
 export function useCourseImportStatus(courseId, options = {}) {
-  const client = useQueryClient();
   return useQuery(
     ["course", courseId, "import", "status"],
     () => apiClient(`courses/${courseId}/import/status`),
     {
       onSuccess({ status } = {}) {
-        client.invalidateQueries(["course", courseId, "import", "status"]);
         options.onSuccess?.(status);
       },
+      // We are refetching this periodically so UX changes state if
+      // import queue is triggered somewhere else
+      refetchInterval: PROGRESS_REFRESH_INTERVAL * 10,
     }
   );
 }
