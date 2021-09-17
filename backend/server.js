@@ -31,6 +31,7 @@ const server = express();
 server.set("trust proxy", 1);
 server.use(
   session({
+    name: "scanned-exams.sid",
     cookie: {
       domain: "kth.se",
       maxAge: 3600 * 1000 /* 1 hour */,
