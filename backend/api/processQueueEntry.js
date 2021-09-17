@@ -47,11 +47,18 @@ module.exports = async function processQueueEntry() {
         courseId: examToBeImported.courseId,
       });
       await updateStatusOfEntryInQueue(examToBeImported, "imported");
+      if (IS_DEV) log.info("Imported file " + examToBeImported.fileId);
     } catch (err) {
       await updateStatusOfEntryInQueue(examToBeImported, "error", {
         type: "import_error",
         message: err.message,
       });
+      if (IS_DEV)
+        log.info(
+          "Error importing file " +
+            examToBeImported.fileId +
+            ` (${err.message})`
+        );
     }
   }
 };
