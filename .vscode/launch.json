@@ -1,0 +1,38 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Backend (NPM)",
+      "runtimeVersion": "14.17.0",
+      "cwd": "${workspaceFolder}/backend",
+      "outputCapture": "std",
+      "env": {
+        "PORT": "4444"
+      },
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run-script",
+        "start"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Jest debug current file",
+      "runtimeVersion": "14.17.0",
+      "cwd": "${workspaceFolder}/backend",
+      "program": "${workspaceRoot}/backend/node_modules/jest/bin/jest.js",
+      "args": ["--verbose", "-i", "--no-cache", "--testPathPattern", "${fileBasename}"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}
