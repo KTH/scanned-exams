@@ -3,6 +3,20 @@ const log = require("skog");
 /* eslint max-classes-per-file: */
 
 /**
+ * AuthError should be handled by the frontend
+ * api client.
+ */
+class AuthError extends Error {
+  constructor({ type, message, details }) {
+    super(message);
+    this.name = "AuthError";
+    this.type = type;
+    this.statusCode = 401;
+    this.details = details;
+  }
+}
+
+/**
  * All errors of type EndpointError must be
  * handled by the frontend code that calls the
  * actual endpoint.
@@ -39,5 +53,6 @@ function errorHandler(err, req, res, next) {
 
 module.exports = {
   errorHandler,
+  AuthError,
   EndpointError,
 };
