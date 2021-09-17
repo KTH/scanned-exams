@@ -1,11 +1,10 @@
 import React from "react";
 import {
-  apiClient,
   useCourseImportStatus,
+  useCourseImportProgress,
   useCourseExams,
   useMutateImportStart,
 } from "../../../common/api";
-import { useInterval } from "../../../common/useHooks";
 import {
   H2,
   LoadingPage,
@@ -14,8 +13,6 @@ import {
   P,
   cssInfoBox,
 } from "../../widgets";
-
-const PROGRESS_REFRESH_INTERVAL = 1000;
 
 export default function PrepareImport({ onNext, courseId }) {
   const [queueStatus, setQueueStatus] = React.useState("idle");
@@ -63,6 +60,12 @@ export default function PrepareImport({ onNext, courseId }) {
     return (
       <div className="max-w-2xl">
         <H2>Import in progress...</H2>
+        <div className={cssInfoBox}>
+          <p>
+            Surprised? The import can be started by another tab or another
+            teacher for this course.
+          </p>
+        </div>
         <div className="mt-8">
           <SummaryTable />
         </div>
@@ -121,24 +124,20 @@ export default function PrepareImport({ onNext, courseId }) {
 
 function ProgressBar({ courseId, defaultTotal, onDone }) {
   const [cancel, setCancel] = React.useState(false);
-  const [total, setTotal] = React.useState(defaultTotal);
-  const [progress, setProgress] = React.useState(0);
 
   // Ping backend to get status of current import
-  useInterval(
-    async () => {
-      const { working } = await apiClient(`courses/${courseId}/import/status`);
-      setTotal(working.total);
-      setProgress(working.progress);
-
+  const { data } = useCourseImportProgress(courseId, {
+    onSuccess: ({ working }) => {
       // We are done, inform the parent
       if (working.progress >= working.total) {
         setCancel(true);
         onDone();
       }
     },
-    cancel ? null : PROGRESS_REFRESH_INTERVAL
-  );
+    cancel,
+  });
+  const { working } = data || {};
+  const { progress = 0, total = defaultTotal } = working || {};
 
   const perc = Math.round((progress / total) * 100);
   return (
@@ -146,7 +145,7 @@ function ProgressBar({ courseId, defaultTotal, onDone }) {
       <div className="relative pt-1 mb-1">
         <div className="overflow-hidden h-4 text-xs flex rounded bg-blue-200">
           <div
-            style={{ width: `${perc}%`, transition: "width 1.5s" }}
+            style={{ width: `${perc}%`, transition: "width 3s" }}
             className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
           />
         </div>

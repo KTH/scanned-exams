@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { assert } from "./utils";
 
+const PROGRESS_REFRESH_INTERVAL = 3000;
+
 export class ApiError extends Error {
   constructor({ type, statusCode, message, details }) {
     super(message);
@@ -71,6 +73,17 @@ export function useCourseImportStatus(courseId, options = {}) {
       // We are refetching this periodically so UX changes state if
       // import queue is triggered somewhere else
       refetchInterval: PROGRESS_REFRESH_INTERVAL * 10,
+    }
+  );
+}
+
+/** Ping API on import progress */
+export function useCourseImportProgress(courseId, options = {}) {
+  return useQuery(
+    ["course", courseId, "import", "status", "ping"],
+    () => apiClient(`courses/${courseId}/import/status`),
+    {
+      refetchInterval: options.cancel ? false : PROGRESS_REFRESH_INTERVAL,
     }
   );
 }
