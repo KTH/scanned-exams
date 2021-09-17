@@ -8,4 +8,5 @@ If you need to customise JEST config, be aware that:
 
 module.exports = {
   preset: "@shelf/jest-mongodb",
+  watchPathIgnorePatterns: ["globalConfig"],
 };
