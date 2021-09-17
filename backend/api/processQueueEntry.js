@@ -37,7 +37,7 @@ module.exports = async function processQueueEntry() {
     try {
       // Force errors during development
       if (IS_DEV && FORCE_RANDOM_ERRORS) {
-        if (Math.random() > 0.6)
+        if (Math.random() > 0.8)
           throw Error("Forced error for testing during development");
       }
 
