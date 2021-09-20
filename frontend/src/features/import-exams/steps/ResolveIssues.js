@@ -64,9 +64,14 @@ export default function PrepareImport({ onNext, onPrev, courseId }) {
 function ExamErrorRow({ exam, rowNr }) {
   return (
     <div className="flex flex-row mt-1">
-      <div className="p2">{rowNr}</div>
-      <div className="p2">{exam.userKthId}</div>
-      <div className="p2 flex-grow">{exam.error?.message}</div>
+      <div className="p-2 w-8">{rowNr}</div>
+      <div className="p-2" style={{ width: "6rem" }}>
+        {exam.student.id}
+      </div>
+      <div className="p-2">
+        {`${exam.student.firstName} ${exam.student.lastName}`}
+      </div>
+      <div className="p-2 flex-grow text-gray-400">{exam.error?.message}</div>
     </div>
   );
 }
