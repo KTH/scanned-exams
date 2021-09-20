@@ -18,6 +18,8 @@ const {
 } = require("./setupCourse");
 const { listAllExams } = require("./listAllExams");
 
+const IS_DEV = process.env.NODE_ENV !== "production";
+
 const router = express.Router();
 
 router.use("/courses/:id", checkPermissionsMiddleware);
@@ -175,6 +177,20 @@ router.post(
             );
           }
         });
+      if (IS_DEV && Math.random() > 0.7) {
+        // eslint-disable-next-line no-await-in-loop
+        await updateStatusOfEntryInQueue(
+          {
+            fileId,
+          },
+          "error",
+          {
+            type: "test_import_error",
+            message: "Forcing errors on import to test queue",
+          }
+        );
+        log.debug("Forced fill to get state 'error'.");
+      }
     }
 
     // Return the queue status object so stats can be updated

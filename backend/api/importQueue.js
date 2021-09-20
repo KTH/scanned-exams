@@ -66,12 +66,14 @@ class QueueStatus {
    * @param {String} param0.status idle|working
    * @param {int} param0.total total number being processed
    * @param {int} param0.progress total number pending import
+   * @param {int} param0.error total number of errors
    */
-  constructor({ status, total, progress }) {
+  constructor({ status, total, progress = 0, error = 0 }) {
     this.status = status;
     if (total !== undefined) {
       this.working = {
-        progress: progress || 0,
+        error,
+        progress,
         total,
       };
     }
@@ -84,6 +86,7 @@ class QueueStatus {
         working: {
           progress: this.working.progress,
           total: this.working.total,
+          error: this.working.error,
         },
       };
     }
@@ -224,6 +227,7 @@ async function getStatusFromQueue(courseId) {
     // Calculate status
     // TODO: This should be done by aggregation and setting indexes
     let pending = 0;
+    let error = 0;
     let total = 0;
     let status = "idle";
     await cursor.forEach((doc) => {
@@ -233,6 +237,10 @@ async function getStatusFromQueue(courseId) {
           pending++;
           status = "working";
           break;
+        case "error":
+          total++;
+          error++;
+          break;
         case "imported":
           total++;
           break;
@@ -240,7 +248,7 @@ async function getStatusFromQueue(courseId) {
       }
     });
     const progress = total - pending;
-    const statusObj = new QueueStatus({ status, total, progress });
+    const statusObj = new QueueStatus({ status, total, progress, error });
 
     // Return a typed status object
     return statusObj;

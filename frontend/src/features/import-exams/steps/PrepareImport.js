@@ -35,6 +35,9 @@ export default function PrepareImport({ onNext, courseId }) {
   const examsToImport = dataExams?.result.filter(
     (exam) => exam.status === "new"
   );
+  const examsWithError = dataExams?.result.filter(
+    (exam) => exam.status === "error"
+  );
 
   // Hoook to start import
   const startImportMutation = useMutateImportStart(courseId, examsToImport, {
@@ -54,7 +57,8 @@ export default function PrepareImport({ onNext, courseId }) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
-  const nrofExamsToImport = examsToImport?.length || 0;
+  const nrofExamsWithErrors = examsWithError?.length || 0;
+  const nrofExamsToImport = (examsToImport?.length || 0) + nrofExamsWithErrors;
 
   if (queueStatus === "working") {
     return (
