@@ -14,7 +14,7 @@ async function checkPermissions(courseId, userId) {
   const EXAMINER_ROLE = 10;
 
   if (!roles.includes(TEACHER_ROLE) && !roles.includes(EXAMINER_ROLE)) {
-    throw AuthError({
+    throw new AuthError({
       type: "permission_denied",
       message: "You must be a teacher or examiner to use this app",
       details: {
