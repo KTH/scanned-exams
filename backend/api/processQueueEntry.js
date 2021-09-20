@@ -19,11 +19,13 @@ async function uploadOneExam({ fileId, courseId }) {
   log.info(
     `Course ${courseId} / File ${fileId} / User ${studentKthId}. Uploading`
   );
+  const uploadExamStart = Date.now();
   await canvas.uploadExam(content, {
     courseId,
     studentKthId,
     examDate,
   });
+  log.info("Time to upload exam: " + (Date.now() - uploadExamStart) + "ms");
 
   log.info(
     `Course ${courseId} / File ${fileId} / User ${studentKthId}. Uploaded!`

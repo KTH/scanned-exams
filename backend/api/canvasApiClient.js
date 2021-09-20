@@ -236,6 +236,7 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
     await unlockAssignment(courseId, assignment.id);
 
     // TODO: will return a 400 if the course is unpublished
+    const reqTokenStart = Date.now();
     const { body: slot } = await canvas.requestUrl(
       `courses/${courseId}/assignments/${assignment.id}/submissions/${user.id}/files`,
       "POST",
@@ -244,7 +245,16 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
       }
     );
 
+    log.info(
+      "Time to generate upload token: " + (Date.now() - reqTokenStart) + "ms"
+    );
+
+    const uploadFileStart = Date.now();
     const { body: uploadedFile } = await sendFile(slot, content);
+
+    log.info(
+      "Time to generate upload token: " + (Date.now() - uploadFileStart) + "ms"
+    );
 
     await canvas.requestUrl(
       `courses/${courseId}/assignments/${assignment.id}/submissions/`,
