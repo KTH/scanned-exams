@@ -41,6 +41,8 @@ server.use(
         ? "strict"
         : "none",
     },
+    resave: true, // should be set explictly. Note: recomended to be false (default is true)
+    saveUninitialized: true, // should be set explictly. Note: recomended to be false (default is true)
     secret: process.env.SESSION_SECRET,
   })
 );
@@ -54,7 +56,11 @@ server.use((req, res, next) => {
     next
   );
 });
-server.use(express.urlencoded());
+server.use(
+  express.urlencoded({
+    extended: true, // should be set explictly (default is true)
+  })
+);
 server.use(express.json());
 server.use(cookieParser());
 
