@@ -252,9 +252,7 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
     const uploadFileStart = Date.now();
     const { body: uploadedFile } = await sendFile(slot, content);
 
-    log.info(
-      "Time to generate upload token: " + (Date.now() - uploadFileStart) + "ms"
-    );
+    log.info("Time to upload file: " + (Date.now() - uploadFileStart) + "ms");
 
     await canvas.requestUrl(
       `courses/${courseId}/assignments/${assignment.id}/submissions/`,
