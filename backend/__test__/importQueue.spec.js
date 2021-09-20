@@ -9,6 +9,7 @@ const {
   updateStatusOfEntryInQueue,
   getStatusFromQueue,
   getFirstPendingFromQueue,
+  resetQueueForImport,
   // updateStatusOfEntryInQueue,
   // getStatusFromQueue,
 } = require("../api/importQueue");
@@ -296,5 +297,44 @@ describe("Get first element from queue", () => {
     const typedEntry = await getFirstPendingFromQueue();
     expect(typedEntry).toBeInstanceOf(QueueEntry);
     expect(typedEntry.fileId).toBe(entry2.fileId);
+  });
+});
+
+describe("Resetting a queue", () => {
+  let connection;
+  let db;
+
+  beforeEach(async () => {
+    connection = await dbClient.connect();
+    db = await connection.db();
+  });
+
+  afterEach(async () => {
+    // Perform tear down here
+    await db.collection(DB_QUEUE_NAME).deleteMany({});
+    dbClient.close();
+  });
+
+  it("should handle queue with errors", async () => {
+    const courseId = "reset_1";
+    for (let i = 1; i <= 10; i++) {
+      /* eslint-disable-next-line no-await-in-loop */
+      await addEntryToQueue(
+        new QueueEntry({
+          fileId: i,
+          courseId,
+          status: i < 8 ? "imported" : "error",
+        })
+      );
+    }
+
+    // Remove 7 imported and set 3 with error to pending
+    await resetQueueForImport(courseId);
+
+    const res = await getEntriesFromQueue(courseId);
+    const pending = res.filter((e) => e.status === "pending");
+    const notPending = res.filter((e) => e.status !== "pending");
+    expect(notPending.length).toBe(0);
+    expect(pending.length).toBe(3);
   });
 });

@@ -135,7 +135,12 @@ async function getEntryFromQueue(fileId) {
   return null;
 }
 
-async function removeFinishedEntries(courseId) {
+/**
+ * Remove entries with status "imported" and set those with status
+ * "error" to "pending" so they can be re-imported.
+ * @param {String} courseId
+ */
+async function resetQueueForImport(courseId) {
   try {
     const conn = await dbClient.connect();
     const db = conn.db();
@@ -144,9 +149,23 @@ async function removeFinishedEntries(courseId) {
     collImportQueue.deleteMany({
       courseId,
       status: {
-        $in: ["imported", "error"],
+        $in: ["imported"],
       },
     });
+
+    collImportQueue.updateMany(
+      {
+        courseId,
+        status: {
+          $in: ["error"],
+        },
+      },
+      {
+        $set: {
+          status: "pending",
+        },
+      }
+    );
   } catch (err) {
     throw new Error("Error removing finished entries");
   }
@@ -323,5 +342,5 @@ module.exports = {
   updateStatusOfEntryInQueue,
   getStatusFromQueue,
   getFirstPendingFromQueue,
-  removeFinishedEntries,
+  resetQueueForImport,
 };

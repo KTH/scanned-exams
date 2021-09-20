@@ -6,7 +6,7 @@ const { checkPermissionsMiddleware } = require("./permission");
 const {
   getStatusFromQueue,
   addEntryToQueue,
-  removeFinishedEntries,
+  resetQueueForImport,
 } = require("./importQueue");
 const {
   getSetupStatus,
@@ -149,7 +149,7 @@ router.post(
       );
     }
 
-    await removeFinishedEntries(courseId);
+    await resetQueueForImport(courseId);
 
     for (const fileId of req.body) {
       // eslint-disable-next-line no-await-in-loop
