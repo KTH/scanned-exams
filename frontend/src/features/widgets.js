@@ -2,6 +2,9 @@
 import React from "react";
 import { Check, Spinner } from "./icons";
 
+export const cssInfoBox =
+  "bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6";
+
 export function P(props) {
   return <p className="mt-6" {...props} />;
 }
@@ -64,7 +67,7 @@ export const PrimaryButton = ({ className, disabled, ...props }) => (
 
 export const SecondaryButton = ({ className, ...props }) => (
   <BaseButton
-    className={`${className} mt-2 sm:mt-0 text-black border border-black hover:bg-gray-200`}
+    className={`${className} mt-2 sm:mt-0 text-black border border-black hover:bg-gray-200  mr-8`}
     {...props}
   />
 );

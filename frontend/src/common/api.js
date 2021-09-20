@@ -1,4 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { assert } from "./utils";
+
+const PROGRESS_REFRESH_INTERVAL = 3000;
 
 export class ApiError extends Error {
   constructor({ type, statusCode, message, details }) {
@@ -9,14 +12,26 @@ export class ApiError extends Error {
   }
 }
 
-async function apiClient(
+export async function apiClient(
   endpoint,
-  { method, ignoreNotFound, ...customConfig } = {}
+  { method, ignoreNotFound, body } = {}
 ) {
   const config = {
     method: method || "GET",
-    ...customConfig,
   };
+
+  // Add body and headers to request if needed
+  if (body !== undefined) {
+    assert(
+      ["POST", "PUT"].indexOf(method) >= 0,
+      "Param body can only be sent with POST or PUT requests"
+    );
+    config.body = JSON.stringify(body);
+    config.headers = {
+      "Content-Type": "application/json",
+    };
+  }
+
   const response = await window.fetch(`/scanned-exams/api/${endpoint}`, config);
   const data = await response.json();
 
@@ -46,6 +61,33 @@ export function useCourseSetup(courseId) {
   );
 }
 
+/** Fetches the API to get information about the setup of a given course */
+export function useCourseImportStatus(courseId, options = {}) {
+  return useQuery(
+    ["course", courseId, "import", "status"],
+    () => apiClient(`courses/${courseId}/import/status`),
+    {
+      onSuccess({ status } = {}) {
+        options.onSuccess?.(status);
+      },
+      // We are refetching this periodically so UX changes state if
+      // import queue is triggered somewhere else
+      refetchInterval: PROGRESS_REFRESH_INTERVAL * 10,
+    }
+  );
+}
+
+/** Ping API on import progress */
+export function useCourseImportProgress(courseId, options = {}) {
+  return useQuery(
+    ["course", courseId, "import", "status", "ping"],
+    () => apiClient(`courses/${courseId}/import/status`),
+    {
+      refetchInterval: options.cancel ? false : PROGRESS_REFRESH_INTERVAL,
+    }
+  );
+}
+
 /** Fetches the API to get information about the exams of a given course */
 export function useCourseExams(courseId) {
   return useQuery(["course", courseId, "exams"], () =>
@@ -67,6 +109,27 @@ export function useMutateCourseSetup(courseId, action, options = {}) {
       onSuccess() {
         client.invalidateQueries(["course", courseId, "setup"]);
         options.onSuccess?.();
+      },
+    }
+  );
+}
+
+/** Start an import */
+export function useMutateImportStart(courseId, examsToImport, options = {}) {
+  const client = useQueryClient();
+
+  return useMutation(
+    () =>
+      apiClient(`courses/${courseId}/import/start`, {
+        method: "POST",
+        body: examsToImport.map((exam) => exam.id),
+      }),
+    {
+      ...options,
+      // Passes status object from API as data to callback
+      onSuccess(data) {
+        client.invalidateQueries(["course", courseId, "setup"]);
+        options.onSuccess?.(data);
       },
     }
   );

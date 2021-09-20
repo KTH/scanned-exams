@@ -1,7 +1,7 @@
 import React from "react";
 import { useCourseSetup } from "../../common/api";
 import SetupFlow from "../setup-course/SetupFlow";
-import UploadScreen from "../upload-exams/UploadScreen";
+import ImportFlow from "../import-exams/ImportFlow";
 import { LoadingPage } from "../widgets";
 
 function isSetupRequired(courseSetup) {
@@ -36,5 +36,5 @@ export default function AuthenticatedApp({ courseId }) {
     );
   }
   // When setup is complete we show the assignment import view
-  return <UploadScreen />;
+  return <ImportFlow courseId={courseId} />;
 }
