@@ -15,10 +15,24 @@ async function tentaApi() {
         data: "403: Forbidden.",
       };
     }
-    log.error({ err }, "Error");
+
+    // TODO: enhance this error
+    const error = new Error(err.message);
+    error.name = "MonitorError";
+    error.response = {
+      url: err.response?.url,
+      statusCode: err.response?.statusCode,
+    };
+
+    error.response = {
+      url: err.response.url,
+    };
+
+    log.error(error, error.message);
+
     return {
       status: "ERROR",
-      data: "See the logs for further information",
+      data: error.message,
     };
   }
 }
