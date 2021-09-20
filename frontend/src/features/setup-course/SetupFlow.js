@@ -1,5 +1,5 @@
 import React from "react";
-import { Step, StepList } from "./StepList";
+import { Step, StepList } from "../StepList";
 import CreateHomePage from "./steps/CreateHomePage";
 import PublishCourse from "./steps/PublishCourse";
 import CreateAssignment from "./steps/CreateAssignment";

@@ -159,8 +159,8 @@ async function removeFinishedEntries(courseId) {
  * @returns QueueEntry
  */
 async function addEntryToQueue(entry) {
-  assert(typeof entry.fileId === "string", "Param entry is missing fileId");
-  assert(typeof entry.courseId === "string", "Param entry is missing courseId");
+  assert(entry.fileId !== undefined, "Param entry is missing fileId");
+  assert(entry.courseId !== undefined, "Param entry is missing courseId");
 
   // Type object to get defaults
   const typedEntry =

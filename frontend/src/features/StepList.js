@@ -1,5 +1,5 @@
 import React from "react";
-import { Check } from "../icons";
+import { Check } from "./icons";
 
 const ListContext = React.createContext(0);
 
