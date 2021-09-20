@@ -7,6 +7,7 @@ const {
   getStatusFromQueue,
   addEntryToQueue,
   resetQueueForImport,
+  updateStatusOfEntryInQueue,
 } = require("./importQueue");
 const {
   getSetupStatus,
@@ -157,7 +158,23 @@ router.post(
         fileId,
         courseId,
         status: "pending",
-      });
+      })
+        // eslint-disable-next-line no-await-in-loop
+        .catch(async (err) => {
+          if (
+            err.message.startsWith(
+              "Add to queue failed becuase entry exist for this fileId"
+            )
+          ) {
+            // We get an error if it already exists so setting it to pending
+            await updateStatusOfEntryInQueue(
+              {
+                fileId,
+              },
+              "pending"
+            );
+          }
+        });
     }
 
     // Return the queue status object so stats can be updated
