@@ -66,7 +66,7 @@ export default function PrepareImport({ onNext, courseId }) {
         <H2>Import in progress...</H2>
         <div className={cssInfoBox}>
           <p>
-            Surprised? The import can be started by another tab or another
+            <b>Surprised?</b> The import can be started by another tab or another
             teacher for this course.
           </p>
         </div>
