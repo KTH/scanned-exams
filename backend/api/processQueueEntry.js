@@ -50,8 +50,9 @@ module.exports = async function processQueueEntry() {
       if (IS_DEV) log.info("Imported file " + examToBeImported.fileId);
     } catch (err) {
       await updateStatusOfEntryInQueue(examToBeImported, "error", {
-        type: "import_error",
+        type: err.type || "import_error",
         message: err.message,
+        details: err.details || {},
       });
       if (IS_DEV)
         log.info(
