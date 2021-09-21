@@ -34,6 +34,6 @@ server.get("/api/v2.0/windream/file/:fileId/true", (req, res) => {
 });
 
 server.listen(4001, (req, res) => {
-  log.info("Started tentaapi-mock in port 4001.");
+  log.debug("Started tentaapi-mock in port 4001.");
   log.fatal("YOU SHOULD ALWAYS RUN THIS APP LOCALLY");
 });

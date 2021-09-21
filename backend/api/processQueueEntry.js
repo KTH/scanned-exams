@@ -11,12 +11,12 @@ const FORCE_RANDOM_ERRORS = DEV_FORCE_RANDOM_ERRORS === "TRUE";
 const IS_DEV = NODE_ENV !== "production";
 
 async function uploadOneExam({ fileId, courseId }) {
-  log.info(`Course ${courseId} / File ${fileId}. Downloading`);
+  log.debug(`Course ${courseId} / File ${fileId}. Downloading`);
   const { content, studentKthId, examDate } = await tentaApi.downloadExam(
     fileId
   );
 
-  log.info(
+  log.debug(
     `Course ${courseId} / File ${fileId} / User ${studentKthId}. Uploading`
   );
   const uploadExamStart = Date.now();
@@ -25,7 +25,7 @@ async function uploadOneExam({ fileId, courseId }) {
     studentKthId,
     examDate,
   });
-  log.info("Time to upload exam: " + (Date.now() - uploadExamStart) + "ms");
+  log.debug("Time to upload exam: " + (Date.now() - uploadExamStart) + "ms");
 
   log.info(
     `Course ${courseId} / File ${fileId} / User ${studentKthId}. Uploaded!`
@@ -49,14 +49,14 @@ module.exports = async function processQueueEntry() {
         courseId: examToBeImported.courseId,
       });
       await updateStatusOfEntryInQueue(examToBeImported, "imported");
-      if (IS_DEV) log.info("Imported file " + examToBeImported.fileId);
+      if (IS_DEV) log.debug("Imported file " + examToBeImported.fileId);
     } catch (err) {
       await updateStatusOfEntryInQueue(examToBeImported, "error", {
         type: "import_error",
         message: err.message,
       });
       if (IS_DEV)
-        log.info(
+        log.debug(
           "Error importing file " +
             examToBeImported.fileId +
             ` (${err.message})`

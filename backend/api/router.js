@@ -18,8 +18,6 @@ const {
 } = require("./setupCourse");
 const { listAllExams } = require("./listAllExams");
 
-const IS_DEV = process.env.NODE_ENV !== "production";
-
 const router = express.Router();
 
 router.use("/courses/:id", checkPermissionsMiddleware);
@@ -32,11 +30,11 @@ router.get("/me", (req, res) => {
   const { userId } = req.session;
 
   if (!userId) {
-    log.info("Getting user information. User is logged out");
+    log.debug("Getting user information. User is logged out");
     return res.status(404).send({ message: "You are logged out" });
   }
 
-  log.info("Getting user information. User is logged in");
+  log.debug("Getting user information. User is logged in");
   return res.status(200).send({ userId });
 });
 
