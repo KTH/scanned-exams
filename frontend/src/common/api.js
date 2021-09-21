@@ -84,6 +84,7 @@ export function useCourseImportProgress(courseId, options = {}) {
     () => apiClient(`courses/${courseId}/import/status`),
     {
       refetchInterval: options.cancel ? false : PROGRESS_REFRESH_INTERVAL,
+      ...options,
     }
   );
 }
