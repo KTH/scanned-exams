@@ -66,8 +66,8 @@ export default function PrepareImport({ onNext, courseId }) {
         <H2>Import in progress...</H2>
         <div className={cssInfoBox}>
           <p>
-            <b>Surprised?</b> The import can be started by another tab or another
-            teacher for this course.
+            <b>Surprised?</b> The import can be started by another tab or
+            another teacher for this course.
           </p>
         </div>
         <div className="mt-8">
@@ -90,7 +90,7 @@ export default function PrepareImport({ onNext, courseId }) {
       <P>
         There are <b>{nrofExamsToImport} exams</b> available to import.{" "}
         {nrofExamsWithErrors > 0 &&
-          `Note: ${nrofExamsWithErrors} of these are exams that previously failed to be imported.`}
+          `Note: ${nrofExamsWithErrors} of these are exams that previously failed to be imported. They are listed in "Resolve Issues", click button "Next" to see them.`}
       </P>
       <div className={cssInfoBox}>
         <p>
