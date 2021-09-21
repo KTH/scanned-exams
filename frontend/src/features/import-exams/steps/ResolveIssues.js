@@ -65,13 +65,15 @@ function ExamErrorRow({ exam, rowNr }) {
   return (
     <div className="flex flex-row mt-1">
       <div className="p-2 w-8">{rowNr}</div>
-      <div className="p-2" style={{ width: "6rem" }}>
+      <div className="p-2 flex-shrink-0 flex-grow-0" style={{ width: "6rem" }}>
         {exam.student.id}
       </div>
-      <div className="p-2">
+      <div className="p-2 flex-shrink-0">
         {`${exam.student.firstName} ${exam.student.lastName}`}
       </div>
-      <div className="p-2 flex-grow text-gray-400">{exam.error?.message}</div>
+      <div className="p-2 flex-grow flex-shrink-0 text-gray-400">
+        {exam.error?.message}
+      </div>
     </div>
   );
 }
