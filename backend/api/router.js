@@ -20,6 +20,7 @@ const { listAllExams } = require("./listAllExams");
 
 const router = express.Router();
 
+router.use(express.json());
 router.use("/courses/:id", checkPermissionsMiddleware);
 
 /**
@@ -124,7 +125,6 @@ router.get("/courses/:id/import/status", async (req, res) => {
 // Start the import process
 router.post(
   "/courses/:id/import/start",
-  express.json(),
   async (req, res, next) => {
     const courseId = req.params.id;
     const { status } = await getStatusFromQueue(courseId);
