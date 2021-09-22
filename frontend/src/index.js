@@ -12,7 +12,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry(failureCount, error) {
-        if (failureCount > 3 || error?.status === 401) {
+        if (failureCount > 3 || error?.statusCode === 401) {
           return false;
         }
         return true;
