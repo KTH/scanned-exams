@@ -20,7 +20,6 @@ const { listAllExams } = require("./listAllExams");
 
 const router = express.Router();
 
-router.use(express.json());
 router.use("/courses/:id", checkPermissionsMiddleware);
 
 /**
