@@ -14,7 +14,7 @@ export class ApiError extends Error {
 
 export async function apiClient(
   endpoint,
-  { method, ignoreNotFound, body } = {}
+  { method, body } = {}
 ) {
   const config = {
     method: method || "GET",
@@ -34,10 +34,6 @@ export async function apiClient(
 
   const response = await window.fetch(`/scanned-exams/api/${endpoint}`, config);
   const data = await response.json();
-
-  if (ignoreNotFound && response.status === 404) {
-    return null;
-  }
 
   if (!response.ok || data.error) {
     if (typeof data.error === "object") {
@@ -142,5 +138,9 @@ export function useMutateImportStart(courseId, examsToImport, options = {}) {
  * If the user is logged out, field "data" will be null
  */
 export function useUser() {
-  return useQuery("user", () => apiClient(`me`, { ignoreNotFound: true }));
+  return useQuery("user", () => apiClient(`me`).catch(err => {
+    if (err instanceof ApiError && err.statusCode === 404) {
+      return null;
+    }
+  }));
 }
