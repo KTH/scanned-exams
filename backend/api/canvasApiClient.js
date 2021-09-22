@@ -230,12 +230,13 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
 
     const ladokId = await getExaminationLadokId(courseId);
     const assignment = await getValidAssignment(courseId, ladokId);
-    log.info(
+    log.debug(
       `Upload Exam: unlocking assignment ${assignment.id} in course ${courseId}`
     );
     await unlockAssignment(courseId, assignment.id);
 
     // TODO: will return a 400 if the course is unpublished
+    const reqTokenStart = Date.now();
     const { body: slot } = await canvas.requestUrl(
       `courses/${courseId}/assignments/${assignment.id}/submissions/${user.id}/files`,
       "POST",
@@ -244,7 +245,14 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
       }
     );
 
+    log.debug(
+      "Time to generate upload token: " + (Date.now() - reqTokenStart) + "ms"
+    );
+
+    const uploadFileStart = Date.now();
     const { body: uploadedFile } = await sendFile(slot, content);
+
+    log.debug("Time to upload file: " + (Date.now() - uploadFileStart) + "ms");
 
     await canvas.requestUrl(
       `courses/${courseId}/assignments/${assignment.id}/submissions/`,

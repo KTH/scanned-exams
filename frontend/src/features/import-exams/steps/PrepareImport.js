@@ -35,6 +35,9 @@ export default function PrepareImport({ onNext, courseId }) {
   const examsToImport = dataExams?.result.filter(
     (exam) => exam.status === "new"
   );
+  const examsWithError = dataExams?.result.filter(
+    (exam) => exam.status === "error"
+  );
 
   // Hoook to start import
   const startImportMutation = useMutateImportStart(courseId, examsToImport, {
@@ -54,7 +57,8 @@ export default function PrepareImport({ onNext, courseId }) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
-  const nrofExamsToImport = examsToImport?.length || 0;
+  const nrofExamsWithErrors = examsWithError?.length || 0;
+  const nrofExamsToImport = (examsToImport?.length || 0) + nrofExamsWithErrors;
 
   if (queueStatus === "working") {
     return (
@@ -62,8 +66,8 @@ export default function PrepareImport({ onNext, courseId }) {
         <H2>Import in progress...</H2>
         <div className={cssInfoBox}>
           <p>
-            Surprised? The import can be started by another tab or another
-            teacher for this course.
+            <b>Surprised?</b> The import can be started by another tab or
+            another teacher for this course.
           </p>
         </div>
         <div className="mt-8">
@@ -84,7 +88,9 @@ export default function PrepareImport({ onNext, courseId }) {
     <div className="max-w-2xl">
       <H2>Prepare Import</H2>
       <P>
-        There are <b>{nrofExamsToImport} exams</b> available to import.
+        There are <b>{nrofExamsToImport} exams</b> available to import.{" "}
+        {nrofExamsWithErrors > 0 &&
+          `Note: ${nrofExamsWithErrors} of these are exams that previously failed to be imported. They are listed in "Resolve Issues", click button "Next" to see them.`}
       </P>
       <div className={cssInfoBox}>
         <p>
@@ -99,6 +105,11 @@ export default function PrepareImport({ onNext, courseId }) {
         <P>
           <b>Verification</b> is a manual process that can take several days to
           complete.
+        </P>
+        <P>
+          When an exam fails to import it is marked with an error. Any exam
+          marked with an error will be re-processed for each subsequent import
+          until success.
         </P>
       </div>
       <div className="mt-8">

@@ -20,12 +20,17 @@ export default function PrepareImport({ onNext, onPrev, courseId }) {
 
   const examsWithErrors =
     dataExams?.result.filter((exam) => exam.status === "error") || [];
+  const importedExams =
+    dataExams?.result.filter((exam) => exam.status === "imported") || [];
 
   if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
-  const nrofExamsToResolve = examsWithErrors?.length || 0;
+  const errors = examsWithErrors?.length || 0;
+  const imported = importedExams?.length || 0;
+  const total = dataExams?.result?.length || 0;
+  const waiting = 0;
 
   return (
     <div className="max-w-2xl">
@@ -46,7 +51,7 @@ export default function PrepareImport({ onNext, onPrev, courseId }) {
         </P>
       </div>
       <div className="mt-8">
-        <SummaryTable summary={{ availableRecords: nrofExamsToResolve }} />
+        <SummaryTable summary={{ errors, imported, total, waiting }} />
       </div>
       <div className="mt-8">
         <SecondaryButton className="sm:w-auto" onClick={onPrev}>
@@ -58,24 +63,25 @@ export default function PrepareImport({ onNext, onPrev, courseId }) {
 }
 
 function SummaryTable({ summary }) {
+  const { errors, imported, total, waiting } = summary;
   return (
     <table className="table-auto">
       <tbody>
         <tr>
           <td className="p-1 pl-0">Total exams submitted:</td>
-          <td className="p-1 pl-2">{summary.availableRecords}</td>
+          <td className="p-1 pl-2">{total}</td>
         </tr>
         <tr>
           <td className="p-1 pl-0">Succesfully imported:</td>
-          <td className="p-1 pl-2">{summary.availableRecords}</td>
+          <td className="p-1 pl-2">{imported}</td>
         </tr>
         <tr>
           <td className="p-1 pl-0">Unresolved errors:</td>
-          <td className="p-1 pl-2">{summary.availableRecords}</td>
+          <td className="p-1 pl-2">{errors}</td>
         </tr>
         <tr>
           <td className="p-1 pl-0">Not available yet:</td>
-          <td className="p-1 pl-2">{summary.availableRecords}</td>
+          <td className="p-1 pl-2">{waiting}</td>
         </tr>
       </tbody>
     </table>
