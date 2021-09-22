@@ -12,10 +12,7 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiClient(
-  endpoint,
-  { method, body } = {}
-) {
+export async function apiClient(endpoint, { method, body } = {}) {
   const config = {
     method: method || "GET",
   };
@@ -138,9 +135,13 @@ export function useMutateImportStart(courseId, examsToImport, options = {}) {
  * If the user is logged out, field "data" will be null
  */
 export function useUser() {
-  return useQuery("user", () => apiClient(`me`).catch(err => {
-    if (err instanceof ApiError && err.statusCode === 404) {
-      return null;
-    }
-  }));
+  return useQuery("user", () =>
+    apiClient(`me`).catch((err) => {
+      if (err instanceof ApiError && err.statusCode === 404) {
+        return null;
+      }
+
+      throw err;
+    })
+  );
 }
