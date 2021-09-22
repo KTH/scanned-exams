@@ -152,23 +152,9 @@ async function resetQueueForImport(courseId) {
     collImportQueue.deleteMany({
       courseId,
       status: {
-        $in: ["imported"],
+        $in: ["imported", "error"],
       },
     });
-
-    collImportQueue.updateMany(
-      {
-        courseId,
-        status: {
-          $in: ["error"],
-        },
-      },
-      {
-        $set: {
-          status: "pending",
-        },
-      }
-    );
   } catch (err) {
     throw new Error("Error removing finished entries");
   }
