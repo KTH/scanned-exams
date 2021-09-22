@@ -1,4 +1,5 @@
 import React from "react";
+import { useCourseImportProgress } from "../../common/api";
 import { Step, StepList } from "../StepList";
 import { H2, PrimaryButton, SecondaryButton, P } from "../widgets";
 import PrepareImport from "./steps/PrepareImport";
@@ -16,6 +17,13 @@ function StepText({ long, short }) {
 
 export default function ImportScreen({ courseId }) {
   const [fakeStep, setFakeStep] = React.useState(0);
+  const importStatus = useCourseImportProgress(courseId);
+
+  if (importStatus.isLoading) {
+    return "Loading...";
+  }
+
+  console.log(importStatus.data);
 
   return (
     <div className="container mx-auto my-8">
