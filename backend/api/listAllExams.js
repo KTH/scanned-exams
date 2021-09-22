@@ -128,6 +128,7 @@ async function listAllExams(courseId) {
           status = "pending";
           break;
         case "error":
+          status = "error";
           errorDetails = foundInQueue.error;
           break;
         case "imported":

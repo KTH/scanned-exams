@@ -29,11 +29,11 @@ async function importOneExam(
   const unmaskedFile = path.resolve(tempDir, "unmasked.pdf");
   const startDate = new Date();
 
-  log.info(`Student ${userId}. Downloading`);
+  log.debug(`Student ${userId}. Downloading`);
   await tentaApi.downloadExam(fileId, unmaskedFile);
   const downloadEnd = new Date();
 
-  log.info(`Student ${userId}. Uploading`);
+  log.debug(`Student ${userId}. Uploading`);
   await canvas.uploadExam(unmaskedFile, {
     courseId,
     assignmentId,
@@ -66,7 +66,7 @@ async function transferExams(courseId) {
 
   try {
     currentStatus.state = "predownloading";
-    log.info("predownloading...");
+    log.debug("predownloading...");
     const ladokId = await canvas.getExaminationLadokId(courseId);
     const { activities, examDate } = await getAktivitetstillfalle(ladokId);
     const examList = [];
@@ -82,7 +82,7 @@ async function transferExams(courseId) {
       examList.push(...list);
     }
 
-    log.info("Checking if assignment is published");
+    log.debug("Checking if assignment is published");
 
     const assignment = await canvas.getValidAssignment(courseId, ladokId);
 
@@ -123,7 +123,7 @@ async function transferExams(courseId) {
     }
 
     await canvas.lockAssignment(courseId, assignment.id);
-    log.info("😺 Finished uploading exams");
+    log.debug("😺 Finished uploading exams");
 
     currentStatus.state = "success";
   } catch (err) {

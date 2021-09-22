@@ -17,7 +17,7 @@ async function getVersion() {
 
 /** Get a list of all exam files for a given exam */
 async function examList({ courseCode, examDate, examCode }) {
-  log.info(`Getting exams for ${courseCode} ${examDate} ${examCode}`);
+  log.debug(`Getting exams for ${courseCode} ${examDate} ${examCode}`);
   const { body } = await client("windream/search/documents/false", {
     method: "POST",
     json: {
@@ -46,7 +46,7 @@ async function examList({ courseCode, examDate, examCode }) {
   });
 
   if (!body.documentSearchResults) {
-    log.info(`No exams found for ${courseCode} ${examDate} ${examCode}`);
+    log.debug(`No exams found for ${courseCode} ${examDate} ${examCode}`);
     return [];
   }
 
