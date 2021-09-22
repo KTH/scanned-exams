@@ -153,8 +153,6 @@ router.post("/courses/:id/import/start", async (req, res, next) => {
     );
   }
 
-  await resetQueueForImport(courseId);
-
   for (const fileId of req.body) {
     // eslint-disable-next-line no-await-in-loop
     await addEntryToQueue({
@@ -184,6 +182,27 @@ router.post("/courses/:id/import/start", async (req, res, next) => {
   // in frontend
   const statusObj = await getStatusFromQueue(courseId);
   return res.status(200).send(statusObj);
+});
+
+router.post("/course/:id/import/reset", async (req, res, next) => {
+  const courseId = req.params.id;
+  const { status } = await getStatusFromQueue(courseId);
+
+  if (status !== "idle") {
+    return next(
+      new EndpointError({
+        type: "queue_not_idle",
+        message: "Can't reset import if the queue for this course is working",
+        statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
+      })
+    );
+  }
+
+  await resetQueueForImport(courseId);
+
+  return res.status(200).send({
+    message: "Done",
+  });
 });
 
 router.use(errorHandler);
