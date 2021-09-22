@@ -315,7 +315,7 @@ describe("Resetting a queue", () => {
     dbClient.close();
   });
 
-  it("should handle queue with errors", async () => {
+  it("should delete all imported and errored entries", async () => {
     const courseId = "reset_1";
     for (let i = 1; i <= 10; i++) {
       /* eslint-disable-next-line no-await-in-loop */
@@ -331,10 +331,7 @@ describe("Resetting a queue", () => {
     // Remove 7 imported and set 3 with error to pending
     await resetQueueForImport(courseId);
 
-    const res = await getEntriesFromQueue(courseId);
-    const pending = res.filter((e) => e.status === "pending");
-    const notPending = res.filter((e) => e.status !== "pending");
-    expect(notPending.length).toBe(0);
-    expect(pending.length).toBe(3);
+    const entries = await getEntriesFromQueue(courseId);
+    expect(entries.length).toBe(0);
   });
 });
