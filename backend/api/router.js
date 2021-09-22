@@ -26,12 +26,18 @@ router.use("/courses/:id", checkPermissionsMiddleware);
  * Returns data from the logged in user.
  * - Returns a 404 if the user is not logged in
  */
-router.get("/me", (req, res) => {
+router.get("/me", (req, res, next) => {
   const { userId } = req.session;
 
   if (!userId) {
     log.debug("Getting user information. User is logged out");
-    return res.status(404).send({ message: "You are logged out" });
+    return next(
+      new EndpointError({
+        type: "logged_out",
+        statusCode: 404,
+        message: "You are logged out",
+      })
+    );
   }
 
   log.debug("Getting user information. User is logged in");
