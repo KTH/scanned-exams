@@ -12,16 +12,22 @@ const ladokGot = got.extend({
   },
 });
 
+function removeDuplicates(arr) {
+  return Array.from(new Set(arr.map(JSON.stringify))).map(JSON.parse);
+}
+
 async function getAktivitetstillfalle(ladokId) {
   log.info(`Getting information for aktivitetstillfälle ${ladokId}`);
   const res = ladokGot.get(`resultat/aktivitetstillfalle/${ladokId}`);
   const body = await res.json();
 
+  const activities = body.Kopplingar.map((k) => ({
+    examCode: k.Aktivitet.Utbildningskod,
+    courseCode: k.Kursinstans.Utbildningskod,
+  }));
+
   return {
-    activities: body.Kopplingar.map((k) => ({
-      examCode: k.Aktivitet.Utbildningskod,
-      courseCode: k.Kursinstans.Utbildningskod,
-    })),
+    activities: removeDuplicates(activities),
     examDate: body.Datumperiod.Startdatum,
   };
 }
