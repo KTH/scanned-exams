@@ -108,7 +108,11 @@ export function useMutateCourseSetup(courseId, action, options = {}) {
     {
       ...options,
       onSuccess() {
-        client.invalidateQueries(["course", courseId, "setup"]);
+        if (action === "publish-course") {
+          client.removeQueries(["course", courseId]);
+        } else {
+          client.invalidateQueries(["course", courseId]);
+        }
         options.onSuccess?.();
       },
     }
