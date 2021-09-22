@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { assert } from "./utils";
 
@@ -72,12 +73,22 @@ export function useCourseImportStatus(courseId, options = {}) {
 
 /** Ping API on import progress */
 export function useCourseImportProgress(courseId, options = {}) {
+  const [refetchInterval, setRefetchInterval] = useState(0);
+
   return useQuery(
     ["course", courseId, "import", "status", "ping"],
     () => apiClient(`courses/${courseId}/import/status`),
     {
-      refetchInterval: options.cancel ? false : PROGRESS_REFRESH_INTERVAL,
+      refetchInterval,
       ...options,
+      onSuccess(data) {
+        if (data.status === "working") {
+          setRefetchInterval(1000);
+        } else {
+          setRefetchInterval(0);
+        }
+        options.onSuccess?.();
+      },
     }
   );
 }
