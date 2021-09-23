@@ -85,7 +85,7 @@ export default function PrepareImport({ onNext, courseId }) {
             defaultTotal={nrofExamsToImport}
             onDone={() => {
               // Clear the query cache to avoid synching issues
-              client.removeQueries(["course", courseId]);
+              client.resetQueries(["course", courseId]);
               onNext();
             }}
           />

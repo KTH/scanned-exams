@@ -101,7 +101,13 @@ export function useMutateCourseSetup(courseId, action, options = {}) {
     {
       ...options,
       onSuccess() {
-        client.invalidateQueries(["course", courseId]);
+        if (action === "publish-assignment") {
+          // Reset queries to trigger loading indicator when
+          // moving to imoport flow
+          client.resetQueries(["course", courseId]);
+        } else {
+          client.invalidateQueries(["course", courseId, "setup"]);
+        }
         options.onSuccess?.();
       },
     }
