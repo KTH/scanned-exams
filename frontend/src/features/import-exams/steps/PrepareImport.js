@@ -149,18 +149,10 @@ function SummaryTable({ summary }) {
       <tbody>
         {summary && (
           <tr>
-            <td className="p-1 pl-0">Records to import:</td>
+            <td className="p-1 pl-0">Exams to import:</td>
             <td className="p-1 pl-2">{summary.availableRecords}</td>
           </tr>
         )}
-        <tr>
-          <td className="p-1 pl-0">Type:</td>
-          <td className="p-1 pl-2">Scanned exams</td>
-        </tr>
-        <tr>
-          <td className="p-1 pl-0">Source:</td>
-          <td className="p-1 pl-2">Tenta API</td>
-        </tr>
       </tbody>
     </table>
   );
