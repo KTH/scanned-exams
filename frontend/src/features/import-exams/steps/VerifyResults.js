@@ -22,7 +22,7 @@ export default function VerifyResults({ onFinish, courseId }) {
   const queryExams = useCourseExams(courseId);
   const {
     data: dataExams,
-    isLoading: examsLoading,
+    isFetching: examsFetching,
     isError: examsError,
   } = queryExams;
 
@@ -31,7 +31,7 @@ export default function VerifyResults({ onFinish, courseId }) {
   const importedExams =
     dataExams?.result.filter((exam) => exam.status === "imported") || [];
 
-  if (examsLoading) {
+  if (examsFetching) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
