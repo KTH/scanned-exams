@@ -2,7 +2,7 @@ import React from "react";
 import { useCourseExams } from "../../../common/api";
 import { H2, LoadingPage, SecondaryButton, P, cssInfoBox } from "../../widgets";
 
-export default function PrepareImport({ onNext, onPrev, courseId }) {
+export default function VerifyResults({ onNext, onPrev, courseId }) {
   // Get exams available to import
   const queryExams = useCourseExams(courseId);
   const {
