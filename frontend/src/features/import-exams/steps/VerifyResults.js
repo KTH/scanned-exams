@@ -9,7 +9,7 @@ import {
   cssInfoBox,
 } from "../../widgets";
 
-export default function PrepareImport({ onNext, onPrev, courseId }) {
+export default function VerifyResults({ onNext, onPrev, courseId }) {
   // Get exams available to import
   const queryExams = useCourseExams(courseId);
   const {
