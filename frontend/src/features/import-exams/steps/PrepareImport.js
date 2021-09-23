@@ -15,7 +15,7 @@ import {
   ImportQueueProgressBar,
 } from "../../widgets";
 
-export default function PrepareImport({ onNext, courseId }) {
+export default function PrepareImport({ onNext, onGoTo, courseId }) {
   const [queueStatus, setQueueStatus] = React.useState("idle");
 
   const client = useQueryClient();
@@ -30,17 +30,15 @@ export default function PrepareImport({ onNext, courseId }) {
 
   // Get exams available to import
   const queryExams = useCourseExams(courseId);
-  const {
-    data: dataExams,
-    isLoading: examsLoading,
-    isError: examsError,
-  } = queryExams;
+  const { data: exams = { result: [] }, isLoading: examsLoading } = queryExams;
+
   const examsToImport =
-    dataExams?.result.filter((exam) => exam.status === "new") || [];
+    exams.result.filter((exam) => exam.status === "new") || [];
   const examsWithError =
-    dataExams?.result.filter((exam) => exam.status === "error") || [];
+    exams.result.filter((exam) => exam.status === "error") || [];
 
   const allExamsToImportOnNextTry = [...examsToImport, ...examsWithError];
+
   // Hoook to start import
   const startImportMutation = useMutateImportStart(
     courseId,
@@ -52,19 +50,24 @@ export default function PrepareImport({ onNext, courseId }) {
       },
     }
   );
-  const {
-    mutate: doStartImport,
-    isLoading: startImportLoading,
-    isError: startImportError,
-  } = startImportMutation;
+  const { mutate: doStartImport, isLoading: startImportLoading } =
+    startImportMutation;
   // TODO: Handle error queue is busy
+
+  // Show error page if we don't have new exams to import but
+  // have errors
+  if (examsToImport.length === 0) {
+    if (examsWithError.length > 0) {
+      onGoTo("issues");
+    }
+  }
 
   if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
   const nrofExamsWithErrors = examsWithError?.length;
-  const nrofExamsToImport = examsToImport?.length + nrofExamsWithErrors;
+  const nrofExamsToImport = (examsToImport?.length || 0) + nrofExamsWithErrors;
 
   if (queueStatus === "working") {
     return (
