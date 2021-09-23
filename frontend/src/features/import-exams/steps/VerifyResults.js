@@ -7,6 +7,7 @@ import {
   SecondaryButton,
   P,
   cssInfoBox,
+  cssSuccessBox,
 } from "../../widgets";
 
 export default function VerifyResults({ onNext, onPrev, courseId }) {
@@ -34,28 +35,10 @@ export default function VerifyResults({ onNext, onPrev, courseId }) {
     <div className="max-w-2xl">
       <H2>Verify Results</H2>
       <P>This is a summary of the status of all the processed exams.</P>
-      <div className={cssInfoBox}>
-        <p>
-          <b>Succesfully imported</b> these exams have been added to Canvas.
-        </p>
-        <P>
-          <b>Unresolved errors</b> these exams could not be added to Canvas.
-        </P>
-      </div>
+      {errors === 0 ? renderDone() : renderHelp()}
       <div className="mt-8">
         <SummaryTable summary={{ errors, imported }} />
       </div>
-      {errors === 0 && (
-        <div className="mt-8">
-          <h2>You Are Done!</h2>
-          <p>
-            All available exams were imported to Canvas and there are no errors.
-            You can safely leave this page and return at another time to check
-            if more exams have been scanned and verified.
-          </p>
-          <P>Good luck with your grading!</P>
-        </div>
-      )}
       <div className="mt-8">
         {errors > 0 && (
           <SecondaryButton className="sm:w-auto" onClick={onPrev}>
@@ -63,6 +46,33 @@ export default function VerifyResults({ onNext, onPrev, courseId }) {
           </SecondaryButton>
         )}
       </div>
+    </div>
+  );
+}
+
+function renderHelp() {
+  return (
+    <div className={cssInfoBox}>
+      <p>
+        <b>Succesfully imported</b> these exams have been added to Canvas.
+      </p>
+      <P>
+        <b>Unresolved errors</b> these exams could not be added to Canvas.
+      </P>
+    </div>
+  );
+}
+
+function renderDone() {
+  return (
+    <div className={cssSuccessBox}>
+      <h2 className="font-semibold text-lg">You Are Done!</h2>
+      <P>
+        All available exams were imported to Canvas and there are no errors. You
+        can safely leave this page and return at another time to check if more
+        exams have been scanned and verified.
+      </P>
+      <P>Good luck with your grading!</P>
     </div>
   );
 }
