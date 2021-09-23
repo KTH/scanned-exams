@@ -1,7 +1,6 @@
 import React from "react";
 import { useQueryClient } from "react-query";
 import {
-  useCourseImportStatus,
   useCourseImportProgress,
   useCourseExams,
   useMutateImportStart,
@@ -16,16 +15,8 @@ import {
 } from "../../widgets";
 
 export default function PrepareImport({ onNext, courseId }) {
-  const [queueStatus, setQueueStatus] = React.useState("idle");
+  const [queueStatus] = React.useState("idle");
 
-  const client = useQueryClient();
-
-  // Get status of import worker
-  useCourseImportStatus(courseId, {
-    onSuccess(status) {
-      setQueueStatus(status);
-    },
-  });
   // TODO: Handle errors?
 
   // Get exams available to import
@@ -42,16 +33,7 @@ export default function PrepareImport({ onNext, courseId }) {
 
   const allExamsToImportOnNextTry = [...examsToImport, ...examsWithError];
   // Hoook to start import
-  const startImportMutation = useMutateImportStart(
-    courseId,
-    allExamsToImportOnNextTry,
-    {
-      onSuccess({ status }) {
-        // status lets us know if the queue is working or still idle
-        setQueueStatus(status);
-      },
-    }
-  );
+  const startImportMutation = useMutateImportStart(courseId, examsToImport);
   const {
     mutate: doStartImport,
     isLoading: startImportLoading,
