@@ -1,6 +1,10 @@
 import React from "react";
 import { useQueryClient } from "react-query";
-import { useCourseExams, useMutateImportStart } from "../../../common/api";
+import {
+  useCourseExams,
+  useMutateImportStart,
+  useMutateAddStudents,
+} from "../../../common/api";
 import {
   H2,
   LoadingPage,
@@ -27,14 +31,31 @@ export default function ResolveIssues({ onNext, onPrev, courseId }) {
   const examsWithErrors =
     dataExams?.result.filter((exam) => exam.status === "error") || [];
 
+  const missingStudentIds =
+    dataExams?.result
+      .filter(
+        (exam) =>
+          exam.status === "error" && exam.error.type === "missing_student"
+      )
+      .map((exam) => exam.error.details.kthId) || [];
+
+  // Hook to add students
+  const addStudentsMutation = useMutateAddStudents(courseId, missingStudentIds);
+
+  const {
+    mutate: doAddStudents,
+    isLoading: addStudentsLoading,
+    isError: addStudentsError,
+  } = addStudentsMutation;
+
   // Hoook to start import
-  // TODO: Call student fix endpoint instead
   const startImportMutation = useMutateImportStart(courseId, examsWithErrors, {
     onSuccess({ status }) {
       // status lets us know if the queue is working or still idle
       setQueueStatus(status);
     },
   });
+
   const {
     mutate: doStartImport,
     isLoading: startImportLoading,
@@ -97,7 +118,10 @@ export default function ResolveIssues({ onNext, onPrev, courseId }) {
           <PrimaryButton
             className="sm:w-auto"
             waiting={startImportLoading}
-            onClick={doStartImport}
+            onClick={async () => {
+              await doAddStudents();
+              doStartImport();
+            }}
           >
             Fix Errors!
           </PrimaryButton>
