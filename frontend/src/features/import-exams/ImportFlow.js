@@ -16,14 +16,21 @@ function StepText({ long, short }) {
 }
 
 export default function ImportScreen({ courseId }) {
-  const [fakeStep, setFakeStep] = React.useState(0);
-  const importStatus = useCourseImportProgress(courseId);
+  const importStatusQuery = useCourseImportProgress(courseId);
 
-  if (importStatus.isLoading) {
+  if (importStatusQuery.isLoading) {
     return "Loading...";
   }
+  const { data: importStatus } = importStatusQuery;
+  let fakeStep = 0;
 
-  console.log(importStatus.data);
+  if (importStatus.status === "working") {
+    fakeStep = 0;
+  } else if (importStatus.working.error > 0) {
+    fakeStep = 1;
+  } else if (importStatus.working.total > 0) {
+    fakeStep = 2;
+  }
 
   return (
     <div className="container mx-auto my-8">
@@ -41,25 +48,9 @@ export default function ImportScreen({ courseId }) {
             </Step>
           </StepList>
         </div>
-        {fakeStep === 0 && (
-          <PrepareImport
-            courseId={courseId}
-            onNext={() => setFakeStep(fakeStep + 1)}
-          />
-        )}
-        {fakeStep === 1 && (
-          <ResolveIIssues
-            courseId={courseId}
-            onNext={() => setFakeStep(fakeStep + 1)}
-            onPrev={() => setFakeStep(fakeStep - 1)}
-          />
-        )}
-        {fakeStep === 2 && (
-          <VerifyResults
-            courseId={courseId}
-            onPrev={() => setFakeStep(fakeStep - 1)}
-          />
-        )}
+        {fakeStep === 0 && <PrepareImport courseId={courseId} />}
+        {fakeStep === 1 && <ResolveIIssues courseId={courseId} />}
+        {fakeStep === 2 && <VerifyResults courseId={courseId} />}
       </div>
     </div>
   );
