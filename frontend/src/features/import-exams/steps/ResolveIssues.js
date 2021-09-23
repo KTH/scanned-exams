@@ -79,7 +79,7 @@ export default function ResolveIssues({ onNext, onPrev, courseId }) {
             defaultTotal={nrofExamsToResolve}
             onDone={() => {
               // Clear the query cache to avoid synching issues
-              client.removeQueries(["course", courseId]);
+              client.resetQueries(["course", courseId]);
               onNext();
             }}
           />
