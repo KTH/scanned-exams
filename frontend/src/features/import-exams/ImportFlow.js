@@ -1,6 +1,7 @@
 import React from "react";
 import { useCourseImportProgress } from "../../common/api";
 import { Step, StepList } from "../StepList";
+import InProgress from "./steps/InProgress";
 import PrepareImport from "./steps/PrepareImport";
 import ResolveIIssues from "./steps/ResolveIssues";
 import VerifyResults from "./steps/VerifyResults";
@@ -47,7 +48,12 @@ export default function ImportScreen({ courseId }) {
             </Step>
           </StepList>
         </div>
-        {fakeStep === 0 && <PrepareImport courseId={courseId} />}
+        {fakeStep === 0 && importStatus.status === "idle" && (
+          <PrepareImport courseId={courseId} />
+        )}
+        {fakeStep === 0 && importStatus.status === "working" && (
+          <InProgress courseId={courseId} />
+        )}
         {fakeStep === 1 && <ResolveIIssues courseId={courseId} />}
         {fakeStep === 2 && <VerifyResults courseId={courseId} />}
       </div>
