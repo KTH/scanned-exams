@@ -22,11 +22,27 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const path = require("path");
 const fs = require("fs");
+const MongoDBStore = require("connect-mongodb-session")(session);
+
 const apiRouter = require("./api/router");
 const authRouter = require("./auth/router");
 const monitor = require("./monitor");
 
 const server = express();
+
+const COOKIE_MAX_AGE_SECONDS = 3600;
+const store = new MongoDBStore({
+  uri: process.env.MONGODB_CONNECTION_STRING,
+  collection: "sessions",
+
+  // Session expiration time
+  expires: COOKIE_MAX_AGE_SECONDS * 1000,
+
+  // These two lines are required when using CosmosDB
+  // See https://github.com/mongodb-js/connect-mongodb-session#azure-cosmos-mongodb-support
+  expiresKey: `_ts`,
+  expiresAfterSeconds: COOKIE_MAX_AGE_SECONDS,
+});
 
 server.set("trust proxy", 1);
 server.use(
@@ -34,16 +50,20 @@ server.use(
     name: "scanned-exams.sid",
     cookie: {
       domain: "kth.se",
-      maxAge: 3600 * 1000 /* 1 hour */,
+      maxAge: COOKIE_MAX_AGE_SECONDS * 1000,
       httpOnly: true,
       secure: true,
       sameSite: process.env.CANVAS_API_URL.endsWith("kth.se")
         ? "strict"
         : "none",
     },
-    resave: true, // should be set explictly. Note: recomended to be false (default is true)
-    saveUninitialized: true, // should be set explictly. Note: recomended to be false (default is true)
+    // MongoDB does not update TTL when reading but when writing
+    resave: true,
+
+    // Avoid saving anonymous sessions (non logged-in users)
+    saveUninitialized: false,
     secret: process.env.SESSION_SECRET,
+    store,
   })
 );
 
@@ -56,11 +76,7 @@ server.use((req, res, next) => {
     next
   );
 });
-server.use(
-  express.urlencoded({
-    extended: true, // should be set explictly (default is true)
-  })
-);
+server.use(express.urlencoded({ extended: true }));
 server.use(express.json());
 server.use(cookieParser());
 
