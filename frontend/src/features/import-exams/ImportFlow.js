@@ -52,7 +52,7 @@ export default function ImportScreen({ courseId }) {
           <PrepareImport courseId={courseId} />
         )}
         {fakeStep === 0 && importStatus.status === "working" && (
-          <InProgress courseId={courseId} />
+          <InProgress status={importStatus} />
         )}
         {fakeStep === 2 && (
           <VerifyResults
