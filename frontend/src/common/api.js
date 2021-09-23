@@ -108,7 +108,7 @@ export function useMutateCourseSetup(courseId, action, options = {}) {
     {
       ...options,
       onSuccess() {
-        if (action === "publish-course") {
+        if (action === "publish-assignment") {
           client.removeQueries(["course", courseId]);
         } else {
           client.invalidateQueries(["course", courseId]);
