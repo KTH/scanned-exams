@@ -45,6 +45,17 @@ export default function VerifyResults({ onNext, onPrev, courseId }) {
       <div className="mt-8">
         <SummaryTable summary={{ errors, imported }} />
       </div>
+      {errors === 0 && (
+        <div className="mt-8">
+          <h2>You Are Done!</h2>
+          <p>
+            All available exams were imported to Canvas and there are no errors.
+            You can safely leave this page and return at another time to check
+            if more exams have been scanned and verified.
+          </p>
+          <P>Good luck with your grading!</P>
+        </div>
+      )}
       <div className="mt-8">
         {errors > 0 && (
           <SecondaryButton className="sm:w-auto" onClick={onPrev}>
