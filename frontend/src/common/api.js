@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { assert } from "./utils";
 
-const PROGRESS_REFRESH_INTERVAL = 3000;
-
 export class ApiError extends Error {
   constructor({ type, statusCode, message, details }) {
     super(message);
