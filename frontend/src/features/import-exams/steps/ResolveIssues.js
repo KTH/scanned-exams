@@ -1,5 +1,5 @@
 import React from "react";
-import { useCourseImportStatus, useCourseExams } from "../../../common/api";
+import { useCourseExams } from "../../../common/api";
 import {
   H2,
   LoadingPage,
