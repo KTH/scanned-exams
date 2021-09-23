@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useCourseExams } from "../../../common/api";
+import { useCourseExams, useMutateImportReset } from "../../../common/api";
 import {
   H2,
   LoadingPage,
@@ -9,8 +9,14 @@ import {
 } from "../../widgets";
 import DetailedErrors from "./DetailedErrors";
 
-export default function VerifyResults({ onNext, onPrev, courseId }) {
+export default function VerifyResults({ onFinish, courseId }) {
   const [showErrorDetails, setShowErrorDetails] = useState(false);
+
+  const resetImportMutation = useMutateImportReset(courseId, {
+    onSuccess() {
+      onFinish();
+    },
+  });
 
   // Get exams available to import
   const queryExams = useCourseExams(courseId);
@@ -70,7 +76,11 @@ export default function VerifyResults({ onNext, onPrev, courseId }) {
         >
           Show error details
         </SecondaryButton>
-        <PrimaryButton className="sm:w-auto" onClick={onNext}>
+        <PrimaryButton
+          className="sm:w-auto"
+          waiting={resetImportMutation.isLoading}
+          onClick={() => resetImportMutation.mutate()}
+        >
           Finish
         </PrimaryButton>
       </div>

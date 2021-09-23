@@ -124,6 +124,24 @@ export function useMutateImportStart(courseId, examsToImport, options = {}) {
   );
 }
 
+export function useMutateImportReset(courseId, options) {
+  const client = useQueryClient();
+
+  return useMutation(
+    () =>
+      apiClient(`courses/${courseId}/import/reset`, {
+        method: "POST",
+      }),
+    {
+      ...options,
+      onSuccess(data) {
+        client.invalidateQueries(["course", courseId, "import", "status"]);
+        options.onSuccess?.(data);
+      },
+    }
+  );
+}
+
 /**
  * Fetches the API to get information about the current user.
  *

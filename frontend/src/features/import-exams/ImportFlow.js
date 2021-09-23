@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useCourseImportProgress } from "../../common/api";
 import { Step, StepList } from "../StepList";
 import InProgress from "./steps/InProgress";
@@ -17,6 +17,10 @@ function StepText({ long, short }) {
 export default function ImportScreen({ courseId }) {
   const importStatusQuery = useCourseImportProgress(courseId);
 
+  // When the importStatus is "idle", it can mean "not started" or "finished"
+  // We use the following boolean to guess it
+  const [finished, setFinished] = useState(false);
+
   if (importStatusQuery.isLoading) {
     return "Loading...";
   }
@@ -27,6 +31,8 @@ export default function ImportScreen({ courseId }) {
     fakeStep = 0;
   } else if (importStatus.working.total > 0) {
     fakeStep = 2;
+  } else if (finished) {
+    fakeStep = 3;
   }
 
   return (
@@ -48,7 +54,13 @@ export default function ImportScreen({ courseId }) {
         {fakeStep === 0 && importStatus.status === "working" && (
           <InProgress courseId={courseId} />
         )}
-        {fakeStep === 2 && <VerifyResults courseId={courseId} />}
+        {fakeStep === 2 && (
+          <VerifyResults
+            courseId={courseId}
+            onFinish={() => setFinished(true)}
+          />
+        )}
+        {fakeStep === 3 && <div>Thanks for using this app!</div>}
       </div>
     </div>
   );
