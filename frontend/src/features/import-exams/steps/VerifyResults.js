@@ -1,13 +1,6 @@
 import React from "react";
 import { useCourseExams } from "../../../common/api";
-import {
-  H2,
-  LoadingPage,
-  PrimaryButton,
-  SecondaryButton,
-  P,
-  cssInfoBox,
-} from "../../widgets";
+import { H2, LoadingPage, SecondaryButton, P, cssInfoBox } from "../../widgets";
 
 export default function PrepareImport({ onNext, onPrev, courseId }) {
   // Get exams available to import
