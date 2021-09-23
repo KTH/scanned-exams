@@ -1,7 +1,6 @@
 import React from "react";
 import { useCourseImportProgress } from "../../common/api";
 import { Step, StepList } from "../StepList";
-import { H2, PrimaryButton, SecondaryButton, P } from "../widgets";
 import PrepareImport from "./steps/PrepareImport";
 import ResolveIIssues from "./steps/ResolveIssues";
 import VerifyResults from "./steps/VerifyResults";
