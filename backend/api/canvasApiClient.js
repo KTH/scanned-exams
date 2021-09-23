@@ -3,7 +3,7 @@ const FormData = require("formdata-node").default;
 const got = require("got");
 const log = require("skog");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
-const { EndpointError } = require("./error");
+const { EndpointError, ImportError } = require("./error");
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,
@@ -235,15 +235,30 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
     );
     await unlockAssignment(courseId, assignment.id);
 
-    // TODO: will return a 400 if the course is unpublished
     const reqTokenStart = Date.now();
-    const { body: slot } = await canvas.requestUrl(
-      `courses/${courseId}/assignments/${assignment.id}/submissions/${user.id}/files`,
-      "POST",
-      {
-        name: `${studentKthId}.pdf`,
-      }
-    );
+    // TODO: will return a 400 if the course is unpublished
+    const { body: slot } = await canvas
+      .requestUrl(
+        `courses/${courseId}/assignments/${assignment.id}/submissions/${user.id}/files`,
+        "POST",
+        {
+          name: `${studentKthId}.pdf`,
+        }
+      )
+      .catch((err) => {
+        if (err.response?.statusCode === 404) {
+          // Student is missing in Canvas
+          throw new ImportError({
+            type: "missing_student",
+            message: "Student is missing in examroom",
+            details: {
+              kthId: studentKthId,
+            },
+          });
+        }
+
+        throw err;
+      });
 
     log.debug(
       "Time to generate upload token: " + (Date.now() - reqTokenStart) + "ms"

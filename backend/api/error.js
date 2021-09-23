@@ -32,6 +32,19 @@ class EndpointError extends Error {
   }
 }
 
+/**
+ * All errors of type "ImportError" are known problems that happened when
+ * importing an exam to Canvas
+ */
+class ImportError extends Error {
+  constructor({ type, message, details }) {
+    super(message);
+    this.name = "ImportError";
+    this.type = type;
+    this.details = details;
+  }
+}
+
 function errorHandler(err, req, res, next) {
   log.error(err);
 
@@ -55,4 +68,5 @@ module.exports = {
   errorHandler,
   AuthError,
   EndpointError,
+  ImportError,
 };
