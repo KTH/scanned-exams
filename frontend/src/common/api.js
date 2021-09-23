@@ -73,7 +73,7 @@ export function useCourseImportStatus(courseId, options = {}) {
 
 /** Ping API on import progress */
 export function useCourseImportProgress(courseId, options = {}) {
-  const [refetchInterval, setRefetchInterval] = useState(0);
+  const [refetchInterval, setRefetchInterval] = useState(false);
 
   return useQuery(
     ["course", courseId, "import", "status", "ping"],
@@ -85,7 +85,7 @@ export function useCourseImportProgress(courseId, options = {}) {
         if (data.status === "working") {
           setRefetchInterval(1000);
         } else {
-          setRefetchInterval(0);
+          setRefetchInterval(false);
         }
         options.onSuccess?.();
       },
