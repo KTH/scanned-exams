@@ -1,5 +1,6 @@
 import React from "react";
-import { useCourseImportStatus, useCourseExams } from "../../../common/api";
+import { useQueryClient } from "react-query";
+import { useCourseExams, useMutateImportStart } from "../../../common/api";
 import {
   H2,
   LoadingPage,
@@ -7,9 +8,14 @@ import {
   SecondaryButton,
   P,
   cssInfoBox,
+  ImportQueueProgressBar,
 } from "../../widgets";
 
-export default function PrepareImport({ onNext, onPrev, courseId }) {
+export default function ResolveIssues({ onNext, onPrev, courseId }) {
+  const client = useQueryClient();
+
+  const [queueStatus, setQueueStatus] = React.useState("idle");
+
   // Get exams available to import
   const queryExams = useCourseExams(courseId);
   const {
@@ -21,11 +27,45 @@ export default function PrepareImport({ onNext, onPrev, courseId }) {
   const examsWithErrors =
     dataExams?.result.filter((exam) => exam.status === "error") || [];
 
+  // Hoook to start import
+  // TODO: Call student fix endpoint instead
+  const startImportMutation = useMutateImportStart(courseId, examsWithErrors, {
+    onSuccess({ status }) {
+      // status lets us know if the queue is working or still idle
+      setQueueStatus(status);
+    },
+  });
+  const {
+    mutate: doStartImport,
+    isLoading: startImportLoading,
+    isError: startImportError,
+  } = startImportMutation;
+
   if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
   const nrofExamsToResolve = examsWithErrors?.length || 0;
+
+  if (queueStatus === "working") {
+    return (
+      <div className="max-w-2xl">
+        <H2>Resolve in progress...</H2>
+        <p>Fixing issues with your latest import.</p>
+        <div className="mt-8">
+          <ImportQueueProgressBar
+            courseId={courseId}
+            defaultTotal={nrofExamsToResolve}
+            onDone={() => {
+              // Clear the query cache to avoid synching issues
+              client.removeQueries(["course", courseId]);
+              onNext();
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl">
@@ -47,13 +87,22 @@ export default function PrepareImport({ onNext, onPrev, courseId }) {
               <ExamErrorRow exam={exam} rowNr={index + 1} />
             ))}
           </div>
-        </>
+        </> /**/
       )}
       <div className="mt-8">
         <SecondaryButton className="sm:w-auto" onClick={onPrev}>
           Prev
         </SecondaryButton>
-        <PrimaryButton className="sm:w-96" onClick={onNext}>
+        {nrofExamsToResolve > 0 && (
+          <PrimaryButton
+            className="sm:w-auto"
+            waiting={startImportLoading}
+            onClick={doStartImport}
+          >
+            Fix Errors!
+          </PrimaryButton>
+        )}
+        <PrimaryButton className="sm:w-56" onClick={onNext}>
           Next
         </PrimaryButton>
       </div>
