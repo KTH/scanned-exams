@@ -130,7 +130,7 @@ router.get("/courses/:id/import/status", async (req, res) => {
 // Start the import process
 router.post("/courses/:id/import/start", async (req, res, next) => {
   const courseId = req.params.id;
-  const { status } = await getStatusFromQueue(courseId);
+  const { status } = (await getStatusFromQueue(courseId)) || {};
 
   if (!Array.isArray(req.body)) {
     return next(
