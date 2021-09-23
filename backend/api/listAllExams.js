@@ -42,6 +42,15 @@ async function getLadokId(courseId) {
 
 /** Returns a list of scanned exams (i.e. in Windream) given its ladokId */
 async function listScannedExams(courseId, ladokId) {
+  // Try getting exams using the Ladok ID. (new format)
+  const allScannedExams = await tentaApi.examListByLadokId(ladokId);
+
+  if (allScannedExams.length > 0) {
+    return allScannedExams;
+  }
+
+  // If there are no exams with the new format
+  // try finding them using { courseCode, examCode, examDate }
   const aktivitetstillfalle = await ladok
     .getAktivitetstillfalle(ladokId)
     .catch(() => {
@@ -57,7 +66,6 @@ async function listScannedExams(courseId, ladokId) {
 
   const { activities, examDate } = aktivitetstillfalle;
 
-  const allScannedExams = [];
   for (const { courseCode, examCode } of activities) {
     allScannedExams.push(
       // eslint-disable-next-line no-await-in-loop
