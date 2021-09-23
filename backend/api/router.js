@@ -184,7 +184,7 @@ router.post("/courses/:id/import/start", async (req, res, next) => {
   return res.status(200).send(statusObj);
 });
 
-router.post("/course/:id/import/reset", async (req, res, next) => {
+router.post("/courses/:id/import/reset", async (req, res, next) => {
   const courseId = req.params.id;
   const { status } = await getStatusFromQueue(courseId);
 
