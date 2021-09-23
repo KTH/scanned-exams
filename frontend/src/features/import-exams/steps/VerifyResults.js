@@ -54,11 +54,10 @@ function renderHelp() {
   return (
     <div className={cssInfoBox}>
       <p>
-        <b>Succesfully imported</b> these exams have been added to Canvas.
+        You have some unresolved issues encountered during the import. Click
+        &quot;Show Errors&quot; to get a list of exams that couldn&apos;t be
+        imported to Canvas.
       </p>
-      <P>
-        <b>Unresolved errors</b> these exams could not be added to Canvas.
-      </P>
     </div>
   );
 }
@@ -83,11 +82,11 @@ function SummaryTable({ summary }) {
     <table className="table-auto">
       <tbody>
         <tr>
-          <td className="p-1 pl-0">Succesfully imported:</td>
+          <td className="p-1 pl-0">Exams succesfully imported to Canvas:</td>
           <td className="p-1 pl-2">{imported}</td>
         </tr>
         <tr>
-          <td className="p-1 pl-0">Unresolved errors:</td>
+          <td className="p-1 pl-0">Exams with unresolved errors:</td>
           <td className="p-1 pl-2">{errors}</td>
         </tr>
       </tbody>
