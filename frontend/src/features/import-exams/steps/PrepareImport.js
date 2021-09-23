@@ -1,13 +1,6 @@
 import React from "react";
 import { useCourseExams, useMutateImportStart } from "../../../common/api";
-import {
-  H2,
-  LoadingPage,
-  PrimaryButton,
-  SecondaryButton,
-  P,
-  cssInfoBox,
-} from "../../widgets";
+import { H2, LoadingPage, PrimaryButton, P, cssInfoBox } from "../../widgets";
 
 export default function PrepareImport({ onNext, courseId }) {
   // Get exams available to import
@@ -78,9 +71,6 @@ export default function PrepareImport({ onNext, courseId }) {
             Start import!
           </PrimaryButton>
         )}
-        <SecondaryButton className="sm:w-auto" onClick={onNext}>
-          Next
-        </SecondaryButton>
       </div>
     </div>
   );
