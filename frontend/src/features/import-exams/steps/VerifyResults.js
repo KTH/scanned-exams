@@ -46,9 +46,11 @@ export default function VerifyResults({ onNext, onPrev, courseId }) {
         <SummaryTable summary={{ errors, imported }} />
       </div>
       <div className="mt-8">
-        <SecondaryButton className="sm:w-auto" onClick={onPrev}>
-          Prev
-        </SecondaryButton>
+        {errors > 0 && (
+          <SecondaryButton className="sm:w-auto" onClick={onPrev}>
+            Show Errors
+          </SecondaryButton>
+        )}
       </div>
     </div>
   );
