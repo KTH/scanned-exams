@@ -1,8 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { useCourseExams } from "../../../common/api";
-import { H2, LoadingPage, SecondaryButton, P, cssInfoBox } from "../../widgets";
+import {
+  H2,
+  LoadingPage,
+  SecondaryButton,
+  P,
+  PrimaryButton,
+} from "../../widgets";
+import DetailedErrors from "./DetailedErrors";
 
 export default function VerifyResults({ onNext, onPrev, courseId }) {
+  const [showErrorDetails, setShowErrorDetails] = useState(false);
+
   // Get exams available to import
   const queryExams = useCourseExams(courseId);
   const {
@@ -24,52 +33,47 @@ export default function VerifyResults({ onNext, onPrev, courseId }) {
   const imported = importedExams?.length || 0;
   const total = dataExams?.result?.length || 0;
 
+  if (showErrorDetails) {
+    return (
+      <DetailedErrors
+        exams={dataExams}
+        onClose={() => setShowErrorDetails(false)}
+      />
+    );
+  }
+
   return (
     <div className="max-w-2xl">
-      <H2>Verify Results</H2>
-      <P>This is a summary of the status of all the processed exams.</P>
-      <div className={cssInfoBox}>
-        <p>
-          <b>Total exams processed</b> excluding new exams that are waiting to
-          be imported.
-        </p>
-        <P>
-          <b>Succesfully imported</b> these exams have been added to Canvas.
-        </P>
-        <P>
-          <b>Unresolved errors</b> these exams could not be added to Canvas.
-        </P>
+      <H2>Import finished</H2>
+      <div className="mt-8">
+        <table className="table-auto">
+          <tbody>
+            <tr>
+              <td className="p-1 pl-0">Total exams processed:</td>
+              <td className="p-1 pl-2">{total}</td>
+            </tr>
+            <tr>
+              <td className="p-1 pl-0">Succesfully imported:</td>
+              <td className="p-1 pl-2">{imported}</td>
+            </tr>
+            <tr>
+              <td className="p-1 pl-0">Failed:</td>
+              <td className="p-1 pl-2">{errors}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div className="mt-8">
-        <SummaryTable summary={{ errors, imported, total }} />
-      </div>
-      <div className="mt-8">
-        <SecondaryButton className="sm:w-auto" onClick={onPrev}>
-          Prev
+        <SecondaryButton
+          className="sm:w-auto"
+          onClick={() => setShowErrorDetails(true)}
+        >
+          Show error details
         </SecondaryButton>
+        <PrimaryButton className="sm:w-auto" onClick={onNext}>
+          Finish
+        </PrimaryButton>
       </div>
     </div>
-  );
-}
-
-function SummaryTable({ summary }) {
-  const { errors, imported, total } = summary;
-  return (
-    <table className="table-auto">
-      <tbody>
-        <tr>
-          <td className="p-1 pl-0">Total exams processed:</td>
-          <td className="p-1 pl-2">{total}</td>
-        </tr>
-        <tr>
-          <td className="p-1 pl-0">Succesfully imported:</td>
-          <td className="p-1 pl-2">{imported}</td>
-        </tr>
-        <tr>
-          <td className="p-1 pl-0">Unresolved errors:</td>
-          <td className="p-1 pl-2">{errors}</td>
-        </tr>
-      </tbody>
-    </table>
   );
 }

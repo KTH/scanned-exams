@@ -1,29 +1,9 @@
 import React from "react";
-import { useCourseExams } from "../../../common/api";
-import {
-  H2,
-  LoadingPage,
-  PrimaryButton,
-  SecondaryButton,
-  P,
-  cssInfoBox,
-} from "../../widgets";
+import { H2, SecondaryButton, P, cssInfoBox } from "../../widgets";
 
-export default function PrepareImport({ onNext, onPrev, courseId }) {
-  // Get exams available to import
-  const queryExams = useCourseExams(courseId);
-  const {
-    data: dataExams,
-    isLoading: examsLoading,
-    isError: examsError,
-  } = queryExams;
-
+export default function DetailedErrors({ onClose, exams }) {
   const examsWithErrors =
-    dataExams?.result.filter((exam) => exam.status === "error") || [];
-
-  if (examsLoading) {
-    return <LoadingPage>Loading...</LoadingPage>;
-  }
+    exams?.result.filter((exam) => exam.status === "error") || [];
 
   const nrofExamsToResolve = examsWithErrors?.length || 0;
 
@@ -50,12 +30,9 @@ export default function PrepareImport({ onNext, onPrev, courseId }) {
         </>
       )}
       <div className="mt-8">
-        <SecondaryButton className="sm:w-auto" onClick={onPrev}>
-          Prev
+        <SecondaryButton className="sm:w-auto" onClick={onClose}>
+          Back to summary
         </SecondaryButton>
-        <PrimaryButton className="sm:w-96" onClick={onNext}>
-          Next
-        </PrimaryButton>
       </div>
     </div>
   );
