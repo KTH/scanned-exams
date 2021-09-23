@@ -30,7 +30,6 @@ export default function PrepareImport({ onNext, onPrev, courseId }) {
   const errors = examsWithErrors?.length || 0;
   const imported = importedExams?.length || 0;
   const total = dataExams?.result?.length || 0;
-  const waiting = 0;
 
   return (
     <div className="max-w-2xl">
@@ -38,20 +37,18 @@ export default function PrepareImport({ onNext, onPrev, courseId }) {
       <P>This is a summary of the status of all the processed exams.</P>
       <div className={cssInfoBox}>
         <p>
-          <b>Total exams submitted</b> bla bla bla.
+          <b>Total exams processed</b> excluding new exams that are waiting to
+          be imported.
         </p>
         <P>
-          <b>Succesfully imported</b> bla bla bla.
+          <b>Succesfully imported</b> these exams have been added to Canvas.
         </P>
         <P>
-          <b>Unresolved errors</b> bla bla bla.
-        </P>
-        <P>
-          <b>Not available yet</b> bla bla bla.
+          <b>Unresolved errors</b> these exams could not be added to Canvas.
         </P>
       </div>
       <div className="mt-8">
-        <SummaryTable summary={{ errors, imported, total, waiting }} />
+        <SummaryTable summary={{ errors, imported, total }} />
       </div>
       <div className="mt-8">
         <SecondaryButton className="sm:w-auto" onClick={onPrev}>
@@ -63,12 +60,12 @@ export default function PrepareImport({ onNext, onPrev, courseId }) {
 }
 
 function SummaryTable({ summary }) {
-  const { errors, imported, total, waiting } = summary;
+  const { errors, imported, total } = summary;
   return (
     <table className="table-auto">
       <tbody>
         <tr>
-          <td className="p-1 pl-0">Total exams submitted:</td>
+          <td className="p-1 pl-0">Total exams processed:</td>
           <td className="p-1 pl-2">{total}</td>
         </tr>
         <tr>
@@ -78,10 +75,6 @@ function SummaryTable({ summary }) {
         <tr>
           <td className="p-1 pl-0">Unresolved errors:</td>
           <td className="p-1 pl-2">{errors}</td>
-        </tr>
-        <tr>
-          <td className="p-1 pl-0">Not available yet:</td>
-          <td className="p-1 pl-2">{waiting}</td>
         </tr>
       </tbody>
     </table>

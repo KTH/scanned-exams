@@ -1,4 +1,5 @@
 import React from "react";
+import { useQueryClient } from "react-query";
 import {
   useCourseImportStatus,
   useCourseImportProgress,
@@ -17,6 +18,8 @@ import {
 export default function PrepareImport({ onNext, courseId }) {
   const [queueStatus, setQueueStatus] = React.useState("idle");
 
+  const client = useQueryClient();
+
   // Get status of import worker
   useCourseImportStatus(courseId, {
     onSuccess(status) {
@@ -32,20 +35,23 @@ export default function PrepareImport({ onNext, courseId }) {
     isLoading: examsLoading,
     isError: examsError,
   } = queryExams;
-  const examsToImport = dataExams?.result.filter(
-    (exam) => exam.status === "new"
-  );
-  const examsWithError = dataExams?.result.filter(
-    (exam) => exam.status === "error"
-  );
+  const examsToImport =
+    dataExams?.result.filter((exam) => exam.status === "new") || [];
+  const examsWithError =
+    dataExams?.result.filter((exam) => exam.status === "error") || [];
 
+  const allExamsToImportOnNextTry = [...examsToImport, ...examsWithError];
   // Hoook to start import
-  const startImportMutation = useMutateImportStart(courseId, examsToImport, {
-    onSuccess({ status }) {
-      // status lets us know if the queue is working or still idle
-      setQueueStatus(status);
-    },
-  });
+  const startImportMutation = useMutateImportStart(
+    courseId,
+    allExamsToImportOnNextTry,
+    {
+      onSuccess({ status }) {
+        // status lets us know if the queue is working or still idle
+        setQueueStatus(status);
+      },
+    }
+  );
   const {
     mutate: doStartImport,
     isLoading: startImportLoading,
@@ -57,8 +63,8 @@ export default function PrepareImport({ onNext, courseId }) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
-  const nrofExamsWithErrors = examsWithError?.length || 0;
-  const nrofExamsToImport = (examsToImport?.length || 0) + nrofExamsWithErrors;
+  const nrofExamsWithErrors = examsWithError?.length;
+  const nrofExamsToImport = examsToImport?.length + nrofExamsWithErrors;
 
   if (queueStatus === "working") {
     return (
@@ -77,7 +83,11 @@ export default function PrepareImport({ onNext, courseId }) {
           <ProgressBar
             courseId={courseId}
             defaultTotal={nrofExamsToImport}
-            onDone={onNext}
+            onDone={() => {
+              // Clear the query cache to avoid synching issues
+              client.removeQueries(["course", courseId]);
+              onNext();
+            }}
           />
         </div>
       </div>
