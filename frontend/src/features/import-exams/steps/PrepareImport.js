@@ -1,10 +1,5 @@
 import React from "react";
-import { useQueryClient } from "react-query";
-import {
-  useCourseImportProgress,
-  useCourseExams,
-  useMutateImportStart,
-} from "../../../common/api";
+import { useCourseExams, useMutateImportStart } from "../../../common/api";
 import {
   H2,
   LoadingPage,
