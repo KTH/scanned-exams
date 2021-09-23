@@ -57,8 +57,11 @@ server.use(
         ? "strict"
         : "none",
     },
-    resave: true, // should be set explictly. Note: recomended to be false (default is true)
-    saveUninitialized: true, // should be set explictly. Note: recomended to be false (default is true)
+    // MongoDB does not update TTL when reading but when writing
+    resave: true,
+
+    // Avoid saving anonymous sessions (non logged-in users)
+    saveUninitialized: false,
     secret: process.env.SESSION_SECRET,
     store,
   })
@@ -73,11 +76,7 @@ server.use((req, res, next) => {
     next
   );
 });
-server.use(
-  express.urlencoded({
-    extended: true, // should be set explictly (default is true)
-  })
-);
+server.use(express.urlencoded({ extended: true }));
 server.use(express.json());
 server.use(cookieParser());
 
