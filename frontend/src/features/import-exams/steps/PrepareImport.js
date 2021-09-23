@@ -15,10 +15,6 @@ import {
 } from "../../widgets";
 
 export default function PrepareImport({ onNext, courseId }) {
-  const [queueStatus] = React.useState("idle");
-
-  // TODO: Handle errors?
-
   // Get exams available to import
   const queryExams = useCourseExams(courseId);
   const {
@@ -31,8 +27,6 @@ export default function PrepareImport({ onNext, courseId }) {
   const examsWithError =
     dataExams?.result.filter((exam) => exam.status === "error") || [];
 
-  const allExamsToImportOnNextTry = [...examsToImport, ...examsWithError];
-  // Hoook to start import
   const startImportMutation = useMutateImportStart(courseId, examsToImport);
   const {
     mutate: doStartImport,
@@ -47,34 +41,6 @@ export default function PrepareImport({ onNext, courseId }) {
 
   const nrofExamsWithErrors = examsWithError?.length;
   const nrofExamsToImport = examsToImport?.length + nrofExamsWithErrors;
-
-  if (queueStatus === "working") {
-    return (
-      <div className="max-w-2xl">
-        <H2>Import in progress...</H2>
-        <div className={cssInfoBox}>
-          <p>
-            <b>Surprised?</b> The import can be started by another tab or
-            another teacher for this course.
-          </p>
-        </div>
-        <div className="mt-8">
-          <SummaryTable />
-        </div>
-        <div className="mt-8">
-          <ProgressBar
-            courseId={courseId}
-            defaultTotal={nrofExamsToImport}
-            onDone={() => {
-              // Clear the query cache to avoid synching issues
-              client.removeQueries(["course", courseId]);
-              onNext();
-            }}
-          />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-2xl">
@@ -120,41 +86,6 @@ export default function PrepareImport({ onNext, courseId }) {
         <SecondaryButton className="sm:w-auto" onClick={onNext}>
           Next
         </SecondaryButton>
-      </div>
-    </div>
-  );
-}
-
-function ProgressBar({ courseId, defaultTotal, onDone }) {
-  const [cancel, setCancel] = React.useState(false);
-
-  // Ping backend to get status of current import
-  const { data } = useCourseImportProgress(courseId, {
-    onSuccess: ({ working }) => {
-      // We are done, inform the parent
-      if (working.progress >= working.total) {
-        setCancel(true);
-        onDone();
-      }
-    },
-    cancel,
-  });
-  const { working } = data || {};
-  const { progress = 0, total = defaultTotal } = working || {};
-
-  const perc = Math.round((progress / total) * 100);
-  return (
-    <div className="mt-8 mb-8">
-      <div className="relative pt-1 mb-1">
-        <div className="overflow-hidden h-4 text-xs flex rounded bg-blue-200">
-          <div
-            style={{ width: `${perc}%`, transition: "width 3s" }}
-            className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
-          />
-        </div>
-      </div>
-      <div className="flex flex-col items-center">
-        <span>{`${progress} of ${total}`}</span>
       </div>
     </div>
   );
