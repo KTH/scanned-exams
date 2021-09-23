@@ -29,7 +29,6 @@ export default function VerifyResults({ onNext, onPrev, courseId }) {
 
   const errors = examsWithErrors?.length || 0;
   const imported = importedExams?.length || 0;
-  const total = dataExams?.result?.length || 0;
 
   return (
     <div className="max-w-2xl">
@@ -37,18 +36,14 @@ export default function VerifyResults({ onNext, onPrev, courseId }) {
       <P>This is a summary of the status of all the processed exams.</P>
       <div className={cssInfoBox}>
         <p>
-          <b>Total exams processed</b> excluding new exams that are waiting to
-          be imported.
-        </p>
-        <P>
           <b>Succesfully imported</b> these exams have been added to Canvas.
-        </P>
+        </p>
         <P>
           <b>Unresolved errors</b> these exams could not be added to Canvas.
         </P>
       </div>
       <div className="mt-8">
-        <SummaryTable summary={{ errors, imported, total }} />
+        <SummaryTable summary={{ errors, imported }} />
       </div>
       <div className="mt-8">
         <SecondaryButton className="sm:w-auto" onClick={onPrev}>
@@ -60,14 +55,10 @@ export default function VerifyResults({ onNext, onPrev, courseId }) {
 }
 
 function SummaryTable({ summary }) {
-  const { errors, imported, total } = summary;
+  const { errors, imported } = summary;
   return (
     <table className="table-auto">
       <tbody>
-        <tr>
-          <td className="p-1 pl-0">Total exams processed:</td>
-          <td className="p-1 pl-2">{total}</td>
-        </tr>
         <tr>
           <td className="p-1 pl-0">Succesfully imported:</td>
           <td className="p-1 pl-2">{imported}</td>
