@@ -135,9 +135,6 @@ export default function PrepareImport({ onNext, courseId }) {
             Start import!
           </PrimaryButton>
         )}
-        <SecondaryButton className="sm:w-auto" onClick={onNext}>
-          Next
-        </SecondaryButton>
       </div>
     </div>
   );
