@@ -58,6 +58,7 @@ export default function ImportScreen({ courseId }) {
           <VerifyResults
             courseId={courseId}
             onFinish={() => setFinished(true)}
+            onStartOver={() => setFinished(false)}
           />
         )}
         {fakeStep === 3 && <div>Thanks for using this app!</div>}

@@ -9,14 +9,22 @@ import {
 } from "../../widgets";
 import DetailedErrors from "./DetailedErrors";
 
-export default function VerifyResults({ onFinish, courseId }) {
+export default function VerifyResults({ onFinish, onStartOver, courseId }) {
   const [showErrorDetails, setShowErrorDetails] = useState(false);
 
-  const resetImportMutation = useMutateImportReset(courseId, {
+  const resetImportMutation1 = useMutateImportReset(courseId, {
     onSuccess() {
       onFinish();
     },
   });
+  const resetImportMutation2 = useMutateImportReset(courseId, {
+    onSuccess() {
+      onStartOver();
+    },
+  });
+
+  const isResetting =
+    resetImportMutation1.isLoading || resetImportMutation2.isLoading;
 
   // Get exams available to import
   const queryExams = useCourseExams(courseId);
@@ -32,7 +40,12 @@ export default function VerifyResults({ onFinish, courseId }) {
     dataExams?.result.filter((exam) => exam.status === "imported") || [];
 
   if (examsFetching) {
-    return <LoadingPage>Loading...</LoadingPage>;
+    return (
+      <div className="max-w-2xl">
+        <H2>Import finished</H2>
+        <LoadingPage>Loading...</LoadingPage>
+      </div>
+    );
   }
 
   const errors = examsWithErrors?.length || 0;
@@ -78,10 +91,21 @@ export default function VerifyResults({ onFinish, courseId }) {
         </SecondaryButton>
         <PrimaryButton
           className="sm:w-auto"
-          waiting={resetImportMutation.isLoading}
-          onClick={() => resetImportMutation.mutate()}
+          disabled={isResetting}
+          onClick={() => {
+            resetImportMutation2.mutate();
+          }}
         >
-          Finish
+          Import more exams
+        </PrimaryButton>
+        <PrimaryButton
+          className="sm:w-auto"
+          disabled={isResetting}
+          onClick={() => {
+            resetImportMutation1.mutate();
+          }}
+        >
+          Quit
         </PrimaryButton>
       </div>
     </div>
