@@ -113,10 +113,10 @@ async function getEntriesFromQueue(courseId) {
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
+    throw err;
   } finally {
     await dbClient.close();
   }
-  return null;
 }
 
 async function getEntryFromQueue(fileId) {
@@ -132,10 +132,10 @@ async function getEntryFromQueue(fileId) {
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
+    throw err;
   } finally {
     await dbClient.close();
   }
-  return null;
 }
 
 /**
@@ -247,10 +247,10 @@ async function getStatusFromQueue(courseId) {
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
+    throw err;
   } finally {
     await dbClient.close();
   }
-  return null;
 }
 
 async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
@@ -304,10 +304,10 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
+    throw err;
   } finally {
     await dbClient.close();
   }
-  return null;
 }
 
 async function getFirstPendingFromQueue() {
@@ -327,10 +327,10 @@ async function getFirstPendingFromQueue() {
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
+    throw err;
   } finally {
     await dbClient.close();
   }
-  return null;
 }
 
 module.exports = {
