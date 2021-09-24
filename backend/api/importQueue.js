@@ -9,6 +9,15 @@ const dbClient = new MongoClient(MONGODB_CONNECTION_STRING, {
   useUnifiedTopology: true,
 });
 
+let __connection__;
+async function getDb() {
+  if (__connection__) {
+    return __connection__.db();
+  }
+  __connection__ = await dbClient.connect();
+  return __connection__.db();
+}
+
 /**
  * For runtime input param testing
  * @param {bool|function} test Test case that should return true
@@ -103,8 +112,7 @@ class QueueStatus {
 async function getEntriesFromQueue(courseId) {
   try {
     // Open collection
-    const conn = await dbClient.connect();
-    const db = conn.db();
+    const db = await getDb();
     const collImportQueue = db.collection(DB_QUEUE_NAME);
 
     const cursor = collImportQueue.find({ courseId });
@@ -114,16 +122,13 @@ async function getEntriesFromQueue(courseId) {
     // TODO: Handle errors
     log.error({ err });
     throw err;
-  } finally {
-    await dbClient.close();
   }
 }
 
 async function getEntryFromQueue(fileId) {
   try {
     // Open collection
-    const conn = await dbClient.connect();
-    const db = conn.db();
+    const db = await getDb();
     const collImportQueue = db.collection(DB_QUEUE_NAME);
 
     const doc = await collImportQueue.findOne({ fileId });
@@ -133,8 +138,6 @@ async function getEntryFromQueue(fileId) {
     // TODO: Handle errors
     log.error({ err });
     throw err;
-  } finally {
-    await dbClient.close();
   }
 }
 
@@ -145,8 +148,7 @@ async function getEntryFromQueue(fileId) {
  */
 async function resetQueueForImport(courseId) {
   try {
-    const conn = await dbClient.connect();
-    const db = conn.db();
+    const db = await getDb();
     const collImportQueue = db.collection(DB_QUEUE_NAME);
 
     await collImportQueue.deleteMany({
@@ -161,8 +163,6 @@ async function resetQueueForImport(courseId) {
       err?.stack
     );
     throw new Error("Error removing finished entries");
-  } finally {
-    await dbClient.close();
   }
 }
 
@@ -182,8 +182,7 @@ async function addEntryToQueue(entry) {
 
   try {
     // Open collection
-    const conn = await dbClient.connect();
-    const db = conn.db();
+    const db = await getDb();
     const collImportQueue = db.collection(DB_QUEUE_NAME);
 
     // Add entry
@@ -202,16 +201,13 @@ async function addEntryToQueue(entry) {
     throw Error(
       `Add to queue failed becuase entry exist for this fileId '${typedEntry.fileId}'`
     );
-  } finally {
-    await dbClient.close();
   }
 }
 
 async function getStatusFromQueue(courseId) {
   try {
     // Open collection
-    const conn = await dbClient.connect();
-    const db = conn.db();
+    const db = await getDb();
     const collImportQueue = db.collection(DB_QUEUE_NAME);
 
     const cursor = collImportQueue.find({ courseId });
@@ -248,16 +244,13 @@ async function getStatusFromQueue(courseId) {
     // TODO: Handle errors
     log.error({ err });
     throw err;
-  } finally {
-    await dbClient.close();
   }
 }
 
 async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
   try {
     // Open collection
-    const conn = await dbClient.connect();
-    const db = conn.db();
+    const db = await getDb();
     const collImportQueue = db.collection(DB_QUEUE_NAME);
 
     // Perform update
@@ -305,16 +298,13 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
     // TODO: Handle errors
     log.error({ err });
     throw err;
-  } finally {
-    await dbClient.close();
   }
 }
 
 async function getFirstPendingFromQueue() {
   try {
     // Open collection
-    const conn = await dbClient.connect();
-    const db = conn.db();
+    const db = await getDb();
     const collImportQueue = db.collection(DB_QUEUE_NAME);
 
     const doc = await collImportQueue.findOne({ status: "pending" });
@@ -328,8 +318,6 @@ async function getFirstPendingFromQueue() {
     // TODO: Handle errors
     log.error({ err });
     throw err;
-  } finally {
-    await dbClient.close();
   }
 }
 
