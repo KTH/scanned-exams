@@ -12,6 +12,7 @@ const {
   resetQueueForImport,
   // updateStatusOfEntryInQueue,
   // getStatusFromQueue,
+  closeImportQueueConnection,
 } = require("../api/importQueue");
 
 /**
@@ -40,11 +41,18 @@ describe("Import queue", () => {
     // TODO: Populate db
   });
 
+  afterEach(async () => {
+    await db.collection(DB_QUEUE_NAME).deleteMany({});
+  });
+
   afterAll(async () => {
     // const DBG_DB = await db.collection(DB_QUEUE_NAME).find({}).toArray();
     // Perform tear down here
     await db.collection(DB_QUEUE_NAME).deleteMany({});
     dbClient.close();
+
+    // Close the import queue db connection
+    await closeImportQueueConnection();
   });
 
   it("should add one entry to queue", async () => {
@@ -196,6 +204,15 @@ describe("Import queue", () => {
   });
 
   it("should provide status summary of queue ('working')", async () => {
+    const entry = {
+      fileId: "errorFile2",
+      courseId: "mainTestCourse",
+      userKthId: "u3433z456",
+      status: "pending",
+    };
+
+    await addEntryToQueue(entry);
+
     const statusSummary = await getStatusFromQueue("mainTestCourse");
 
     expect(statusSummary).toBeInstanceOf(QueueStatus);
@@ -231,7 +248,7 @@ describe("Get first element from queue", () => {
   let connection;
   let db;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     connection = await dbClient.connect();
     db = await connection.db();
   });
@@ -239,7 +256,14 @@ describe("Get first element from queue", () => {
   afterEach(async () => {
     // Perform tear down here
     await db.collection(DB_QUEUE_NAME).deleteMany({});
+  });
+
+  afterAll(async () => {
+    // Perform tear down here
     dbClient.close();
+
+    // Close the import queue db connection
+    await closeImportQueueConnection();
   });
 
   it("should return null if nothing is enqueued", async () => {
@@ -250,7 +274,7 @@ describe("Get first element from queue", () => {
   it("should return null if there is no `pending` element", async () => {
     const entry1 = {
       fileId: "statusFile1",
-      courseId: "statusTestCourse",
+      courseId: "statusTestCourse1",
       userKthId: "u3433z456",
       status: "success",
     };
@@ -262,8 +286,8 @@ describe("Get first element from queue", () => {
 
   it("should return the first element if something is enqueued", async () => {
     const entry1 = {
-      fileId: "statusFile1",
-      courseId: "statusTestCourse",
+      fileId: "statusFile2",
+      courseId: "statusTestCourse2",
       userKthId: "u3433z456",
       status: "pending",
     };
@@ -277,15 +301,15 @@ describe("Get first element from queue", () => {
 
   it("should return the first `pending` element", async () => {
     const entry1 = {
-      fileId: "statusFile1",
-      courseId: "statusTestCourse",
+      fileId: "statusFile3.1",
+      courseId: "statusTestCourse3",
       userKthId: "u3433z456",
       status: "pending",
     };
 
     const entry2 = {
-      fileId: "statusFile2",
-      courseId: "statusTestCourse",
+      fileId: "statusFile3.2",
+      courseId: "statusTestCourse3",
       userKthId: "u3433z456",
       status: "pending",
     };
@@ -304,7 +328,7 @@ describe("Resetting a queue", () => {
   let connection;
   let db;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     connection = await dbClient.connect();
     db = await connection.db();
   });
@@ -312,7 +336,14 @@ describe("Resetting a queue", () => {
   afterEach(async () => {
     // Perform tear down here
     await db.collection(DB_QUEUE_NAME).deleteMany({});
+  });
+
+  afterAll(async () => {
+    // Perform tear down here
     dbClient.close();
+
+    // Close the import queue db connection
+    await closeImportQueueConnection();
   });
 
   it("should delete all imported and errored entries", async () => {

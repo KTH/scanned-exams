@@ -18,6 +18,13 @@ async function getDb() {
   return __connection__.db();
 }
 
+async function closeImportQueueConnection() {
+  if (__connection__) {
+    await __connection__.close();
+    __connection__ = null;
+  }
+}
+
 /**
  * For runtime input param testing
  * @param {bool|function} test Test case that should return true
@@ -331,4 +338,5 @@ module.exports = {
   getStatusFromQueue,
   getFirstPendingFromQueue,
   resetQueueForImport,
+  closeImportQueueConnection,
 };
