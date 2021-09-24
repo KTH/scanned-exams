@@ -15,7 +15,7 @@ import {
   ImportQueueProgressBar,
 } from "../../widgets";
 
-export default function PrepareImport({ onNext, onGoTo, courseId }) {
+export default function PrepareImport({ onGoTo, courseId }) {
   const [queueStatus, setQueueStatus] = React.useState("idle");
 
   const client = useQueryClient();
@@ -89,7 +89,7 @@ export default function PrepareImport({ onNext, onGoTo, courseId }) {
             onDone={() => {
               // Clear the query cache to avoid synching issues
               client.removeQueries(["course", courseId]);
-              onNext();
+              onGoTo("issues");
             }}
           />
         </div>

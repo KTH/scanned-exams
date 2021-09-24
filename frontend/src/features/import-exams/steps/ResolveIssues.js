@@ -15,7 +15,7 @@ import {
   ImportQueueProgressBar,
 } from "../../widgets";
 
-export default function ResolveIssues({ onNext, onPrev, courseId }) {
+export default function ResolveIssues({ onGoTo, courseId }) {
   const client = useQueryClient();
 
   const [queueStatus, setQueueStatus] = React.useState("idle");
@@ -92,7 +92,7 @@ export default function ResolveIssues({ onNext, onPrev, courseId }) {
             onDone={() => {
               // Clear the query cache to avoid synching issues
               client.resetQueries(["course", courseId]);
-              onNext();
+              // Staying on this step for now
             }}
           />
         </div>
@@ -134,7 +134,7 @@ export default function ResolveIssues({ onNext, onPrev, courseId }) {
         </> /**/
       )}
       <div className="mt-8">
-        <PrimaryButton className="sm:w-96" onClick={onNext}>
+        <PrimaryButton className="sm:w-96" onClick={() => onGoTo("result")}>
           Show Summary
         </PrimaryButton>
       </div>

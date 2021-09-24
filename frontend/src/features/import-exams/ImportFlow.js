@@ -42,20 +42,18 @@ export default function ImportScreen({ courseId }) {
           <PrepareImport
             courseId={courseId}
             onGoTo={(stepName) => setFakeStep(stepIndex[stepName])}
-            onNext={() => setFakeStep(fakeStep + 1)}
           />
         )}
         {fakeStep === 1 && (
           <ResolveIIssues
             courseId={courseId}
-            onNext={() => setFakeStep(fakeStep + 1)}
-            onPrev={() => setFakeStep(fakeStep - 1)}
+            onGoTo={(stepName) => setFakeStep(stepIndex[stepName])}
           />
         )}
         {fakeStep === 2 && (
           <VerifyResults
             courseId={courseId}
-            onPrev={() => setFakeStep(fakeStep - 1)}
+            onGoTo={(stepName) => setFakeStep(stepIndex[stepName])}
           />
         )}
       </div>

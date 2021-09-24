@@ -10,7 +10,7 @@ import {
   cssSuccessBox,
 } from "../../widgets";
 
-export default function VerifyResults({ onNext, onPrev, courseId }) {
+export default function VerifyResults({ onGoTo, courseId }) {
   // Get exams available to import
   const queryExams = useCourseExams(courseId);
   const {
@@ -41,7 +41,10 @@ export default function VerifyResults({ onNext, onPrev, courseId }) {
       </div>
       <div className="mt-8">
         {errors > 0 && (
-          <SecondaryButton className="sm:w-auto" onClick={onPrev}>
+          <SecondaryButton
+            className="sm:w-auto"
+            onClick={() => onGoTo("issues")}
+          >
             Show Errors
           </SecondaryButton>
         )}
