@@ -7,7 +7,7 @@ export default function PrepareImport({ onNext, courseId }) {
   const queryExams = useCourseExams(courseId);
   const {
     data: dataExams,
-    isLoading: examsLoading,
+    isFetching: examsLoading,
     isError: examsError,
   } = queryExams;
   const examsToImport =
