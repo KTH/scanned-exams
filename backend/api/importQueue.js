@@ -16,6 +16,11 @@ function startDatabaseConnection() {
   return dbClient.connect();
 }
 
+/** Return the Import Queue collection */
+function getImportQueueCollection() {
+  return dbClient.db().collection(DB_QUEUE_NAME);
+}
+
 /**
  * For runtime input param testing
  * @param {bool|function} test Test case that should return true
@@ -110,9 +115,7 @@ class QueueStatus {
 async function getEntriesFromQueue(courseId) {
   try {
     // Open collection
-    const db = dbClient.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
-
+    const collImportQueue = getImportQueueCollection();
     const cursor = collImportQueue.find({ courseId });
 
     return await cursor.toArray();
@@ -126,9 +129,7 @@ async function getEntriesFromQueue(courseId) {
 async function getEntryFromQueue(fileId) {
   try {
     // Open collection
-    const db = dbClient.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
-
+    const collImportQueue = getImportQueueCollection();
     const doc = await collImportQueue.findOne({ fileId });
 
     return new QueueEntry(doc);
@@ -146,9 +147,7 @@ async function getEntryFromQueue(fileId) {
  */
 async function resetQueueForImport(courseId) {
   try {
-    const db = dbClient.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
-
+    const collImportQueue = getImportQueueCollection();
     await collImportQueue.deleteMany({
       courseId,
       status: {
@@ -179,9 +178,7 @@ async function addEntryToQueue(entry) {
     entry instanceof QueueEntry ? entry : new QueueEntry(entry);
 
   try {
-    // Open collection
-    const db = dbClient.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
+    const collImportQueue = getImportQueueCollection();
 
     // Add entry
     const res = await collImportQueue.insertOne({
@@ -205,9 +202,7 @@ async function addEntryToQueue(entry) {
 async function getStatusFromQueue(courseId) {
   try {
     // Open collection
-    const db = dbClient.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
-
+    const collImportQueue = getImportQueueCollection();
     const cursor = collImportQueue.find({ courseId });
 
     // Calculate status
@@ -247,9 +242,7 @@ async function getStatusFromQueue(courseId) {
 
 async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
   try {
-    // Open collection
-    const db = dbClient.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
+    const collImportQueue = getImportQueueCollection();
 
     // Perform update
     const tmpOld = await collImportQueue.findOne({ fileId: entry.fileId });
@@ -301,10 +294,7 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
 
 async function getFirstPendingFromQueue() {
   try {
-    // Open collection
-    const db = dbClient.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
-
+    const collImportQueue = getImportQueueCollection();
     const doc = await collImportQueue.findOne({ status: "pending" });
 
     if (!doc) {
