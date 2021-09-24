@@ -285,11 +285,15 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
 
     await lockAssignment(courseId, assignment.id);
   } catch (err) {
-    if (err.response?.statusCode === 404) {
+    if (err.type === "missing_student") {
       log.warn(`User ${studentKthId} is missing in Canvas course ${courseId}`);
     } else {
-      throw err;
+      log.error(
+        { err },
+        `Error when uploading an exam ${studentKthId} / course ${courseId}`
+      );
     }
+    throw err;
   }
 }
 
