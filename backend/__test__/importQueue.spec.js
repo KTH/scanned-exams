@@ -1,5 +1,4 @@
 const { expect } = require("@jest/globals");
-const { MongoClient } = require("mongodb");
 const {
   QueueEntry,
   QueueStatus,
@@ -10,6 +9,7 @@ const {
   getStatusFromQueue,
   getFirstPendingFromQueue,
   resetQueueForImport,
+  startDatabaseConnection,
   // updateStatusOfEntryInQueue,
   // getStatusFromQueue,
 } = require("../api/importQueue");
@@ -21,30 +21,23 @@ const {
  *
  */
 
-const { MONGODB_CONNECTION_STRING } = process.env;
 // TODO: Consider using env-var (sync with importQueue.js)
 const DB_QUEUE_NAME = "import_queue";
-
-const dbClient = new MongoClient(MONGODB_CONNECTION_STRING, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
 
 describe("Import queue", () => {
   let connection;
   let db;
 
   beforeAll(async () => {
-    connection = await dbClient.connect();
-    db = await connection.db();
-    // TODO: Populate db
+    connection = await startDatabaseConnection();
+    db = connection.db();
   });
 
   afterAll(async () => {
     // const DBG_DB = await db.collection(DB_QUEUE_NAME).find({}).toArray();
     // Perform tear down here
     await db.collection(DB_QUEUE_NAME).deleteMany({});
-    dbClient.close();
+    connection.close();
   });
 
   it("should add one entry to queue", async () => {
@@ -232,14 +225,14 @@ describe("Get first element from queue", () => {
   let db;
 
   beforeEach(async () => {
-    connection = await dbClient.connect();
-    db = await connection.db();
+    connection = await startDatabaseConnection();
+    db = connection.db();
   });
 
   afterEach(async () => {
     // Perform tear down here
     await db.collection(DB_QUEUE_NAME).deleteMany({});
-    dbClient.close();
+    connection.close();
   });
 
   it("should return null if nothing is enqueued", async () => {
@@ -305,14 +298,14 @@ describe("Resetting a queue", () => {
   let db;
 
   beforeEach(async () => {
-    connection = await dbClient.connect();
-    db = await connection.db();
+    connection = await startDatabaseConnection();
+    db = connection.db();
   });
 
   afterEach(async () => {
     // Perform tear down here
     await db.collection(DB_QUEUE_NAME).deleteMany({});
-    dbClient.close();
+    connection.close();
   });
 
   it("should delete all imported and errored entries", async () => {
