@@ -153,10 +153,7 @@ router.post("/courses/:id/import/start", async (req, res, next) => {
     );
   }
 
-  await resetQueueForImport(courseId).catch(() => {
-    // If the queue hasn't been created the app might crash so lets accept a failure here
-    log.info("Resetting import queue failed but we will try to import anyway.");
-  });
+  await resetQueueForImport(courseId);
 
   for (const fileId of req.body) {
     // eslint-disable-next-line no-await-in-loop
