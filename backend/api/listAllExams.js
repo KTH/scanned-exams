@@ -111,11 +111,9 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
 async function listAllExams(courseId) {
   const ladokId = await getLadokId(courseId);
   const allScannedExams = await listScannedExams(courseId, ladokId);
-  const studentsWithExamsInCanvas = await listStudentsWithExamsInCanvas(
-    courseId,
-    ladokId
-  );
-  const examsInImportQueue = await getEntriesFromQueue(courseId);
+  const studentsWithExamsInCanvas =
+    (await listStudentsWithExamsInCanvas(courseId, ladokId)) || [];
+  const examsInImportQueue = (await getEntriesFromQueue(courseId)) || [];
 
   const listOfExamsToHandle = allScannedExams.map((exam) => {
     const foundInCanvas = studentsWithExamsInCanvas.find(

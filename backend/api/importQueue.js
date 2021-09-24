@@ -113,10 +113,10 @@ async function getEntriesFromQueue(courseId) {
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
+    throw err;
   } finally {
     await dbClient.close();
   }
-  return null;
 }
 
 async function getEntryFromQueue(fileId) {
@@ -132,10 +132,10 @@ async function getEntryFromQueue(fileId) {
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
+    throw err;
   } finally {
     await dbClient.close();
   }
-  return null;
 }
 
 /**
@@ -149,14 +149,20 @@ async function resetQueueForImport(courseId) {
     const db = conn.db();
     const collImportQueue = db.collection(DB_QUEUE_NAME);
 
-    collImportQueue.deleteMany({
+    await collImportQueue.deleteMany({
       courseId,
       status: {
         $in: ["imported", "error"],
       },
     });
   } catch (err) {
+    log.warn(
+      "resetQueueForImport failet with error. If this happens once in isolation it is okay, this method is called every time we start an import.",
+      err?.stack
+    );
     throw new Error("Error removing finished entries");
+  } finally {
+    await dbClient.close();
   }
 }
 
@@ -241,10 +247,10 @@ async function getStatusFromQueue(courseId) {
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
+    throw err;
   } finally {
     await dbClient.close();
   }
-  return null;
 }
 
 async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
@@ -298,10 +304,10 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
+    throw err;
   } finally {
     await dbClient.close();
   }
-  return null;
 }
 
 async function getFirstPendingFromQueue() {
@@ -321,10 +327,10 @@ async function getFirstPendingFromQueue() {
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
+    throw err;
   } finally {
     await dbClient.close();
   }
-  return null;
 }
 
 module.exports = {
