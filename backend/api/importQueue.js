@@ -149,7 +149,7 @@ async function resetQueueForImport(courseId) {
     const db = conn.db();
     const collImportQueue = db.collection(DB_QUEUE_NAME);
 
-    collImportQueue.deleteMany({
+    await collImportQueue.deleteMany({
       courseId,
       status: {
         $in: ["imported", "error"],
@@ -161,6 +161,8 @@ async function resetQueueForImport(courseId) {
       err?.stack
     );
     throw new Error("Error removing finished entries");
+  } finally {
+    await dbClient.close();
   }
 }
 
