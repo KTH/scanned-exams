@@ -2,7 +2,6 @@ import React from "react";
 import { useQueryClient } from "react-query";
 import {
   useCourseImportStatus,
-  useCourseImportProgress,
   useCourseExams,
   useMutateImportStart,
 } from "../../../common/api";
@@ -13,6 +12,7 @@ import {
   SecondaryButton,
   P,
   cssInfoBox,
+  ImportQueueProgressBar,
 } from "../../widgets";
 
 export default function PrepareImport({ onNext, courseId }) {
@@ -80,7 +80,7 @@ export default function PrepareImport({ onNext, courseId }) {
           <SummaryTable />
         </div>
         <div className="mt-8">
-          <ProgressBar
+          <ImportQueueProgressBar
             courseId={courseId}
             defaultTotal={nrofExamsToImport}
             onDone={() => {
@@ -138,41 +138,6 @@ export default function PrepareImport({ onNext, courseId }) {
         <SecondaryButton className="sm:w-auto" onClick={onNext}>
           Next
         </SecondaryButton>
-      </div>
-    </div>
-  );
-}
-
-function ProgressBar({ courseId, defaultTotal, onDone }) {
-  const [cancel, setCancel] = React.useState(false);
-
-  // Ping backend to get status of current import
-  const { data } = useCourseImportProgress(courseId, {
-    onSuccess: ({ working }) => {
-      // We are done, inform the parent
-      if (working.progress >= working.total) {
-        setCancel(true);
-        onDone();
-      }
-    },
-    cancel,
-  });
-  const { working } = data || {};
-  const { progress = 0, total = defaultTotal } = working || {};
-
-  const perc = Math.round((progress / total) * 100);
-  return (
-    <div className="mt-8 mb-8">
-      <div className="relative pt-1 mb-1">
-        <div className="overflow-hidden h-4 text-xs flex rounded bg-blue-200">
-          <div
-            style={{ width: `${perc}%`, transition: "width 3s" }}
-            className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
-          />
-        </div>
-      </div>
-      <div className="flex flex-col items-center">
-        <span>{`${progress} of ${total}`}</span>
       </div>
     </div>
   );

@@ -129,6 +129,27 @@ export function useMutateImportStart(courseId, examsToImport, options = {}) {
   );
 }
 
+/** Add Students to Course */
+export function useMutateAddStudents(courseId, studentIds, options = {}) {
+  const client = useQueryClient();
+
+  return useMutation(
+    () =>
+      apiClient(`courses/${courseId}/students`, {
+        method: "POST",
+        body: studentIds,
+      }),
+    {
+      ...options,
+      // Passes status object from API as data to callback
+      onSuccess(data) {
+        client.invalidateQueries(["course", courseId, "setup"]);
+        options.onSuccess?.(data);
+      },
+    }
+  );
+}
+
 /**
  * Fetches the API to get information about the current user.
  *

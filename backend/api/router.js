@@ -17,6 +17,7 @@ const {
   publishSpecialAssignment,
 } = require("./setupCourse");
 const { listAllExams } = require("./listAllExams");
+const { enrollStudent } = require("./canvasApiClient");
 
 const router = express.Router();
 
@@ -184,6 +185,19 @@ router.post("/courses/:id/import/start", async (req, res, next) => {
   // in frontend
   const statusObj = await getStatusFromQueue(courseId);
   return res.status(200).send(statusObj);
+});
+
+router.post("/courses/:id/students", async (req, res) => {
+  const students = req.body;
+
+  for (const kthId of students) {
+    // eslint-disable-next-line no-await-in-loop
+    await enrollStudent(req.params.id, kthId);
+  }
+
+  res.status(200).send({
+    message: "done!",
+  });
 });
 
 router.use(errorHandler);
