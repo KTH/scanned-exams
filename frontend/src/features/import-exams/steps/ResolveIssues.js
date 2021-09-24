@@ -92,7 +92,7 @@ export default function ResolveIssues({ onGoTo, courseId }) {
             onDone={() => {
               // Clear the query cache to avoid synching issues
               client.resetQueries(["course", courseId]);
-              // Staying on this step for now
+              onGoTo("result");
             }}
           />
         </div>
