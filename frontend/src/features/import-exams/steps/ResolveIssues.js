@@ -28,16 +28,17 @@ export default function ResolveIssues({ onNext, onPrev, courseId }) {
     isError: examsError,
   } = queryExams;
 
-  const examsWithErrors =
-    dataExams?.result.filter((exam) => exam.status === "error") || [];
+  const examsWithMissingStudentError =
+    dataExams?.result.filter(
+      (exam) => exam.status === "error" && exam.error.type === "missing_student"
+    ) || [];
+  const examsWithOtherErrors =
+    dataExams?.result.filter(
+      (exam) => exam.status === "error" && exam.error.type !== "missing_student"
+    ) || [];
 
   const missingStudentIds =
-    dataExams?.result
-      .filter(
-        (exam) =>
-          exam.status === "error" && exam.error.type === "missing_student"
-      )
-      .map((exam) => exam.error.details.kthId) || [];
+    examsWithMissingStudentError.map((exam) => exam.error.details.kthId) || [];
 
   // Hook to add students
   const addStudentsMutation = useMutateAddStudents(courseId, missingStudentIds);
@@ -49,12 +50,19 @@ export default function ResolveIssues({ onNext, onPrev, courseId }) {
   } = addStudentsMutation;
 
   // Hoook to start import
-  const startImportMutation = useMutateImportStart(courseId, examsWithErrors, {
-    onSuccess({ status }) {
-      // status lets us know if the queue is working or still idle
-      setQueueStatus(status);
-    },
-  });
+  const startImportMutation = useMutateImportStart(
+    courseId,
+    // Fix missing student errors during import, this will also
+    // attempt to import exams with other errors in case they
+    // can be fixed too by reimporting.
+    [...examsWithMissingStudentError, ...examsWithOtherErrors],
+    {
+      onSuccess({ status }) {
+        // status lets us know if the queue is working or still idle
+        setQueueStatus(status);
+      },
+    }
+  );
 
   const {
     mutate: doStartImport,
@@ -66,13 +74,17 @@ export default function ResolveIssues({ onNext, onPrev, courseId }) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
-  const nrofExamsToResolve = examsWithErrors?.length || 0;
+  const nrofExamsToResolve =
+    examsWithOtherErrors.length + examsWithMissingStudentError.length;
 
   if (queueStatus === "working") {
     return (
       <div className="max-w-2xl">
         <H2>Resolve in progress...</H2>
-        <p>Fixing issues with your latest import.</p>
+        <p>
+          Fixing issues with your latest import. This adds missing students and
+          also attempts to fix other import errors.
+        </p>
         <div className="mt-8">
           <ImportQueueProgressBar
             courseId={courseId}
@@ -103,8 +115,19 @@ export default function ResolveIssues({ onNext, onPrev, courseId }) {
           <div className={cssInfoBox}>
             <p>Information about resolving errors.</p>
           </div>
+          {/* Render missing students */}
+          {examsWithMissingStudentError.length > 0 &&
+            renderMissingStudents({
+              exams: examsWithMissingStudentError,
+              isLoading: startImportLoading,
+              onFix: async () => {
+                await doAddStudents();
+                doStartImport();
+              },
+            })}
+          {/* Render other import errors */}
           <div className="mt-8">
-            {examsWithErrors.map((exam, index) => (
+            {examsWithOtherErrors.map((exam, index) => (
               <ExamErrorRow exam={exam} rowNr={index + 1} />
             ))}
           </div>
@@ -114,23 +137,33 @@ export default function ResolveIssues({ onNext, onPrev, courseId }) {
         <SecondaryButton className="sm:w-auto" onClick={onPrev}>
           Prev
         </SecondaryButton>
-        {nrofExamsToResolve > 0 && (
-          <PrimaryButton
-            className="sm:w-auto"
-            waiting={startImportLoading}
-            onClick={async () => {
-              await doAddStudents();
-              doStartImport();
-            }}
-          >
-            Fix Errors!
-          </PrimaryButton>
-        )}
+
         <PrimaryButton className="sm:w-56" onClick={onNext}>
           Next
         </PrimaryButton>
       </div>
     </div>
+  );
+}
+
+function renderMissingStudents({ exams, isLoading, onFix }) {
+  return (
+    <>
+      <div className="mt-8">
+        {exams.map((exam, index) => (
+          <ExamErrorRow exam={exam} rowNr={index + 1} />
+        ))}
+      </div>
+      <div className="mt-8">
+        <PrimaryButton
+          className="sm:w-auto"
+          waiting={isLoading}
+          onClick={onFix}
+        >
+          Fix Missing Students!
+        </PrimaryButton>
+      </div>
+    </> /**/
   );
 }
 
