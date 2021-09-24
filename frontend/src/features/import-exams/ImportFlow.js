@@ -14,6 +14,11 @@ function StepText({ long, short }) {
   );
 }
 
+const stepIndex = {
+  import: 0,
+  issues: 1,
+  result: 2,
+};
 export default function ImportScreen({ courseId }) {
   const [fakeStep, setFakeStep] = React.useState(0);
 
@@ -36,20 +41,19 @@ export default function ImportScreen({ courseId }) {
         {fakeStep === 0 && (
           <PrepareImport
             courseId={courseId}
-            onNext={() => setFakeStep(fakeStep + 1)}
+            onGoTo={(stepName) => setFakeStep(stepIndex[stepName])}
           />
         )}
         {fakeStep === 1 && (
           <ResolveIIssues
             courseId={courseId}
-            onNext={() => setFakeStep(fakeStep + 1)}
-            onPrev={() => setFakeStep(fakeStep - 1)}
+            onGoTo={(stepName) => setFakeStep(stepIndex[stepName])}
           />
         )}
         {fakeStep === 2 && (
           <VerifyResults
             courseId={courseId}
-            onPrev={() => setFakeStep(fakeStep - 1)}
+            onGoTo={(stepName) => setFakeStep(stepIndex[stepName])}
           />
         )}
       </div>

@@ -61,7 +61,7 @@ export default function SetupScreen({
         {currentStep === 0 && (
           <CreateHomePage
             courseId={courseId}
-            onCreate={() => setHomepageCreated(true)}
+            onDone={() => setHomepageCreated(true)}
           />
         )}
         {currentStep === 1 && <PublishCourse courseId={courseId} />}

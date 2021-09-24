@@ -6,6 +6,9 @@ import { useCourseImportProgress } from "../common/api";
 export const cssInfoBox =
   "bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6";
 
+export const cssSuccessBox =
+  "bg-green-50 border-l-4 border-green-600 text-green-800 p-4 mt-6";
+
 export function P(props) {
   return <p className="mt-6" {...props} />;
 }

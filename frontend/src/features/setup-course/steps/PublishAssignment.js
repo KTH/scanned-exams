@@ -1,5 +1,5 @@
 import React from "react";
-import { H2, PrimaryButton, SecondaryButton, P } from "../../widgets";
+import { H2, PrimaryButton, P } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
 export default function CreateAssignment({ courseId }) {
@@ -28,12 +28,6 @@ export default function CreateAssignment({ courseId }) {
         >
           Publish Assignment
         </PrimaryButton>
-        <SecondaryButton
-          className="sm:w-auto"
-          onClick={() => alert("TODO: open preview")}
-        >
-          Show preview
-        </SecondaryButton>
       </P>
     </div>
   );
