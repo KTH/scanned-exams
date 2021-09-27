@@ -27,9 +27,8 @@ afterAll(async () => {
 });
 
 describe("Import queue", () => {
-  afterAll(async () => {
-    // const DBG_DB = await db.collection(DB_QUEUE_NAME).find({}).toArray();
-    // Perform tear down here
+  afterEach(async () => {
+    // Prevent tests from relying on previous state
     await getImportQueueCollection().then((coll) => coll.deleteMany({}));
   });
 
@@ -182,6 +181,15 @@ describe("Import queue", () => {
   });
 
   it("should provide status summary of queue ('working')", async () => {
+    const entry = {
+      fileId: "errorFile2",
+      courseId: "mainTestCourse",
+      userKthId: "u3433z456",
+      status: "pending",
+    };
+
+    await addEntryToQueue(entry);
+
     const statusSummary = await getStatusFromQueue("mainTestCourse");
 
     expect(statusSummary).toBeInstanceOf(QueueStatus);
