@@ -192,7 +192,14 @@ router.post("/courses/:id/students", async (req, res) => {
 
   for (const kthId of students) {
     // eslint-disable-next-line no-await-in-loop
-    await enrollStudent(req.params.id, kthId);
+    await enrollStudent(req.params.id, kthId).catch((err) => {
+      // We are catching this error so it doesn't stop adding
+      // remaining students in list.
+      log.error(
+        { err },
+        "An error occured when trying to add a student to Canvas"
+      );
+    });
   }
 
   res.status(200).send({
