@@ -4,10 +4,26 @@ const log = require("skog");
 const { MONGODB_CONNECTION_STRING } = process.env;
 const DB_QUEUE_NAME = "import_queue";
 
-const dbClient = new MongoClient(MONGODB_CONNECTION_STRING, {
+const databaseClient = new MongoClient(MONGODB_CONNECTION_STRING, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  maxPoolSize: 5,
+  minPoolSize: 1,
 });
+
+// Note: `databaseConnection` is a promise and must be awaited to be used
+const databaseConnection = databaseClient.connect();
+
+/**
+ * Return the Import Queue collection.
+ *
+ * It also connects to the database if it's not already connected
+ */
+async function getImportQueueCollection() {
+  await databaseConnection;
+
+  return databaseClient.db().collection(DB_QUEUE_NAME);
+}
 
 /**
  * For runtime input param testing
@@ -103,10 +119,7 @@ class QueueStatus {
 async function getEntriesFromQueue(courseId) {
   try {
     // Open collection
-    const conn = await dbClient.connect();
-    const db = conn.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
-
+    const collImportQueue = await getImportQueueCollection();
     const cursor = collImportQueue.find({ courseId });
 
     return await cursor.toArray();
@@ -114,18 +127,13 @@ async function getEntriesFromQueue(courseId) {
     // TODO: Handle errors
     log.error({ err });
     throw err;
-  } finally {
-    await dbClient.close();
   }
 }
 
 async function getEntryFromQueue(fileId) {
   try {
     // Open collection
-    const conn = await dbClient.connect();
-    const db = conn.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
-
+    const collImportQueue = await getImportQueueCollection();
     const doc = await collImportQueue.findOne({ fileId });
 
     return new QueueEntry(doc);
@@ -133,8 +141,6 @@ async function getEntryFromQueue(fileId) {
     // TODO: Handle errors
     log.error({ err });
     throw err;
-  } finally {
-    await dbClient.close();
   }
 }
 
@@ -145,10 +151,7 @@ async function getEntryFromQueue(fileId) {
  */
 async function resetQueueForImport(courseId) {
   try {
-    const conn = await dbClient.connect();
-    const db = conn.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
-
+    const collImportQueue = await getImportQueueCollection();
     await collImportQueue.deleteMany({
       courseId,
       status: {
@@ -161,8 +164,6 @@ async function resetQueueForImport(courseId) {
       err?.stack
     );
     throw new Error("Error removing finished entries");
-  } finally {
-    await dbClient.close();
   }
 }
 
@@ -181,10 +182,7 @@ async function addEntryToQueue(entry) {
     entry instanceof QueueEntry ? entry : new QueueEntry(entry);
 
   try {
-    // Open collection
-    const conn = await dbClient.connect();
-    const db = conn.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
+    const collImportQueue = await getImportQueueCollection();
 
     // Add entry
     const res = await collImportQueue.insertOne({
@@ -202,18 +200,13 @@ async function addEntryToQueue(entry) {
     throw Error(
       `Add to queue failed becuase entry exist for this fileId '${typedEntry.fileId}'`
     );
-  } finally {
-    await dbClient.close();
   }
 }
 
 async function getStatusFromQueue(courseId) {
   try {
     // Open collection
-    const conn = await dbClient.connect();
-    const db = conn.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
-
+    const collImportQueue = await getImportQueueCollection();
     const cursor = collImportQueue.find({ courseId });
 
     // Calculate status
@@ -248,17 +241,12 @@ async function getStatusFromQueue(courseId) {
     // TODO: Handle errors
     log.error({ err });
     throw err;
-  } finally {
-    await dbClient.close();
   }
 }
 
 async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
   try {
-    // Open collection
-    const conn = await dbClient.connect();
-    const db = conn.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
+    const collImportQueue = await getImportQueueCollection();
 
     // Perform update
     const tmpOld = await collImportQueue.findOne({ fileId: entry.fileId });
@@ -305,18 +293,12 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
     // TODO: Handle errors
     log.error({ err });
     throw err;
-  } finally {
-    await dbClient.close();
   }
 }
 
 async function getFirstPendingFromQueue() {
   try {
-    // Open collection
-    const conn = await dbClient.connect();
-    const db = conn.db();
-    const collImportQueue = db.collection(DB_QUEUE_NAME);
-
+    const collImportQueue = await getImportQueueCollection();
     const doc = await collImportQueue.findOne({ status: "pending" });
 
     if (!doc) {
@@ -328,8 +310,6 @@ async function getFirstPendingFromQueue() {
     // TODO: Handle errors
     log.error({ err });
     throw err;
-  } finally {
-    await dbClient.close();
   }
 }
 
@@ -343,4 +323,6 @@ module.exports = {
   getStatusFromQueue,
   getFirstPendingFromQueue,
   resetQueueForImport,
+  getImportQueueCollection,
+  databaseClient,
 };

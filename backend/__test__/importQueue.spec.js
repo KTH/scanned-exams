@@ -1,5 +1,4 @@
-const { expect } = require("@jest/globals");
-const { MongoClient } = require("mongodb");
+const { expect, afterAll } = require("@jest/globals");
 const {
   QueueEntry,
   QueueStatus,
@@ -10,6 +9,8 @@ const {
   getStatusFromQueue,
   getFirstPendingFromQueue,
   resetQueueForImport,
+  getImportQueueCollection,
+  databaseClient,
   // updateStatusOfEntryInQueue,
   // getStatusFromQueue,
 } = require("../api/importQueue");
@@ -21,30 +22,14 @@ const {
  *
  */
 
-const { MONGODB_CONNECTION_STRING } = process.env;
-// TODO: Consider using env-var (sync with importQueue.js)
-const DB_QUEUE_NAME = "import_queue";
-
-const dbClient = new MongoClient(MONGODB_CONNECTION_STRING, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+afterAll(async () => {
+  await databaseClient.close();
 });
 
 describe("Import queue", () => {
-  let connection;
-  let db;
-
-  beforeAll(async () => {
-    connection = await dbClient.connect();
-    db = await connection.db();
-    // TODO: Populate db
-  });
-
-  afterAll(async () => {
-    // const DBG_DB = await db.collection(DB_QUEUE_NAME).find({}).toArray();
-    // Perform tear down here
-    await db.collection(DB_QUEUE_NAME).deleteMany({});
-    dbClient.close();
+  afterEach(async () => {
+    // Prevent tests from relying on previous state
+    await getImportQueueCollection().then((coll) => coll.deleteMany({}));
   });
 
   it("should add one entry to queue", async () => {
@@ -196,6 +181,15 @@ describe("Import queue", () => {
   });
 
   it("should provide status summary of queue ('working')", async () => {
+    const entry = {
+      fileId: "errorFile2",
+      courseId: "mainTestCourse",
+      userKthId: "u3433z456",
+      status: "pending",
+    };
+
+    await addEntryToQueue(entry);
+
     const statusSummary = await getStatusFromQueue("mainTestCourse");
 
     expect(statusSummary).toBeInstanceOf(QueueStatus);
@@ -228,18 +222,9 @@ describe("Import queue", () => {
 });
 
 describe("Get first element from queue", () => {
-  let connection;
-  let db;
-
-  beforeEach(async () => {
-    connection = await dbClient.connect();
-    db = await connection.db();
-  });
-
   afterEach(async () => {
     // Perform tear down here
-    await db.collection(DB_QUEUE_NAME).deleteMany({});
-    dbClient.close();
+    await getImportQueueCollection().then((coll) => coll.deleteMany({}));
   });
 
   it("should return null if nothing is enqueued", async () => {
@@ -301,18 +286,9 @@ describe("Get first element from queue", () => {
 });
 
 describe("Resetting a queue", () => {
-  let connection;
-  let db;
-
-  beforeEach(async () => {
-    connection = await dbClient.connect();
-    db = await connection.db();
-  });
-
   afterEach(async () => {
     // Perform tear down here
-    await db.collection(DB_QUEUE_NAME).deleteMany({});
-    dbClient.close();
+    await getImportQueueCollection().then((coll) => coll.deleteMany({}));
   });
 
   it("should delete all imported and errored entries", async () => {
