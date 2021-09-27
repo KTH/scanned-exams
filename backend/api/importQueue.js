@@ -11,13 +11,17 @@ const dbClient = new MongoClient(MONGODB_CONNECTION_STRING, {
   minPoolSize: 1,
 });
 
-/** Start connection to MongoDB database */
-function startDatabaseConnection() {
-  return dbClient.connect();
-}
+// Note: `databaseConnection` is a promise and must be awaited to be used
+const databaseConnection = dbClient.connect();
 
-/** Return the Import Queue collection */
-function getImportQueueCollection() {
+/**
+ * Return the Import Queue collection.
+ *
+ * It also connects to the database if it's not already connected
+ */
+async function getImportQueueCollection() {
+  await databaseConnection;
+
   return dbClient.db().collection(DB_QUEUE_NAME);
 }
 
@@ -115,7 +119,7 @@ class QueueStatus {
 async function getEntriesFromQueue(courseId) {
   try {
     // Open collection
-    const collImportQueue = getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection();
     const cursor = collImportQueue.find({ courseId });
 
     return await cursor.toArray();
@@ -129,7 +133,7 @@ async function getEntriesFromQueue(courseId) {
 async function getEntryFromQueue(fileId) {
   try {
     // Open collection
-    const collImportQueue = getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection();
     const doc = await collImportQueue.findOne({ fileId });
 
     return new QueueEntry(doc);
@@ -147,7 +151,7 @@ async function getEntryFromQueue(fileId) {
  */
 async function resetQueueForImport(courseId) {
   try {
-    const collImportQueue = getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection();
     await collImportQueue.deleteMany({
       courseId,
       status: {
@@ -178,7 +182,7 @@ async function addEntryToQueue(entry) {
     entry instanceof QueueEntry ? entry : new QueueEntry(entry);
 
   try {
-    const collImportQueue = getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection();
 
     // Add entry
     const res = await collImportQueue.insertOne({
@@ -202,7 +206,7 @@ async function addEntryToQueue(entry) {
 async function getStatusFromQueue(courseId) {
   try {
     // Open collection
-    const collImportQueue = getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection();
     const cursor = collImportQueue.find({ courseId });
 
     // Calculate status
@@ -242,7 +246,7 @@ async function getStatusFromQueue(courseId) {
 
 async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
   try {
-    const collImportQueue = getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection();
 
     // Perform update
     const tmpOld = await collImportQueue.findOne({ fileId: entry.fileId });
@@ -294,7 +298,7 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
 
 async function getFirstPendingFromQueue() {
   try {
-    const collImportQueue = getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection();
     const doc = await collImportQueue.findOne({ status: "pending" });
 
     if (!doc) {
@@ -319,5 +323,5 @@ module.exports = {
   getStatusFromQueue,
   getFirstPendingFromQueue,
   resetQueueForImport,
-  startDatabaseConnection,
+  getImportQueueCollection,
 };
