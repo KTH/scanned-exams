@@ -55,17 +55,20 @@ module.exports = async function processQueueEntry() {
       await updateStatusOfEntryInQueue(examToBeImported, "imported");
       if (IS_DEV) log.debug("Imported file " + examToBeImported.fileId);
     } catch (err) {
+      // TODO: Improve handling of errors, at least adding a more user
+      // friendly message
       await updateStatusOfEntryInQueue(examToBeImported, "error", {
         type: err.type || "import_error",
         message: err.message,
         details: err.details || {},
       });
-      if (IS_DEV)
-        log.debug(
-          "Error importing file " +
-            examToBeImported.fileId +
-            ` (${err.message})`
-        );
+      // Logging an error so we can improve handling of various
+      // failure modes that occur in canvas
+      log.error(
+        "Unhandled Import Error - we failed importing file " +
+          examToBeImported.fileId +
+          ` (${err.type} | ${err.message})`
+      );
     }
   }
 
