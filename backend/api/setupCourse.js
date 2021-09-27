@@ -13,6 +13,7 @@ async function getLadokId(courseId) {
   if (ladokIds.length === 0) {
     throw new EndpointError({
       type: "invalid_course",
+      statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       message:
         "This course can't be used for importing exams. It must be an examroom",
       details: {
@@ -23,6 +24,7 @@ async function getLadokId(courseId) {
 
   if (ladokIds.lengh > 1) {
     throw new EndpointError({
+      statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       type: "invalid_course",
       message: "Examrooms with more than one examination are not supported",
       details: {
@@ -66,7 +68,7 @@ async function createSpecialAssignment(courseId) {
   if (existingAssignment) {
     throw new EndpointError({
       type: "assignment_exists",
-      statusCode: 409,
+      statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       message: "The assignment already exists",
     });
   }
@@ -82,7 +84,7 @@ async function publishSpecialAssignment(courseId) {
   if (!assignment) {
     throw new EndpointError({
       type: "assignment_not_found",
-      statusCode: 400,
+      statusCode: 404,
       message: "There is no valid assignment that can be published",
     });
   }

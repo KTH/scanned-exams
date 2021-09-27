@@ -18,6 +18,7 @@ async function getLadokId(courseId) {
   if (ladokIds.length === 0) {
     throw new EndpointError({
       type: "invalid_course",
+      statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       message:
         "This course can't be used for importing exams. It must be an examroom",
       details: {
@@ -29,6 +30,7 @@ async function getLadokId(courseId) {
   if (ladokIds.lengh > 1) {
     throw new EndpointError({
       type: "invalid_course",
+      statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       message: "Examrooms with more than one examination are not supported",
       details: {
         courseId,
@@ -56,6 +58,7 @@ async function listScannedExams(courseId, ladokId) {
     .catch(() => {
       throw new EndpointError({
         type: "invalid_activity",
+        statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
         message: `The course [${courseId}] is associated with a not valid Ladok activitestillfälle [${ladokId}]`,
         details: {
           courseId,
@@ -86,6 +89,7 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
       if (!result) {
         throw new EndpointError({
           type: "not_setup_course",
+          statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
           message: `The course [${courseId}] has no valid assignment for scanned exams. Probably is not setup correctly`,
           details: {
             courseId,
