@@ -4,15 +4,13 @@ const log = require("skog");
 const server = require("./server");
 
 const { startBackgroundImport } = require("./importWorker");
-const { startDatabaseConnection } = require("./api/importQueue");
 
 const privateKey = fs.readFileSync("certs/key.pem");
 const certificate = fs.readFileSync("certs/cert.pem");
 
-server.listen(4000, async () => {
+startBackgroundImport();
+server.listen(4000, () => {
   log.info(`Started HTTP server in http://localhost:4000`);
-  await startDatabaseConnection();
-  startBackgroundImport();
 });
 
 const httpsServer = https.createServer(
