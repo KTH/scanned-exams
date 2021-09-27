@@ -4,7 +4,7 @@ const log = require("skog");
 const { MONGODB_CONNECTION_STRING } = process.env;
 const DB_QUEUE_NAME = "import_queue";
 
-const dbClient = new MongoClient(MONGODB_CONNECTION_STRING, {
+const databaseClient = new MongoClient(MONGODB_CONNECTION_STRING, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   maxPoolSize: 5,
@@ -12,7 +12,7 @@ const dbClient = new MongoClient(MONGODB_CONNECTION_STRING, {
 });
 
 // Note: `databaseConnection` is a promise and must be awaited to be used
-const databaseConnection = dbClient.connect();
+const databaseConnection = databaseClient.connect();
 
 /**
  * Return the Import Queue collection.
@@ -22,7 +22,7 @@ const databaseConnection = dbClient.connect();
 async function getImportQueueCollection() {
   await databaseConnection;
 
-  return dbClient.db().collection(DB_QUEUE_NAME);
+  return databaseClient.db().collection(DB_QUEUE_NAME);
 }
 
 /**
@@ -324,4 +324,5 @@ module.exports = {
   getFirstPendingFromQueue,
   resetQueueForImport,
   getImportQueueCollection,
+  databaseClient,
 };
