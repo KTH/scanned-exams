@@ -1,100 +1,204 @@
 const express = require("express");
 const log = require("skog");
-const canvas = require("./canvasApiClient");
-const { transferExams, getStatus } = require("./transferExams.js");
-const { internalServerError, unauthorized } = require("../utils");
+const { errorHandler, EndpointError } = require("./error");
+
+const { checkPermissionsMiddleware } = require("./permission");
+const {
+  getStatusFromQueue,
+  addEntryToQueue,
+  resetQueueForImport,
+  updateStatusOfEntryInQueue,
+} = require("./importQueue");
+const {
+  getSetupStatus,
+  createSpecialHomepage,
+  publishCourse,
+  createSpecialAssignment,
+  publishSpecialAssignment,
+} = require("./setupCourse");
+const { listAllExams } = require("./listAllExams");
+const { enrollStudent } = require("./canvasApiClient");
 
 const router = express.Router();
 
-// eslint-disable-next-line prefer-arrow-callback
-router.use(async function checkAuthorization(req, res, next) {
+router.use("/courses/:id", checkPermissionsMiddleware);
+
+/**
+ * Returns data from the logged in user.
+ * - Returns a 404 if the user is not logged in
+ */
+router.get("/me", (req, res, next) => {
+  const { userId } = req.session;
+
+  if (!userId) {
+    log.debug("Getting user information. User is logged out");
+    return next(
+      new EndpointError({
+        type: "logged_out",
+        statusCode: 404,
+        message: "You are logged out",
+      })
+    );
+  }
+
+  log.debug("Getting user information. User is logged in");
+  return res.status(200).send({ userId });
+});
+
+router.get("/courses/:id/setup", async (req, res, next) => {
   try {
-    const courseId = req.query.courseId || req.body.courseId;
-    const { userId } = req.session;
-    const { roles, authorized } = await canvas.getAuthorizationData(
+    const status = await getSetupStatus(req.params.id);
+    res.send(status);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/courses/:id/setup/create-homepage", async (req, res, next) => {
+  try {
+    await createSpecialHomepage(req.params.id);
+
+    res.send({
+      message: "done!",
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/courses/:id/setup/publish-course", async (req, res, next) => {
+  try {
+    await publishCourse(req.params.id);
+
+    res.send({
+      message: "done!",
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/courses/:id/setup/create-assignment", async (req, res, next) => {
+  try {
+    await createSpecialAssignment(req.params.id);
+
+    return res.send({
+      message: "done!",
+    });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.post("/courses/:id/setup/publish-assignment", async (req, res, next) => {
+  try {
+    await publishSpecialAssignment(req.params.id);
+
+    return res.send({
+      message: "done!",
+    });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/**
+ * return the list of exams
+ * - Canvas is source of truth regarding if a submitted exam is truly imported
+ * - the internal import queue keeps state of pending and last performed import
+ */
+router.get("/courses/:id/exams", async (req, res, next) => {
+  try {
+    const { result, summary } = await listAllExams(req.params.id);
+
+    return res.send({
+      result,
+      summary,
+    });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// Get the import process status
+router.get("/courses/:id/import/status", async (req, res) => {
+  const courseId = req.params.id;
+  const status = await getStatusFromQueue(courseId);
+
+  res.send(status);
+});
+
+// Start the import process
+router.post("/courses/:id/import/start", async (req, res, next) => {
+  const courseId = req.params.id;
+  const { status } = await getStatusFromQueue(courseId);
+
+  if (!Array.isArray(req.body)) {
+    return next(
+      new EndpointError({
+        type: "missing_body",
+        message: "This endpoint expects to get a list of fileIds to import",
+        statusCode: 400, // Bad Request
+      })
+    );
+  }
+
+  if (status !== "idle") {
+    return next(
+      new EndpointError({
+        type: "queue_not_idle",
+        message:
+          "Can't start new import if the queue for this course is working",
+        statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
+      })
+    );
+  }
+
+  await resetQueueForImport(courseId);
+
+  for (const fileId of req.body) {
+    // eslint-disable-next-line no-await-in-loop
+    await addEntryToQueue({
+      fileId,
       courseId,
-      userId
-    );
-
-    if (authorized) {
-      log.debug(`Authorized. User ${userId} in Course ${courseId}.`);
-
-      return next();
-    }
-
-    log.warn(
-      `Not authorized. User ${userId} in Course ${courseId} has roles: [${roles}].`
-    );
-
-    return unauthorized(
-      `Unauthorized: you must be teacher or examiner to use this app`,
-      res
-    );
-  } catch (err) {
-    log.error(err);
-
-    return internalServerError(err, res);
+      status: "pending",
+    })
+      // eslint-disable-next-line no-await-in-loop
+      .catch(async (err) => {
+        if (
+          err.message.startsWith(
+            "Add to queue failed becuase entry exist for this fileId"
+          )
+        ) {
+          // We get an error if it already exists so setting it to pending
+          await updateStatusOfEntryInQueue(
+            {
+              fileId,
+            },
+            "pending"
+          );
+        }
+      });
   }
+
+  // Return the queue status object so stats can be updated
+  // in frontend
+  const statusObj = await getStatusFromQueue(courseId);
+  return res.status(200).send(statusObj);
 });
 
-router.get("/assignment", async (req, res) => {
-  try {
-    const { courseId } = req.query;
-    const ladokId = await canvas.getExaminationLadokId(courseId);
-    const assignment = await canvas.getValidAssignment(courseId, ladokId);
+router.post("/courses/:id/students", async (req, res) => {
+  const students = req.body;
 
-    res.json({
-      assignment,
-    });
-  } catch (err) {
-    log.error(err);
-    internalServerError(err, res);
+  for (const kthId of students) {
+    // eslint-disable-next-line no-await-in-loop
+    await enrollStudent(req.params.id, kthId);
   }
+
+  res.status(200).send({
+    message: "done!",
+  });
 });
 
-router.post("/assignment", async (req, res) => {
-  try {
-    const { courseId } = req.body;
-    const ladokId = await canvas.getExaminationLadokId(courseId);
-    let assignment = await canvas.getValidAssignment(courseId, ladokId);
-
-    if (!assignment) {
-      assignment = await canvas.createAssignment(courseId, ladokId);
-    }
-
-    res.json({
-      message: "Assignment created successfully",
-      assignment,
-    });
-  } catch (err) {
-    internalServerError(err, res);
-  }
-});
-
-router.post("/exams", (req, res) => {
-  try {
-    transferExams(req.body.courseId);
-
-    res.json({
-      message: "Exam uploading started",
-    });
-  } catch (err) {
-    internalServerError(err, res);
-  }
-});
-
-router.get("/exams", (req, res) => {
-  try {
-    const status = getStatus(req.query.courseId);
-
-    // TODO: return a different code depending on the error
-    res.status(status.error ? 400 : 200).json({
-      state: status.state,
-      error: status.error,
-    });
-  } catch (err) {
-    internalServerError(err, res);
-  }
-});
-
+router.use(errorHandler);
 module.exports = router;

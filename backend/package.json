@@ -4,12 +4,13 @@
   "description": "Backend of the Scanned Exams service. Application integrated into the Canvas LMS that download paper exams from the 'Tenta API' and uploads them into Canvas",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server-https.js",
-    "debug": "node --inspect-brk server-https.js",
+    "start": "nodemon app-https.js | pino-pretty -e options,response -o '{msg}\n' --ignore options,pid,hostname --singleLine --translateTime 'HH:MM:ss.l' --hideObject",
+    "debug": "node --inspect-brk app-https.js",
     "format": "prettier --write .",
     "test:lint": "eslint *.js api/**/*.js auth/**/*.js",
     "test:format": "prettier --check .",
-    "test": "npm run test:lint && npm run test:format && jest --passWithNoTests"
+    "test:api": "jest",
+    "test": "npm run test:lint && npm run test:api"
   },
   "repository": {
     "type": "git",
@@ -23,14 +24,16 @@
   },
   "homepage": "https://github.com/KTH/scannade-tentor#readme",
   "dependencies": {
-    "@kth/canvas-api": "^3.0.2",
+    "@kth/canvas-api": "^3.2.0",
     "@kth/reqvars": "^2.0.1",
+    "connect-mongodb-session": "^3.1.0",
     "cookie-parser": "^1.4.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "formdata-node": "^2.5.0",
     "got": "^11.8.2",
+    "mongodb": "^4.1.1",
     "openid-client": "^4.6.0",
     "pino": "^6.11.2",
     "skog": "^2.1.0"
@@ -38,6 +41,7 @@
   "devDependencies": {
     "@jest/globals": "^26.6.2",
     "@kth/eslint-config-kth": "^1.0.10",
+    "@shelf/jest-mongodb": "^2.0.3",
     "eslint": "^7.29.0",
     "jest": "^26.6.3",
     "nodemon": "^2.0.7",

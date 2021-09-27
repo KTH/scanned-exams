@@ -1,16 +1,68 @@
 const Canvas = require("@kth/canvas-api");
 const FormData = require("formdata-node").default;
-const fs = require("fs");
 const got = require("got");
 const log = require("skog");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
+const { EndpointError, ImportError } = require("./error");
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,
   process.env.CANVAS_API_ADMIN_TOKEN
 );
 
+/** Get data from one canvas course */
+async function getCourse(courseId) {
+  const { body } = await canvas.get(`courses/${courseId}`);
+
+  return body;
+}
+
+/** Creates a "good-looking" homepage in Canvas */
+async function createHomepage(courseId) {
+  await canvas.requestUrl(`courses/${courseId}/front_page`, "PUT", {
+    wiki_page: {
+      // To make this page, use the Rich Content Editor in Canvas (https://kth.test.instructure.com/courses/30347/pages/welcome-to-the-exam/edit)
+      // Then copy the HTML code:
+      body: `<p>Welcome to the Canvas page for the exam results</p>
+      <p>This course will be used to grade your exams digitally. This means that, after your exams are scanned, they will be uploaded in this Canvas course</p>
+      <p>&nbsp;</p>
+      <p>Once your exam has been graded, you will be able to see the grades and teachers feedback under "Grades".</p>`,
+    },
+  });
+  return canvas.requestUrl(`courses/${courseId}`, "PUT", {
+    course: {
+      default_view: "wiki",
+    },
+  });
+}
+
+/** Publish a course */
+async function publishCourse(courseId) {
+  return canvas.requestUrl(`courses/${courseId}`, "PUT", {
+    course: {
+      event: "offer",
+    },
+  });
+}
+
 /** Get the Ladok UID of the examination linked with a canvas course */
+async function getAktivitetstillfalleUIDs(courseId) {
+  const sections = await canvas.list(`courses/${courseId}/sections`).toArray();
+
+  // For SIS IDs with format "AKT.<ladok id>.<suffix>", take the "<ladok id>"
+  const REGEX = /^AKT\.([\w-]+)/;
+  const sisIds = sections
+    .map((section) => section.sis_section_id?.match(REGEX)?.[1])
+    .filter((sisId) => sisId /* Filter out null and undefined */);
+
+  // Deduplicate IDs (there are usually one "funka" and one "non-funka" with
+  // the same Ladok ID)
+  const uniqueIds = Array.from(new Set(sisIds));
+
+  return uniqueIds;
+}
+
+// TODO: this function is kept only for backwards-compatibility reasons
 async function getExaminationLadokId(courseId) {
   const sections = await canvas.list(`courses/${courseId}/sections`).toArray();
 
@@ -45,6 +97,18 @@ async function getValidAssignment(courseId, ladokId) {
   );
 }
 
+async function getAssignmentSubmissions(courseId, assignmentId) {
+  // API docs https://canvas.instructure.com/doc/api/submissions.html
+  // GET /api/v1/courses/:course_id/assignments/:assignment_id/submissions
+  // ?include=user (to get user obj wth kth id)
+  return canvas
+    .list(
+      `courses/${courseId}/assignments/${assignmentId}/submissions`,
+      { include: "user" } // include user obj with kth id
+    )
+    .toArray();
+}
+
 async function createAssignment(courseId, ladokId) {
   const examination = await getAktivitetstillfalle(ladokId);
 
@@ -73,6 +137,19 @@ async function createAssignment(courseId, ladokId) {
       },
     })
     .then((r) => r.body);
+}
+
+/** Publish an assignment */
+async function publishAssignment(courseId, assignmentId) {
+  return canvas.requestUrl(
+    `courses/${courseId}/assignments/${assignmentId}`,
+    "PUT",
+    {
+      assignment: {
+        published: true,
+      },
+    }
+  );
 }
 
 async function unlockAssignment(courseId, assignmentId) {
@@ -107,7 +184,7 @@ async function lockAssignment(courseId, assignmentId) {
 }
 
 // eslint-disable-next-line camelcase
-async function sendFile({ upload_url, upload_params }, filePath) {
+async function sendFile({ upload_url, upload_params }, content) {
   const form = new FormData();
 
   // eslint-disable-next-line camelcase
@@ -117,7 +194,7 @@ async function sendFile({ upload_url, upload_params }, filePath) {
     }
   }
 
-  form.append("attachment", fs.createReadStream(filePath));
+  form.append("attachment", content, upload_params.filename);
 
   return got.post({
     url: upload_url,
@@ -145,26 +222,55 @@ async function hasSubmission({ courseId, assignmentId, userId }) {
   }
 }
 
-async function uploadExam(
-  filePath,
-  { courseId, assignmentId, userId, examDate }
-) {
+async function uploadExam(content, { courseId, studentKthId, examDate }) {
   try {
-    const { body: user } = await canvas.get(`users/sis_user_id:${userId}`);
-
-    // TODO: will return a 400 if the course is unpublished
-    const { body: slot } = await canvas.requestUrl(
-      `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}/files`,
-      "POST",
-      {
-        name: `${userId}.pdf`,
-      }
+    const { body: user } = await canvas.get(
+      `users/sis_user_id:${studentKthId}`
     );
 
-    const { body: uploadedFile } = await sendFile(slot, filePath);
+    const ladokId = await getExaminationLadokId(courseId);
+    const assignment = await getValidAssignment(courseId, ladokId);
+    log.debug(
+      `Upload Exam: unlocking assignment ${assignment.id} in course ${courseId}`
+    );
+    await unlockAssignment(courseId, assignment.id);
+
+    const reqTokenStart = Date.now();
+    // TODO: will return a 400 if the course is unpublished
+    const { body: slot } = await canvas
+      .requestUrl(
+        `courses/${courseId}/assignments/${assignment.id}/submissions/${user.id}/files`,
+        "POST",
+        {
+          name: `${studentKthId}.pdf`,
+        }
+      )
+      .catch((err) => {
+        if (err.response?.statusCode === 404) {
+          // Student is missing in Canvas
+          throw new ImportError({
+            type: "missing_student",
+            message: "Student is missing in examroom",
+            details: {
+              kthId: studentKthId,
+            },
+          });
+        }
+
+        throw err;
+      });
+
+    log.debug(
+      "Time to generate upload token: " + (Date.now() - reqTokenStart) + "ms"
+    );
+
+    const uploadFileStart = Date.now();
+    const { body: uploadedFile } = await sendFile(slot, content);
+
+    log.debug("Time to upload file: " + (Date.now() - uploadFileStart) + "ms");
 
     await canvas.requestUrl(
-      `courses/${courseId}/assignments/${assignmentId}/submissions/`,
+      `courses/${courseId}/assignments/${assignment.id}/submissions/`,
       "POST",
       {
         submission: {
@@ -176,38 +282,70 @@ async function uploadExam(
         },
       }
     );
+
+    await lockAssignment(courseId, assignment.id);
   } catch (err) {
-    if (err.response?.statusCode === 404) {
-      log.warn(`User ${userId} is missing in Canvas course ${courseId}`);
+    if (err.type === "missing_student") {
+      log.warn(`User ${studentKthId} is missing in Canvas course ${courseId}`);
     } else {
-      throw err;
+      log.error(
+        { err },
+        `Error when uploading an exam ${studentKthId} / course ${courseId}`
+      );
     }
+    throw err;
   }
 }
 
-async function getAuthorizationData(courseId, userId) {
+async function getRoles(courseId, userId) {
+  if (!courseId) {
+    throw new EndpointError({
+      type: "missing_argument",
+      statusCode: 400,
+      message: "Missing argument [courseId]",
+    });
+  }
+
+  if (!userId) {
+    throw new EndpointError({
+      type: "missing_argument",
+      statusCode: 400,
+      message: "Missing argument [userId]",
+    });
+  }
+
+  // TODO: error handling for non-existent courseId or userId
   const enrollments = await canvas
     .list(`courses/${courseId}/enrollments`, { user_id: userId })
     .toArray();
 
-  const roles = enrollments.map((enr) => enr.role_id);
+  return enrollments.map((enr) => enr.role_id);
+}
 
-  const TEACHER = 4;
-  const EXAMINER = 10;
-
-  return {
-    authorized: roles.includes(TEACHER) || roles.includes(EXAMINER),
-    roles,
-  };
+async function enrollStudent(courseId, userId) {
+  return canvas.requestUrl(`courses/${courseId}/enrollments`, "POST", {
+    enrollment: {
+      user_id: `sis_user_id:${userId}`,
+      role_id: 3,
+      enrollment_state: "active",
+      notify: false,
+    },
+  });
 }
 
 module.exports = {
-  getExaminationLadokId,
+  getCourse,
+  publishCourse,
+  createHomepage,
+  getAktivitetstillfalleUIDs,
   getValidAssignment,
+  getAssignmentSubmissions,
   createAssignment,
+  publishAssignment,
   unlockAssignment,
   lockAssignment,
   hasSubmission,
   uploadExam,
-  getAuthorizationData,
+  getRoles,
+  enrollStudent,
 };

@@ -1,147 +1,31 @@
-/* eslint-disable react/jsx-one-expression-per-line, no-console */
-import React, { useState, useEffect, createRef } from "react";
-import CreateAssignment from "./components/CreateAssignment";
-import Layout from "./components/Layout";
-import UploadScannedExams from "./components/UploadScannedExams";
-import {
-  createAssignment,
-  getAssignment,
-  sendExam,
-  uploadStatus,
-} from "./utils";
+import React from "react";
+import { useUser } from "./common/api";
+import UnauthenticatedApp from "./features/unauthenticated-app/UnauthenticatedApp";
+import AuthenticatedApp from "./features/authenticated-app/AuthenticatedApp";
 
-function App() {
-  const [created, setCreated] = useState(false);
-  const [isLoading, setLoading] = useState(true);
-  const [alert, setAlert] = useState({ type: null, message: null });
+function getCourseId() {
+  const urlParams = new URLSearchParams(window.location.search);
 
-  const loop = createRef();
+  if (!urlParams.has("courseId")) {
+    throw new Error(
+      "Missing URL parameter 'courseId'. This app should be launched from Canvas"
+    );
+  }
 
-  const clearAlert = () => {
-    setAlert({ type: null, message: null });
-  };
-
-  const getStatus = async () => {
-    try {
-      const res = await uploadStatus();
-      if (res.ok) {
-        const data = await res.json();
-        if (data.state === "success") {
-          setAlert({
-            type: "success",
-            message: "The exams have been successfully uploaded!",
-          });
-          setLoading(false);
-          return;
-        }
-      } else {
-        setAlert({
-          type: "danger",
-          message: "There was an unexpected error, please try again later...",
-        });
-      }
-      loop.current = setTimeout(getStatus, 1000);
-    } catch (err) {
-      console.log(err);
-      setAlert({
-        type: "danger",
-        message: "There was an unexpected error, please try again later...",
-      });
-    } finally {
-      clearTimeout(loop);
-    }
-  };
-
-  const onUpload = () => {
-    clearAlert();
-    setLoading(true);
-
-    const sendFile = async () => {
-      try {
-        const res = await sendExam();
-        if (res.ok) {
-          getStatus();
-        } else {
-          throw new Error();
-        }
-      } catch (err) {
-        console.log(err);
-        setAlert({
-          type: "danger",
-          message: "There was an unexpected error, please try again later...",
-        });
-        setLoading(false);
-      }
-    };
-
-    sendFile();
-  };
-
-  const onCreate = async () => {
-    try {
-      setLoading(true);
-      const res = await createAssignment();
-      const data = await res.json();
-      if (data.assignment) {
-        setCreated(true);
-      } else {
-        throw new Error("Unable to create ");
-      }
-      setLoading(false);
-    } catch (err) {
-      console.log(err);
-      setAlert({
-        type: "danger",
-        message: "There was an unexpected error, please try again later...",
-      });
-    }
-  };
-
-  const View = () => {
-    if (isLoading) {
-      return (
-        <>
-          <p>
-            The exams are now being imported to Canvas which can take up to 10
-            minutes. You can close this browser window.
-          </p>
-          <p>
-            If you have any questions, or any problem arises, please contact{" "}
-            <a href="mailto:it-support@kth.se">it-support@kth.se</a>!
-          </p>
-          <p>Loading...</p>
-        </>
-      );
-    }
-
-    if (created) {
-      return <UploadScannedExams onUpload={onUpload} />;
-    }
-
-    return <CreateAssignment onCreate={onCreate} />;
-  };
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const res = await getAssignment();
-        const data = await res.json();
-        if (data.assignment) {
-          setCreated(true);
-        }
-        setLoading(false);
-      } catch (err) {
-        console.log(err);
-        setAlert({
-          type: "danger",
-          message: "There was an unexpected error, please try again later...",
-        });
-      }
-    };
-    init();
-  }, [setCreated, setLoading, setAlert]);
-
-  return <Layout alert={alert}>{View()}</Layout>;
+  return urlParams.get("courseId");
 }
 
-export default App;
+export default function App() {
+  const { isLoading, data } = useUser();
+  const courseId = getCourseId();
+
+  if (isLoading) {
+    return <div />;
+  }
+
+  if (data) {
+    return <AuthenticatedApp courseId={courseId} />;
+  }
+
+  return <UnauthenticatedApp courseId={courseId} />;
+}

@@ -22,27 +22,48 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const path = require("path");
 const fs = require("fs");
+const MongoDBStore = require("connect-mongodb-session")(session);
+
 const apiRouter = require("./api/router");
 const authRouter = require("./auth/router");
 const monitor = require("./monitor");
-const canvas = require("./api/canvasApiClient");
 
-const PORT = 4000;
 const server = express();
+
+const COOKIE_MAX_AGE_SECONDS = 3600;
+const store = new MongoDBStore({
+  uri: process.env.MONGODB_CONNECTION_STRING,
+  collection: "sessions",
+
+  // Session expiration time
+  expires: COOKIE_MAX_AGE_SECONDS * 1000,
+
+  // These two lines are required when using CosmosDB
+  // See https://github.com/mongodb-js/connect-mongodb-session#azure-cosmos-mongodb-support
+  expiresKey: `_ts`,
+  expiresAfterSeconds: COOKIE_MAX_AGE_SECONDS,
+});
 
 server.set("trust proxy", 1);
 server.use(
   session({
+    name: "scanned-exams.sid",
     cookie: {
       domain: "kth.se",
-      maxAge: 3600 * 1000 /* 1 hour */,
+      maxAge: COOKIE_MAX_AGE_SECONDS * 1000,
       httpOnly: true,
       secure: true,
       sameSite: process.env.CANVAS_API_URL.endsWith("kth.se")
         ? "strict"
         : "none",
     },
+    // MongoDB does not update TTL when reading but when writing
+    resave: true,
+
+    // Avoid saving anonymous sessions (non logged-in users)
+    saveUninitialized: false,
     secret: process.env.SESSION_SECRET,
+    store,
   })
 );
 
@@ -55,7 +76,7 @@ server.use((req, res, next) => {
     next
   );
 });
-server.use(express.urlencoded());
+server.use(express.urlencoded({ extended: true }));
 server.use(express.json());
 server.use(cookieParser());
 
@@ -71,12 +92,16 @@ server.post("/scanned-exams", async (req, res) => {
     const domain = req.body.custom_domain;
     const courseId = req.body.custom_courseid;
 
+    // TODO: if domain is kth.test.instructure.com > Redirect to the app in referens
+    // TODO: if domain is kth.instructure.com > Show a message encouraging people to use "canvas.kth.se"
+    // TODO: set a cookie to check from client-side JS that the cookie is set correctly
+
     if (req.session.userId) {
-      log.info("POST /scanned-exams: user has a session. Redirecting to /app");
+      log.debug("POST /scanned-exams: user has a session. Redirecting to /app");
       return res.redirect(`/scanned-exams/app?courseId=${courseId}`);
     }
 
-    log.info(
+    log.debug(
       `POST /scanned-exams: user has launched the app from course ${courseId}`
     );
 
@@ -94,19 +119,7 @@ server.post("/scanned-exams", async (req, res) => {
 
     req.session.userId = null;
 
-    // TODO: if domain is kth.test.instructure.com > Redirect to the app in referens
-    // TODO: if domain is kth.instructure.com > Show a message encouraging people to use "canvas.kth.se"
-    // TODO: set a cookie to check from client-side JS that the cookie is set correctly
-
-    const html = await fs.promises.readFile("index.html", {
-      encoding: "utf-8",
-    });
-
-    return res
-      .status(200)
-      .send(
-        html.replace("{{COURSE_ID}}", courseId).replace("{{DOMAIN}}", domain)
-      );
+    return res.redirect(`/scanned-exams/app?courseId=${courseId}`);
   } catch (err) {
     log.error({ err });
     return res.status(500).send("Unknown error. Please contact IT support");
@@ -116,22 +129,12 @@ server.use("/scanned-exams/auth", authRouter);
 server.use("/scanned-exams/api", apiRouter);
 server.get("/scanned-exams/app", async (req, res) => {
   try {
-    const { courseId } = req.query;
-    const { userId } = req.session;
-    const { authorized } = await canvas.getAuthorizationData(courseId, userId);
-
-    if (!authorized) {
-      return res.send(
-        "Unauthorized: you must be teacher or examiner to use this app"
-      );
-    }
-
     const html = await fs.promises.readFile(
       path.join(__dirname, "..", "frontend", "build", "index.html"),
       { encoding: "utf-8" }
     );
 
-    return res.send(html.replace("__COURSE_ID__", courseId));
+    return res.send(html);
   } catch (err) {
     log.error(err);
     return res.status(500).send("Unknown error. Please contact IT support");
@@ -144,7 +147,3 @@ server.use(
 
 server.get("/scanned-exams/_monitor", monitor);
 module.exports = server;
-
-server.listen(PORT, () => {
-  log.info(`App listening on port ${PORT}`);
-});

@@ -1,2 +1,4 @@
 .DS_Store
 .#*
+globalConfig.json
+.vscode/settings.json

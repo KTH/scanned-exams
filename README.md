@@ -8,9 +8,8 @@ Application that downloads exams from the "Windream/AlcomREST tenta API" and upl
 
 Pre-requirements
 
-1. Install [ImageMagick](https://imagemagick.org/index.php) or [GraphicsMagick](http://www.graphicsmagick.org/) in your computer.
-2. Install [mkcert](https://github.com/FiloSottile/mkcert) (a tool to generate self-signed SSH certificates easily)
-3. Make sure you have a line like this in `/etc/hosts`:
+1. Install [mkcert](https://github.com/FiloSottile/mkcert) (a tool to generate self-signed SSH certificates easily)
+2. Make sure you have a line like this in `/etc/hosts`:
 
     ```
     127.0.0.1   localdev.kth.se
