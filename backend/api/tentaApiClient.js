@@ -124,17 +124,25 @@ async function downloadExam(fileId) {
     responseType: "json",
   });
 
+  // TODO: Throw descriptibe error if we don't get expected data
+
   const getValue = (index) =>
     body.wdFile.objectIndiceses.find((di) => di.index === index)?.value;
 
   const examDateTime = getValue("e_date");
   const examDate = examDateTime.split("T")[0];
+  const studentKthId = getValue("s_uid");
+
+  if (!studentKthId)
+    throw new Error(
+      `Could not get KTH ID (s_uid) from TentaAPI (windream) for file id "${fileId}".`
+    );
 
   return {
     content: Readable.from(
       Buffer.from(body.wdFile.fileAsBase64.toString("utf-8"), "base64")
     ),
-    studentKthId: getValue("s_uid"),
+    studentKthId,
     examDate,
   };
 }
