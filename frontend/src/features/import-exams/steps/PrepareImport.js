@@ -59,6 +59,9 @@ export default function PrepareImport({ onGoTo, courseId }) {
   if (examsToImport.length === 0) {
     if (examsWithError.length > 0) {
       onGoTo("issues");
+    } else if (exams.length > 0) {
+      // We have done a successful import but nothing new waiting
+      onGoTo("result");
     }
   }
 
