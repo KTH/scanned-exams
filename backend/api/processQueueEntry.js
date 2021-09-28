@@ -32,6 +32,10 @@ async function uploadOneExam({ fileId, courseId }) {
   );
 }
 
+/**
+ * Find and process an entry from the global import queue and exit
+ * @returns {bool} return true is entry was processed and false if queue was empty
+ */
 module.exports = async function processQueueEntry() {
   const examToBeImported = await getFirstPendingFromQueue();
 
@@ -64,4 +68,6 @@ module.exports = async function processQueueEntry() {
         );
     }
   }
+
+  return !!examToBeImported;
 };
