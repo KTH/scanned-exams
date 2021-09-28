@@ -46,7 +46,13 @@ class ImportError extends Error {
 }
 
 function errorHandler(err, req, res, next) {
-  log.error(err);
+  if (err?.name === "EndpointError") {
+    log.info(err);
+  } else if (err?.name === "AuthError") {
+    log.warn(err);
+  } else {
+    log.error(err);
+  }
 
   if (res.headersSent) {
     return next(err);
