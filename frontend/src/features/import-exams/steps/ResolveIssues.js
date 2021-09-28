@@ -83,7 +83,8 @@ export default function ResolveIssues({ onGoTo, courseId }) {
         <H2>Resolve in progress...</H2>
         <p>
           Fixing issues with your latest import. This adds missing students and
-          also attempts to fix other import errors.
+          also attempts to fix other import errors. Please stay on this page
+          during this process.
         </p>
         <div className="mt-8">
           <ImportQueueProgressBar
@@ -108,12 +109,27 @@ export default function ResolveIssues({ onGoTo, courseId }) {
         during import.
       </P>
       {nrofExamsToResolve === 0 && (
-        <P>You can safely proceed to verify the status of all your imports.</P>
+        <P>
+          <b>DONE!</b> You can safely proceed to the summary to verify the
+          status of all your imports.
+        </P>
       )}
       {nrofExamsToResolve > 0 && (
         <>
           <div className={cssInfoBox}>
-            <p>Information about resolving errors.</p>
+            <p>We encountered errors during the import.</p>
+            <P>
+              <b>You can start grading exams</b> that have been imported to the
+              assignment even if not all of them where succesfully imported.
+            </P>
+            <P>
+              <b>Exams marked with "missing student"</b> can be fixed by
+              clicking the button "Fix missing students!".
+            </P>
+            <P>
+              <b>Exams marked with other errors</b> might need further
+              investigation. Contact IT-support.
+            </P>
           </div>
           {/* Render missing students */}
           {examsWithMissingStudentError.length > 0 &&
