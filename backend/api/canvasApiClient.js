@@ -169,15 +169,14 @@ async function unlockAssignment(courseId, assignmentId) {
 }
 
 async function lockAssignment(courseId, assignmentId) {
-  const YESTERDAY = new Date();
-  YESTERDAY.setDate(YESTERDAY.getDate() - 1);
+  const NOW = new Date();
 
   return canvas.requestUrl(
     `courses/${courseId}/assignments/${assignmentId}`,
     "PUT",
     {
       assignment: {
-        lock_at: YESTERDAY.toISOString(),
+        lock_at: NOW.toISOString(),
       },
     }
   );
