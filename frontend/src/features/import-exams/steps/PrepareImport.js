@@ -101,26 +101,6 @@ export default function PrepareImport({ onGoTo, courseId }) {
         {nrofExamsWithErrors > 0 &&
           `Note: ${nrofExamsWithErrors} of these are exams that previously failed to be imported. They are listed in "Resolve Issues", click button "Next" to see them.`}
       </P>
-      <div className={cssInfoBox}>
-        <p>
-          Before exams are ready to be imported to Canvas they need to be
-          scanned and verified. You may need to perform further imports when
-          more exams are available.
-        </p>
-        <P>
-          <b>Scanning</b> is an automated process that happens a few days after
-          the exam date.
-        </P>
-        <P>
-          <b>Verification</b> is a manual process that can take several days to
-          complete.
-        </P>
-        <P>
-          When an exam fails to import it is marked with an error. Any exam
-          marked with an error will be re-processed for each subsequent import
-          until success.
-        </P>
-      </div>
       <div className="mt-8">
         <SummaryTable summary={{ availableRecords: nrofExamsToImport }} />
       </div>
