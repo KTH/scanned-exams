@@ -9,7 +9,6 @@ import {
   H2,
   LoadingPage,
   PrimaryButton,
-  SecondaryButton,
   P,
   cssInfoBox,
   ImportQueueProgressBar,
@@ -76,12 +75,6 @@ export default function PrepareImport({ onGoTo, courseId }) {
     return (
       <div className="max-w-2xl">
         <H2>Import in progress...</H2>
-        <div className={cssInfoBox}>
-          <p>
-            <b>Surprised?</b> The import can be started by another tab or
-            another teacher for this course.
-          </p>
-        </div>
         <div className="mt-8">
           <SummaryTable />
         </div>
