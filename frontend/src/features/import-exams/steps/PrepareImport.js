@@ -76,9 +76,6 @@ export default function PrepareImport({ onGoTo, courseId }) {
       <div className="max-w-2xl">
         <H2>Import in progress...</H2>
         <div className="mt-8">
-          <SummaryTable />
-        </div>
-        <div className="mt-8">
           <ImportQueueProgressBar
             courseId={courseId}
             defaultTotal={nrofExamsToImport}
@@ -102,9 +99,6 @@ export default function PrepareImport({ onGoTo, courseId }) {
           `Note: ${nrofExamsWithErrors} of these are exams that previously failed to be imported. They are listed in "Resolve Issues", click button "Next" to see them.`}
       </P>
       <div className="mt-8">
-        <SummaryTable summary={{ availableRecords: nrofExamsToImport }} />
-      </div>
-      <div className="mt-8">
         {nrofExamsToImport > 0 && (
           <PrimaryButton
             className="sm:w-96"
@@ -116,20 +110,5 @@ export default function PrepareImport({ onGoTo, courseId }) {
         )}
       </div>
     </div>
-  );
-}
-
-function SummaryTable({ summary }) {
-  return (
-    <table className="table-auto">
-      <tbody>
-        {summary && (
-          <tr>
-            <td className="p-1 pl-0">Exams to import:</td>
-            <td className="p-1 pl-2">{summary.availableRecords}</td>
-          </tr>
-        )}
-      </tbody>
-    </table>
   );
 }
