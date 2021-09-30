@@ -36,7 +36,7 @@ async function examListByLadokId(ladokId) {
   });
 
   if (!body.documentSearchResults) {
-    log.info(`No exams found with the "new format" e_ladokid=${ladokId}`);
+    log.debug(`No exams found with the "new format" e_ladokid=${ladokId}`);
     return [];
   }
 
