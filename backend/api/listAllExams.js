@@ -1,4 +1,5 @@
 /** Functions that handle the "import exams" part of the app */
+const log = require("skog");
 const canvas = require("./canvasApiClient");
 const ladok = require("./ladokApiClient");
 const tentaApi = require("./tentaApiClient");
@@ -52,7 +53,7 @@ function deduplicateScannedExams(exams) {
 /** Returns a list of scanned exams (i.e. in Windream) given its ladokId */
 async function listScannedExams(courseId, ladokId) {
   // Try getting exams using the Ladok ID. (new format)
-  const allScannedExams = await tentaApi.examListByLadokId(ladokId);
+  const examsWithNewFormat = await tentaApi.examListByLadokId(ladokId);
   const aktivitetstillfalle = await ladok
     .getAktivitetstillfalle(ladokId)
     .catch(() => {
@@ -69,8 +70,9 @@ async function listScannedExams(courseId, ladokId) {
 
   const { activities, examDate } = aktivitetstillfalle;
 
+  const examsWithOldFormat = [];
   for (const { courseCode, examCode } of activities) {
-    allScannedExams.push(
+    examsWithOldFormat.push(
       // eslint-disable-next-line no-await-in-loop
       ...(await tentaApi.examList({ courseCode, examCode, examDate }))
     );
@@ -79,7 +81,16 @@ async function listScannedExams(courseId, ladokId) {
   // Note: Since we are fetching exams based on {courseCode, examCode, examDate}
   // (old format) and ladok ID (new format), we can find exams in Windream that
   // have both formats. Hence, we need to deduplicate
-  return deduplicateScannedExams(allScannedExams);
+  const allScannedExams = deduplicateScannedExams([
+    ...examsWithNewFormat,
+    ...examsWithOldFormat,
+  ]);
+
+  log.info(
+    `Obtained exams for course [${courseId}] ladokId [${ladokId}] with new format ${examsWithNewFormat.length} / old format: ${examsWithOldFormat.length} / total (without duplicates) ${allScannedExams.length}`
+  );
+
+  return allScannedExams;
 }
 
 /**
