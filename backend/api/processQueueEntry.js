@@ -32,6 +32,16 @@ async function uploadOneExam({ fileId, courseId }) {
   );
 }
 
+function handleUploadErrors(err, exam) {
+  // Logging an error so we can improve handling of various
+  // failure modes that occur in canvas
+  log.error(
+    "Unhandled Import Error - we failed uploading exam " +
+      exam.fileId +
+      ` (${err.type || err.name} | ${err.message})`
+  );
+}
+
 /**
  * Find and process an entry from the global import queue and exit
  * @returns {bool} return true is entry was processed and false if queue was empty
@@ -47,25 +57,27 @@ module.exports = async function processQueueEntry() {
           throw Error("Forced error for testing during development");
       }
 
-      // Normal
+      // Upload to Canvas
       await uploadOneExam({
         fileId: examToBeImported.fileId,
         courseId: examToBeImported.courseId,
+      }).catch((err) => {
+        handleUploadErrors(err, examToBeImported);
+        throw err;
       });
+
+      // Update status in import queue
       await updateStatusOfEntryInQueue(examToBeImported, "imported");
+
       if (IS_DEV) log.debug("Imported file " + examToBeImported.fileId);
     } catch (err) {
+      // TODO: Improve handling of errors, at least adding a more user
+      // friendly message
       await updateStatusOfEntryInQueue(examToBeImported, "error", {
-        type: err.type || "import_error",
+        type: err.type || err.name,
         message: err.message,
         details: err.details || {},
       });
-      if (IS_DEV)
-        log.debug(
-          "Error importing file " +
-            examToBeImported.fileId +
-            ` (${err.message})`
-        );
     }
   }
 
