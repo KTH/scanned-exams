@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-boolean-value */
 /* eslint-disable react/no-unescaped-entities */
 import React, { useState } from "react";
 import { useMutateExamroomSetup } from "../../../common/api";
@@ -21,7 +22,7 @@ export default function SetupCourse({ courseId }) {
     isError,
     ...mutation
   } = useMutateExamroomSetup(courseId);
-  const [recommendedHomepage, setRecommendedHomepage] = useState("yes");
+  const [recommendedHomepage, setRecommendedHomepage] = useState();
 
   if (isError) {
     throw mutation.error;
@@ -46,14 +47,14 @@ export default function SetupCourse({ courseId }) {
           value={recommendedHomepage}
           onChange={(v) => setRecommendedHomepage(v)}
         >
-          <BlockRadio value="yes" id="create-homepage-yes">
+          <BlockRadio value={true} id="create-homepage-yes">
             <div>Recommended setup</div>
             <div className="my-2 text-sm">
               Create a special assignment called "Scanned Exams" and replace the
               existing homepage with our recommendation
             </div>
           </BlockRadio>
-          <BlockRadio value="no" id="create-homepage-no">
+          <BlockRadio value={false} id="create-homepage-no">
             <div>Minimal setup</div>
             <div className="my-2 text-sm">
               Only create a special assignment called "Scanned Exams". Leave
@@ -67,7 +68,7 @@ export default function SetupCourse({ courseId }) {
       </P>
       <PrimaryButton
         className="my-8 sm:w-72"
-        onClick={() => setupExamroom(recommendedHomepage === "yes")}
+        onClick={() => setupExamroom(recommendedHomepage)}
         waiting={isLoading}
         success={isSuccess}
       >
