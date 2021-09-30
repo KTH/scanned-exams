@@ -128,7 +128,8 @@ export default function ResolveIssues({ onGoTo, courseId }) {
             </P>
             <P>
               <b>Exams marked with other errors</b> might need further
-              investigation. Contact IT-support.
+              investigation. Contact IT-support or click "Re-import rows..." if you
+              believe the issue has been resolved.
             </P>
           </div>
           {/* Render missing students */}
@@ -150,7 +151,16 @@ export default function ResolveIssues({ onGoTo, courseId }) {
         </> /**/
       )}
       <div className="mt-8">
-        <PrimaryButton className="sm:w-96" onClick={() => onGoTo("result")}>
+        {examsWithOtherErrors.length > 0 && (
+          <SecondaryButton
+            className="sm:w-auto"
+            waiting={startImportLoading}
+            onClick={doStartImport}
+          >
+            Re-import rows with errors
+          </SecondaryButton>
+        )}
+        <PrimaryButton className="sm:w-56" onClick={() => onGoTo("result")}>
           Show Summary
         </PrimaryButton>
       </div>
