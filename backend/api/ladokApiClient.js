@@ -13,7 +13,7 @@ const ladokGot = got.extend({
 });
 
 async function getAktivitetstillfalle(ladokId) {
-  log.info(`Getting information for aktivitetstillfälle ${ladokId}`);
+  log.debug(`Getting information for aktivitetstillfälle ${ladokId}`);
   const res = ladokGot.get(`resultat/aktivitetstillfalle/${ladokId}`);
   const body = await res.json();
 

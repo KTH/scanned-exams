@@ -16,7 +16,7 @@ async function getVersion() {
 }
 
 async function examListByLadokId(ladokId) {
-  log.info(`Getting exams for Ladok ID ${ladokId}`);
+  log.debug(`Getting exams for Ladok ID ${ladokId}`);
 
   const { body } = await client("windream/search/documents/false", {
     method: "POST",
@@ -36,7 +36,7 @@ async function examListByLadokId(ladokId) {
   });
 
   if (!body.documentSearchResults) {
-    log.info(`No exams found for ladok ID ${ladokId}`);
+    log.info(`No exams found with the "new format" e_ladokid=${ladokId}`);
     return [];
   }
 
@@ -63,7 +63,9 @@ async function examListByLadokId(ladokId) {
 
 /** Get a list of all exam files for a given exam */
 async function examList({ courseCode, examDate, examCode }) {
-  log.debug(`Getting exams for ${courseCode} ${examDate} ${examCode}`);
+  log.debug(
+    `Getting exams with the "old format" ${courseCode} ${examDate} ${examCode}`
+  );
   const { body } = await client("windream/search/documents/false", {
     method: "POST",
     json: {
