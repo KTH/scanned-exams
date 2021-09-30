@@ -20,6 +20,14 @@ export function RadioGroup({ value, name, onChange, ...props }) {
 }
 
 /**
+ * Obtains the value of the component as a whole i.e., the value
+ * set in `RadioGroup`
+ */
+export function useRadioInputValue() {
+  return useContext(RadioContext).value;
+}
+
+/**
  * A normal HTML radio button but with its value controlled by a parent
  * `RadioGroup` component.
  *
