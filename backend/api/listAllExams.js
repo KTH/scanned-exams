@@ -1,4 +1,5 @@
 /** Functions that handle the "import exams" part of the app */
+const log = require("skog");
 const canvas = require("./canvasApiClient");
 const ladok = require("./ladokApiClient");
 const tentaApi = require("./tentaApiClient");
@@ -83,6 +84,7 @@ async function listScannedExams(courseId, ladokId) {
  * Returns a list of students (KTH IDs) that has an exam in Canvas
  */
 async function listStudentsWithExamsInCanvas(courseId, ladokId) {
+  log.debug(`Getting assignment for course [${courseId}] [${ladokId}]`);
   const assignment = await canvas
     .getValidAssignment(courseId, ladokId)
     .then((result) => {
@@ -101,9 +103,17 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
       }
     });
 
+  log.debug(
+    `Getting submissions for course [${courseId}] assignment [${assignment.id}]`
+  );
+
   const submissions = await canvas.getAssignmentSubmissions(
     courseId,
     assignment.id
+  );
+
+  log.debug(
+    `Submissions in course [${courseId}] assignment [${assignment.id}]. Found ${submissions.length}`
   );
 
   // Filter-out submissions without exams or without KTH ID
