@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import React, { useState } from "react";
-import { useMutateCourseSetup } from "../../../common/api";
+import { useMutateExamroomSetup } from "../../../common/api";
 import { P, H2, PrimaryButton } from "../../widgets";
 import { RadioGroup, RadioInput } from "../../RadioGroup";
 
@@ -14,12 +14,18 @@ function BlockRadio({ children, value, id }) {
 }
 
 export default function SetupCourse({ courseId }) {
-  const createAssignmentMutation = useMutateCourseSetup(
-    courseId,
-    "create-assignment"
-  );
-  const setHomepageMutation = useMutateCourseSetup(courseId, "create-homepage");
+  const {
+    mutate: setupExamroom,
+    isLoading,
+    isSuccess,
+    isError,
+    ...mutation
+  } = useMutateExamroomSetup(courseId);
   const [recommendedHomepage, setRecommendedHomepage] = useState("yes");
+
+  if (isError) {
+    throw mutation.error;
+  }
 
   return (
     <div className="max-w-2xl">
@@ -59,7 +65,14 @@ export default function SetupCourse({ courseId }) {
       <P>
         Note: neither the examroom or assignment will be published in this step
       </P>
-      <PrimaryButton className="my-8 sm:w-72">Apply changes</PrimaryButton>
+      <PrimaryButton
+        className="my-8 sm:w-72"
+        onClick={() => setupExamroom(recommendedHomepage === "yes")}
+        waiting={isLoading}
+        success={isSuccess}
+      >
+        Apply changes
+      </PrimaryButton>
     </div>
   );
 }

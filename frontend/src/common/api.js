@@ -89,6 +89,30 @@ export function useCourseExams(courseId) {
   );
 }
 
+export function useMutateExamroomSetup(courseId, options = {}) {
+  const client = useQueryClient();
+
+  return useMutation(
+    async (setRecommendedHomepage = false) => {
+      if (setRecommendedHomepage) {
+        await apiClient(`courses/${courseId}/setup/create-homepage`, {
+          method: "POST",
+        });
+      }
+
+      return apiClient(`courses/${courseId}/setup/create-assignment`, {
+        method: "POST",
+      });
+    },
+    {
+      ...options,
+      onSuccess() {
+        client.invalidateQueries(["course", courseId, "setup"]);
+      },
+    }
+  );
+}
+
 /** Performs one action to change the setup of a course */
 export function useMutateCourseSetup(courseId, action, options = {}) {
   const client = useQueryClient();
