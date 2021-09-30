@@ -42,17 +42,17 @@ async function getLadokId(courseId) {
   return ladokIds[0];
 }
 
+function deduplicateScannedExams(exams) {
+  const allIds = exams.map((e) => e.fileId);
+  const uniqueIds = Array.from(new Set(allIds));
+
+  return uniqueIds.map((id) => exams.find((e) => e.fileId === id));
+}
+
 /** Returns a list of scanned exams (i.e. in Windream) given its ladokId */
 async function listScannedExams(courseId, ladokId) {
   // Try getting exams using the Ladok ID. (new format)
   const allScannedExams = await tentaApi.examListByLadokId(ladokId);
-
-  if (allScannedExams.length > 0) {
-    return allScannedExams;
-  }
-
-  // If there are no exams with the new format
-  // try finding them using { courseCode, examCode, examDate }
   const aktivitetstillfalle = await ladok
     .getAktivitetstillfalle(ladokId)
     .catch(() => {
@@ -76,7 +76,10 @@ async function listScannedExams(courseId, ladokId) {
     );
   }
 
-  return allScannedExams;
+  // Note: Since we are fetching exams based on {courseCode, examCode, examDate}
+  // (old format) and ladok ID (new format), we can find exams in Windream that
+  // have both formats. Hence, we need to deduplicate
+  return deduplicateScannedExams(allScannedExams);
 }
 
 /**
@@ -175,5 +178,6 @@ async function listAllExams(courseId) {
 }
 
 module.exports = {
+  listScannedExams,
   listAllExams,
 };
