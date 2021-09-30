@@ -27,6 +27,15 @@ async function getAktivitetstillfalle(ladokId) {
   }));
 
   return {
+    // When fetching Ladok asking which examCode-courseCode are associated
+    // with one "aktivitetstillfälle", we might get the same pair of
+    // courseCode-examCode. This is because the same course can have multiple
+    // versions and in those cases every version is returned as a separate
+    // element. Example:
+    //   Try to GET https://api.integrationstest.ladok.se/resultat/aktivitetstillfalle/0aa3c265-9dce-11eb-863b-62bcffd242dd
+    //   and look at "Kopplingar" in the body response
+    // However, from our perspective all versions are identical so we can just
+    // remove all duplicates safely.
     activities: removeDuplicates(activities),
     examDate: body.Datumperiod.Startdatum,
   };
