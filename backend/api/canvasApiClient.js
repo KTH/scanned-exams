@@ -102,10 +102,10 @@ async function getAssignmentSubmissions(courseId, assignmentId) {
   // GET /api/v1/courses/:course_id/assignments/:assignment_id/submissions
   // ?include=user (to get user obj wth kth id)
   return canvas
-    .list(
-      `courses/${courseId}/assignments/${assignmentId}/submissions`,
-      { include: "user" } // include user obj with kth id
-    )
+    .list(`courses/${courseId}/assignments/${assignmentId}/submissions`, {
+      include: "user", // include user obj with kth id
+      per_page: 100,
+    })
     .toArray();
 }
 
