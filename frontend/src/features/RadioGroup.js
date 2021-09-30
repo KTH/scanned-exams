@@ -2,6 +2,7 @@
 import React, { createContext, useContext } from "react";
 
 const RadioContext = createContext({
+  name: undefined,
   value: undefined,
   onChange: () => {},
 });
@@ -14,8 +15,8 @@ const RadioContext = createContext({
  * - When selecting some `RadioInput`, the `onChange` from `RadioGroup` will
  *   be invoked
  */
-export function RadioGroup({ value, onChange, ...props }) {
-  return <RadioContext.Provider value={{ value, onChange }} {...props} />;
+export function RadioGroup({ value, name, onChange, ...props }) {
+  return <RadioContext.Provider value={{ name, value, onChange }} {...props} />;
 }
 
 /**
@@ -33,6 +34,7 @@ export function RadioInput({ value, ...props }) {
   return (
     <input
       type="radio"
+      name={ctx.name}
       checked={ctx.value === value}
       onChange={(e) => {
         if (e.target.value === "on") {
