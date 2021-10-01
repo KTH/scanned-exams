@@ -14,7 +14,7 @@ function BlockRadio({ children, value, id }) {
   );
 }
 
-export default function SetupCourse({ courseId }) {
+export default function SetupExamroom({ courseId }) {
   const {
     mutate: setupExamroom,
     isLoading,
