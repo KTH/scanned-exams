@@ -5,5 +5,12 @@
     "prettier/react",
     "react-app",
     "react-app/jest"
-  ]
+  ],
+  "rules": {
+    "jsx-a11y/label-has-associated-control": [ 2, {
+      "labelAttributes": ["label"],
+      "controlComponents": ["RadioInput"],
+      "depth": 3
+    }]
+  }
 }

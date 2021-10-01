@@ -89,26 +89,47 @@ export function useCourseExams(courseId) {
   );
 }
 
-/** Performs one action to change the setup of a course */
-export function useMutateCourseSetup(courseId, action, options = {}) {
+export function useMutateExamroomSetup(courseId, options = {}) {
   const client = useQueryClient();
 
   return useMutation(
-    () =>
-      apiClient(`courses/${courseId}/setup/${action}`, {
+    async (setRecommendedHomepage = false) => {
+      if (setRecommendedHomepage) {
+        await apiClient(`courses/${courseId}/setup/create-homepage`, {
+          method: "POST",
+        });
+      }
+
+      return apiClient(`courses/${courseId}/setup/create-assignment`, {
         method: "POST",
-      }),
+      });
+    },
     {
       ...options,
       onSuccess() {
-        if (action === "publish-assignment") {
-          // Reset queries to trigger loading indicator when
-          // moving to imoport flow
-          client.resetQueries(["course", courseId]);
-        } else {
-          client.invalidateQueries(["course", courseId, "setup"]);
-        }
-        options.onSuccess?.();
+        client.invalidateQueries(["course", courseId, "setup"]);
+      },
+    }
+  );
+}
+
+export function useMutatePublishAll(courseId, options = {}) {
+  const client = useQueryClient();
+
+  return useMutation(
+    async () => {
+      await apiClient(`courses/${courseId}/setup/publish-course`, {
+        method: "POST",
+      });
+      await apiClient(`courses/${courseId}/setup/publish-assignment`, {
+        method: "POST",
+      });
+    },
+    {
+      ...options,
+      onSuccess() {
+        client.resetQueries(["course", courseId]);
+        client.invalidateQueries(["course", courseId, "setup"]);
       },
     }
   );
