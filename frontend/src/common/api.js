@@ -135,31 +135,6 @@ export function useMutatePublishAll(courseId, options = {}) {
   );
 }
 
-/** Performs one action to change the setup of a course */
-export function useMutateCourseSetup(courseId, action, options = {}) {
-  const client = useQueryClient();
-
-  return useMutation(
-    () =>
-      apiClient(`courses/${courseId}/setup/${action}`, {
-        method: "POST",
-      }),
-    {
-      ...options,
-      onSuccess() {
-        if (action === "publish-assignment") {
-          // Reset queries to trigger loading indicator when
-          // moving to imoport flow
-          client.resetQueries(["course", courseId]);
-        } else {
-          client.invalidateQueries(["course", courseId, "setup"]);
-        }
-        options.onSuccess?.();
-      },
-    }
-  );
-}
-
 /** Start an import */
 export function useMutateImportStart(courseId, examsToImport, options = {}) {
   const client = useQueryClient();
