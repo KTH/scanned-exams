@@ -1,6 +1,6 @@
 import React from "react";
 import { Step, StepList } from "../StepList";
-import PublishCourse from "./steps/PublishCourse";
+import PublishExamroom from "./steps/PublishExamroom";
 import SetupExamroom from "./steps/SetupExamroom";
 
 function StepText({ long, short }) {
@@ -29,7 +29,7 @@ export default function SetupScreen({ assignmentCreated, courseId }) {
           </StepList>
         </div>
         {currentStep === 0 && <SetupExamroom courseId={courseId} />}
-        {currentStep === 1 && <PublishCourse courseId={courseId} />}
+        {currentStep === 1 && <PublishExamroom courseId={courseId} />}
       </div>
     </div>
   );

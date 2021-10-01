@@ -113,6 +113,28 @@ export function useMutateExamroomSetup(courseId, options = {}) {
   );
 }
 
+export function useMutatePublishAll(courseId, options = {}) {
+  const client = useQueryClient();
+
+  return useMutation(
+    async () => {
+      await apiClient(`courses/${courseId}/setup/publish-course`, {
+        method: "POST",
+      });
+      await apiClient(`courses/${courseId}/setup/publish-assignment`, {
+        method: "POST",
+      });
+    },
+    {
+      ...options,
+      onSuccess() {
+        client.resetQueries(["course", courseId]);
+        client.invalidateQueries(["course", courseId, "setup"]);
+      },
+    }
+  );
+}
+
 /** Performs one action to change the setup of a course */
 export function useMutateCourseSetup(courseId, action, options = {}) {
   const client = useQueryClient();
