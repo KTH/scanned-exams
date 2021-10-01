@@ -116,21 +116,18 @@ async function createAssignment(courseId, ladokId) {
     .requestUrl(`courses/${courseId}/assignments`, "POST", {
       assignment: {
         name: "Scanned exams",
+        // By setting submission_types to "on_paper", we don't allow students
+        // to upload their exams. Only when needed, will we change this setting
+        // to "online_upload"
+        submission_types: ["on_paper"],
         description:
           'This is an assignment created automatically by importing scanned exams to Canvas. The grade posting policy is set to "Manual" which makes it possible to grade all submissions before publishing the student feedback for all students at once.',
-        submission_types: ["online_upload"],
-        allowed_extensions: ["pdf"],
-        // TODO: save only the "Ladok UID" because `examination.courseCode` and
-        //       `examination.examCode` can be more than one
-        // TODO: add more data to be able to filter out better?
         integration_data: {
           ladokId,
         },
         published: false,
         grading_type: "letter_grade",
         notify_of_update: false,
-        lock_at: new Date().toISOString(),
-        // IMPORTANT: do NOT pass a time zone in the "due_at" field
         due_at: `${examination.examDate}T23:59:59`,
         // TODO: take the grading standard from TentaAPI
         //       grading_standard_id: 1,
@@ -161,6 +158,8 @@ async function unlockAssignment(courseId, assignmentId) {
     "PUT",
     {
       assignment: {
+        submission_types: ["online_upload"],
+        allowed_extensions: ["pdf"],
         lock_at: TOMORROW.toISOString(),
         published: true,
       },
