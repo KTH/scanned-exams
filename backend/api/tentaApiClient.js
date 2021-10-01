@@ -62,7 +62,7 @@ async function examListByLadokId(ladokId) {
 }
 
 /** Get a list of all exam files for a given exam */
-async function examList({ courseCode, examDate, examCode }) {
+async function examListByDate({ courseCode, examDate, examCode }) {
   log.debug(
     `Getting exams with the "old format" ${courseCode} ${examDate} ${examCode}`
   );
@@ -150,7 +150,7 @@ async function downloadExam(fileId) {
 }
 
 module.exports = {
-  examList,
+  examListByDate,
   examListByLadokId,
   downloadExam,
   getVersion,

@@ -43,26 +43,15 @@ async function getLadokId(courseId) {
   return ladokIds[0];
 }
 
-function deduplicateScannedExams(exams) {
-  const allIds = exams.map((e) => e.fileId);
-  const uniqueIds = Array.from(new Set(allIds));
-
-  return uniqueIds.map((id) => exams.find((e) => e.fileId === id));
-}
-
-/** Returns a list of scanned exams (i.e. in Windream) given its ladokId */
-async function listScannedExams(courseId, ladokId) {
-  // Try getting exams using the Ladok ID. (new format)
-  const examsWithNewFormat = await tentaApi.examListByLadokId(ladokId);
+async function listScannedExamsWithOldFormat(ladokId) {
   const aktivitetstillfalle = await ladok
     .getAktivitetstillfalle(ladokId)
     .catch(() => {
       throw new EndpointError({
         type: "invalid_activity",
         statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
-        message: `The course [${courseId}] is associated with a not valid Ladok activitestillfälle [${ladokId}]`,
+        message: `Not valid Ladok activitestillfälle [${ladokId}]`,
         details: {
-          courseId,
           ladokId,
         },
       });
@@ -74,9 +63,24 @@ async function listScannedExams(courseId, ladokId) {
   for (const { courseCode, examCode } of activities) {
     examsWithOldFormat.push(
       // eslint-disable-next-line no-await-in-loop
-      ...(await tentaApi.examList({ courseCode, examCode, examDate }))
+      ...(await tentaApi.examListByDate({ courseCode, examCode, examDate }))
     );
   }
+
+  return examsWithOldFormat;
+}
+
+function deduplicateScannedExams(exams) {
+  const allIds = exams.map((e) => e.fileId);
+  const uniqueIds = Array.from(new Set(allIds));
+
+  return uniqueIds.map((id) => exams.find((e) => e.fileId === id));
+}
+
+/** Returns a list of scanned exams (i.e. in Windream) given its ladokId */
+async function listScannedExams(courseId, ladokId) {
+  const examsWithNewFormat = await tentaApi.examListByLadokId(ladokId);
+  const examsWithOldFormat = await listScannedExamsWithOldFormat(ladokId);
 
   // Note: Since we are fetching exams based on {courseCode, examCode, examDate}
   // (old format) and ladok ID (new format), we can find exams in Windream that
