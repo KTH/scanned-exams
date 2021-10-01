@@ -129,9 +129,7 @@ async function createAssignment(courseId, ladokId) {
         published: false,
         grading_type: "letter_grade",
         notify_of_update: false,
-        lock_at: new Date().toISOString(),
-        // IMPORTANT: do NOT pass a time zone in the "due_at" field
-        due_at: `${examination.examDate}T23:59:59`,
+        due_at: `${examination.examDate}T00:00:00`,
         // TODO: take the grading standard from TentaAPI
         //       grading_standard_id: 1,
       },
