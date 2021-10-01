@@ -82,9 +82,8 @@ export default function ResolveIssues({ onGoTo, courseId }) {
       <div className="max-w-2xl">
         <H2>Resolve in progress...</H2>
         <p>
-          Fixing issues with your latest import. This adds missing students and
-          also attempts to fix other import errors. Please stay on this page
-          during this process.
+          Re-importing exams with issues. Please stay on this page during this
+          process.
         </p>
         <div className="mt-8">
           <ImportQueueProgressBar
@@ -123,12 +122,12 @@ export default function ResolveIssues({ onGoTo, courseId }) {
               assignment even if not all of them where succesfully imported.
             </P>
             <P>
-              <b>Exams marked with "missing student"</b> can be fixed by
-              clicking the button "Fix missing students!".
+              <b>Exams marked with &quot;missing student&quot;</b> can be fixed
+              by clicking the button &quot;Fix missing students!&quot;.
             </P>
             <P>
-              <b>Exams marked with other errors</b> might need further
-              investigation. Contact IT-support or click "Re-import rows..." if you
+              <b>Exams marked as unhandled</b> might need further investigation.
+              Contact IT-support or click &quot;Re-import rows...&quot; if you
               believe the issue has been resolved.
             </P>
           </div>
