@@ -17,9 +17,11 @@ const canvas = new Canvas(
 const TEMPLATES = {
   assignment: {
     en: "courses/33450/assignments/178066",
+    sv: "courses/33450/assignments/178752",
   },
   homepage: {
     en: "courses/33450/pages/151311",
+    sv: "courses/33450/pages/151959",
   },
 };
 
