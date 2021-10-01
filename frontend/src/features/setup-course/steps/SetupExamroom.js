@@ -51,7 +51,7 @@ export default function SetupExamroom({ courseId }) {
             <div>Recommended setup</div>
             <div className="my-2 text-sm">
               Create a special assignment called "Scanned Exams" and replace the
-              existing homepage with our recommendation
+              existing homepage with information to students.
             </div>
           </BlockRadio>
           <BlockRadio value={false} id="create-homepage-no">
