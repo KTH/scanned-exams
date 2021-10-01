@@ -118,11 +118,10 @@ async function createAssignment(courseId, ladokId) {
         name: "Scanned exams",
         description:
           'This is an assignment created automatically by importing scanned exams to Canvas. The grade posting policy is set to "Manual" which makes it possible to grade all submissions before publishing the student feedback for all students at once.',
-        submission_types: ["online_upload"],
-        allowed_extensions: ["pdf"],
-        // TODO: save only the "Ladok UID" because `examination.courseCode` and
-        //       `examination.examCode` can be more than one
-        // TODO: add more data to be able to filter out better?
+        // "on_paper" allows us to create an assignment where students cannot
+        // submit anything. This will be converted to "online_upload" when
+        // we actually submit something (when calling `unlockAssignment`)
+        submission_types: ["on_paper"],
         integration_data: {
           ladokId,
         },
@@ -150,6 +149,16 @@ async function publishAssignment(courseId, assignmentId) {
   );
 }
 
+/**
+ * Unlocks an assignment for one day.
+ *
+ * During the unlock period, everybody can upload PDF files to this assignment
+ * - When students upload things, they will be marked as "LATE"
+ * - When "we" upload things, they will not be marked as "LATE"
+ *
+ * The "LATE" mark allows us to detect if someone that is not us has uploaded
+ * something.
+ */
 async function unlockAssignment(courseId, assignmentId) {
   const TOMORROW = new Date();
   TOMORROW.setDate(TOMORROW.getDate() + 1);
@@ -159,6 +168,8 @@ async function unlockAssignment(courseId, assignmentId) {
     "PUT",
     {
       assignment: {
+        submission_types: ["online_upload"],
+        allowed_extensions: ["pdf"],
         lock_at: TOMORROW.toISOString(),
         published: true,
       },
@@ -166,6 +177,12 @@ async function unlockAssignment(courseId, assignmentId) {
   );
 }
 
+/**
+ * Locks the assignment
+ *
+ * After locking the assignment, no one (students or us) can upload more things
+ * This prevents students to upload things by accident.
+ */
 async function lockAssignment(courseId, assignmentId) {
   const NOW = new Date();
 
