@@ -17,11 +17,14 @@ const databaseClient = new MongoClient(MONGODB_CONNECTION_STRING, {
  * It also connects to the database if it's not already connected
  */
 let databaseConnection;
+function getDatabaseConnection() {
+  databaseConnection = databaseConnection || databaseClient.connect();
+  return databaseConnection;
+}
 async function getImportQueueCollection() {
   // Note: `databaseConnection` is a promise and must be awaited to be used
   // Instansiate once, but not before it is used the first time
-  databaseConnection = databaseConnection || databaseClient.connect();
-  await databaseConnection;
+  await getDatabaseConnection();
 
   return databaseClient.db().collection(DB_QUEUE_NAME);
 }
