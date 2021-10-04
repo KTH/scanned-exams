@@ -5,6 +5,7 @@ const {
   getFirstPendingFromQueue,
   updateStatusOfEntryInQueue,
 } = require("./importQueue");
+const { ImportError } = require("./error");
 
 const { DEV_FORCE_RANDOM_ERRORS, NODE_ENV } = process.env;
 const FORCE_RANDOM_ERRORS = DEV_FORCE_RANDOM_ERRORS === "TRUE";
@@ -24,6 +25,7 @@ async function uploadOneExam({ fileId, courseId }) {
     courseId,
     studentKthId,
     examDate,
+    fileId,
   });
   log.debug("Time to upload exam: " + (Date.now() - uploadExamStart) + "ms");
 
@@ -33,13 +35,39 @@ async function uploadOneExam({ fileId, courseId }) {
 }
 
 function handleUploadErrors(err, exam) {
-  // Logging an error so we can improve handling of various
-  // failure modes that occur in canvas
-  log.error(
-    "Unhandled Import Error - we failed uploading exam " +
-      exam.fileId +
-      ` (${err.type || err.name} | ${err.message})`
-  );
+  if (err instanceof ImportError) {
+    if (err.type === "import_error") {
+      // This is a general error which means we don't know
+      // how to fix it from code.
+      log.error(
+        "Unhandled Canvas Error - we failed uploading exam " +
+          exam.fileId +
+          ` (${err.type || err.name} | ${err.message})`
+      );
+    }
+    // ImportErrors already have a good error message
+    // so we just throw them as is
+    throw err;
+  } else {
+    // This error was probably caused by our code
+    log.error(
+      { err },
+      "Unhandled Import Error - we failed uploading exam " +
+        exam.fileId +
+        ` (${err.message})`
+    );
+
+    // We need to create a user friendly error message that is stored in the
+    // import queue
+    throw new ImportError({
+      type: "other_error",
+      message: `We encountered an unhandled error when importing exam (windream fileId: ${exam.fileId})`,
+      details: {
+        err,
+        exam,
+      },
+    });
+  }
 }
 
 /**
@@ -63,7 +91,6 @@ module.exports = async function processQueueEntry() {
         courseId: examToBeImported.courseId,
       }).catch((err) => {
         handleUploadErrors(err, examToBeImported);
-        throw err;
       });
 
       // Update status in import queue

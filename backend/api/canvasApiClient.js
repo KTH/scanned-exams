@@ -221,7 +221,10 @@ async function hasSubmission({ courseId, assignmentId, userId }) {
   }
 }
 
-async function uploadExam(content, { courseId, studentKthId, examDate }) {
+async function uploadExam(
+  content,
+  { courseId, studentKthId, examDate, fileId }
+) {
   try {
     const { body: user } = await canvas.get(
       `users/sis_user_id:${studentKthId}`
@@ -246,7 +249,7 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
       )
       .catch((err) => {
         if (err.response?.statusCode === 404) {
-          // Student is missing in Canvas
+          // Student is missing in Canvas, we can fix this
           throw new ImportError({
             type: "missing_student",
             message: "Student is missing in examroom",
@@ -254,9 +257,17 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
               kthId: studentKthId,
             },
           });
+        } else {
+          // Other errors from Canvas API that we don't know how to fix
+          throw new ImportError({
+            type: "import_error",
+            message: `Canvas returned an error when importing this exam (windream fileId: ${fileId})`,
+            details: {
+              kthId: studentKthId,
+              fileId,
+            },
+          });
         }
-
-        throw err;
       });
 
     log.debug(
