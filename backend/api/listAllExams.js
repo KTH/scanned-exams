@@ -70,7 +70,8 @@ async function listScannedExamsWithOldFormat(ladokId) {
   return examsWithOldFormat;
 }
 
-function deduplicateScannedExams(exams) {
+function mergeAndDeduplicate(array1, array2) {
+  const exams = [...array1, ...array2];
   const allIds = exams.map((e) => e.fileId);
   const uniqueIds = Array.from(new Set(allIds));
 
@@ -85,10 +86,10 @@ async function listScannedExams(courseId, ladokId) {
   // Note: Since we are fetching exams based on {courseCode, examCode, examDate}
   // (old format) and ladok ID (new format), we can find exams in Windream that
   // have both formats. Hence, we need to deduplicate
-  const allScannedExams = deduplicateScannedExams([
-    ...examsWithNewFormat,
-    ...examsWithOldFormat,
-  ]);
+  const allScannedExams = mergeAndDeduplicate(
+    examsWithNewFormat,
+    examsWithOldFormat
+  );
 
   log.info(
     `Obtained exams for course [${courseId}] ladokId [${ladokId}] with new format ${examsWithNewFormat.length} / old format: ${examsWithOldFormat.length} / total (without duplicates) ${allScannedExams.length}`
@@ -195,4 +196,5 @@ async function listAllExams(courseId) {
 module.exports = {
   listScannedExams,
   listAllExams,
+  mergeAndDeduplicate,
 };
