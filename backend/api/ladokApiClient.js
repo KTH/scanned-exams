@@ -15,6 +15,7 @@ function getLadokGot() {
         Accept: "application/json",
       },
     });
+  return ladokGot;
 }
 
 async function getAktivitetstillfalle(ladokId) {
