@@ -112,6 +112,16 @@ async function getAssignmentSubmissions(courseId, assignmentId) {
 async function createAssignment(courseId, ladokId) {
   const examination = await getAktivitetstillfalle(ladokId);
 
+  const examinationDate = new Date(`${examination.examDate}T00:00:00`);
+
+  if (examinationDate > new Date()) {
+    throw new EndpointError({
+      type: "future_exam",
+      statusCode: 400,
+      message: `You can not create the assignment now. Please run the app again after the exam date, i.e. on ${examination.examDate} or later`,
+    });
+  }
+
   return canvas
     .requestUrl(`courses/${courseId}/assignments`, "POST", {
       assignment: {
@@ -131,7 +141,7 @@ async function createAssignment(courseId, ladokId) {
         notify_of_update: false,
         lock_at: new Date().toISOString(),
         // IMPORTANT: do NOT pass a time zone in the "due_at" field
-        due_at: `${examination.examDate}T23:59:59`,
+        due_at: `${examination.examDate}T00:00:00`,
         // TODO: take the grading standard from TentaAPI
         //       grading_standard_id: 1,
       },
