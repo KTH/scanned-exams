@@ -159,10 +159,7 @@ async function resetQueueForImport(courseId) {
       },
     });
   } catch (err) {
-    log.warn(
-      "resetQueueForImport failet with error. If this happens once in isolation it is okay, this method is called every time we start an import."
-    );
-    log.error(err);
+    log.error({ err });
     throw new Error("Error removing finished entries");
   }
 }
