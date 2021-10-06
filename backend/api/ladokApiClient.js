@@ -12,8 +12,20 @@ const ladokGot = got.extend({
   },
 });
 
-function removeDuplicates(arr) {
-  return Array.from(new Set(arr.map(JSON.stringify))).map(JSON.parse);
+/**
+ * Deduplicate an array of {examCode, courseCode} objects
+ * @param {Object[]} arr
+ * @param {string} arr[].examCode
+ * @param {string} arr[].courseCode
+ * @returns
+ */
+function deduplicate(arr) {
+  return arr.filter(
+    (e1) =>
+      !arr.find(
+        (e2) => e1.courseCode === e2.courseCode && e1.examCode === e2.examCode
+      )
+  );
 }
 
 async function getAktivitetstillfalle(ladokId) {
@@ -36,7 +48,7 @@ async function getAktivitetstillfalle(ladokId) {
     //   and look at "Kopplingar" in the body response
     // However, from our perspective all versions are identical so we can just
     // remove all duplicates safely.
-    activities: removeDuplicates(activities),
+    activities: deduplicate(activities),
     examDate: body.Datumperiod.Startdatum,
   };
 }
