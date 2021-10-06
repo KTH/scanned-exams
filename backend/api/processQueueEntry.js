@@ -11,11 +11,26 @@ const { DEV_FORCE_RANDOM_ERRORS, NODE_ENV } = process.env;
 const FORCE_RANDOM_ERRORS = DEV_FORCE_RANDOM_ERRORS === "TRUE";
 const IS_DEV = NODE_ENV !== "production";
 
+/**
+ * Students that don't exist in UG get a fake personnummer
+ * in windream and they need to be graded manually
+ */
+function throwIfStudentNotInUg(fileId, studentPersNr) {
+  if (studentPersNr.replace(/-/g, "") === "121212121212") {
+    throw new ImportError({
+      type: "not_in_ug",
+      message: `This student isn't in UG and grading needs to be done manually (windream fileId: ${fileId})`,
+    });
+  }
+}
+
 async function uploadOneExam({ fileId, courseId }) {
   log.debug(`Course ${courseId} / File ${fileId}. Downloading`);
-  const { content, studentKthId, examDate } = await tentaApi.downloadExam(
-    fileId
-  );
+  const { content, studentKthId, studentPersNr, examDate } =
+    await tentaApi.downloadExam(fileId);
+
+  // Some business rules
+  throwIfStudentNotInUg(fileId, studentPersNr);
 
   log.debug(
     `Course ${courseId} / File ${fileId} / User ${studentKthId}. Uploading`
