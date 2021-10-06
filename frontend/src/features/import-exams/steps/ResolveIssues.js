@@ -12,7 +12,6 @@ import {
   SecondaryButton,
   P,
   cssInfoBox,
-  cssSuccessBox,
   ImportQueueProgressBar,
 } from "../../widgets";
 
@@ -26,7 +25,7 @@ export default function ResolveIssues({ onGoTo, courseId }) {
   const {
     data: dataExams,
     isLoading: examsLoading,
-    isError: examsError,
+    // isError: examsError,
   } = queryExams;
 
   const examsSuccessfullyImported =
@@ -48,8 +47,8 @@ export default function ResolveIssues({ onGoTo, courseId }) {
 
   const {
     mutate: doAddStudents,
-    isLoading: addStudentsLoading,
-    isError: addStudentsError,
+    // isLoading: addStudentsLoading,
+    // isError: addStudentsError,
   } = addStudentsMutation;
 
   // Hoook to start import
@@ -70,7 +69,7 @@ export default function ResolveIssues({ onGoTo, courseId }) {
   const {
     mutate: doStartImport,
     isLoading: startImportLoading,
-    isError: startImportError,
+    // isError: startImportError,
   } = startImportMutation;
 
   if (examsLoading) {
