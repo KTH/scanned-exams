@@ -134,6 +134,7 @@ async function downloadExam(fileId) {
   const examDateTime = getValue("e_date");
   const examDate = examDateTime.split("T")[0];
   const studentKthId = getValue("s_uid");
+  const studentPersNr = getValue("s_pnr");
 
   if (!studentKthId)
     throw new Error(
@@ -145,6 +146,7 @@ async function downloadExam(fileId) {
       Buffer.from(body.wdFile.fileAsBase64.toString("utf-8"), "base64")
     ),
     studentKthId,
+    studentPersNr,
     examDate,
   };
 }
