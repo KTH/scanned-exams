@@ -29,7 +29,7 @@ export default function PrepareImport({ onGoTo, courseId }) {
 
   // Get exams available to import
   const queryExams = useCourseExams(courseId);
-  const { data = {}, isLoading: examsLoading } = queryExams;
+  const { data = {}, isFetching: examsLoading } = queryExams;
   const { result: exams = [] } = data;
 
   const examsToImport = exams.filter((exam) => exam.status === "new") || [];
