@@ -15,11 +15,11 @@ const IS_DEV = NODE_ENV !== "production";
  * Students that don't exist in UG get a fake personnummer
  * in windream and they need to be graded manually
  */
-function throwIfStudentNotInUg({ fileId, studentPersNr, studentKthId }) {
+function throwIfStudentNotInUg({ fileId, studentPersNr }) {
   if (studentPersNr.replace(/-/g, "") === "121212121212") {
     throw new ImportError({
       type: "not_in_ug",
-      message: `The student does not have a Canvas account. Please contact IT-support (attach the following data: windream fileId: ${fileId}, KTH ID: ${studentKthId})`,
+      message: `The student does not have a Canvas account. Please contact IT-support (windream fileId: ${fileId})`,
     });
   }
 }
@@ -30,7 +30,7 @@ async function uploadOneExam({ fileId, courseId }) {
     await tentaApi.downloadExam(fileId);
 
   // Some business rules
-  throwIfStudentNotInUg({ fileId, studentKthId, studentPersNr });
+  throwIfStudentNotInUg({ fileId, studentPersNr });
 
   log.debug(
     `Course ${courseId} / File ${fileId} / User ${studentKthId}. Uploading`
