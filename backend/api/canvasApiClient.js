@@ -25,6 +25,21 @@ const TEMPLATES = {
   },
 };
 
+// NOTE:
+// This solution is temporal. It is only if Course ID in Test
+// are different from the Course ID in production
+if (process.env.CANVAS_API_URL.startsWith("https://kth.test.instructure.com")) {
+  TEMPLATES.assignment = {
+    en: "33462/assignments/177929",
+    sv: "33462/assignments/178046",
+  };
+
+  TEMPLATES.homepage = {
+    en: "courses/33462/pages/149980",
+    sv: "courses/33462/pages/150041",
+  };
+}
+
 /** Get data from one canvas course */
 async function getCourse(courseId) {
   const { body } = await canvas.get(`courses/${courseId}`);
