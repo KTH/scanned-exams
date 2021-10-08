@@ -1,7 +1,7 @@
 /** Endpoints to setup a Canvas course */
 
-const canvas = require("./canvasApiClient");
-const { EndpointError } = require("./error");
+const canvas = require("../externalApis/canvasApiClient");
+const { EndpointError } = require("../error");
 
 /**
  * Get the "ladokId" of a given course. It throws in case the course

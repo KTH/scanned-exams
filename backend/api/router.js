@@ -10,7 +10,7 @@ const {
   publishCourse,
   createSpecialAssignment,
   publishSpecialAssignment,
-} = require("./setupCourse");
+} = require("./endpointHandlers/setupCourse");
 
 const {
   getExamsEndpoint,

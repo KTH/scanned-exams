@@ -1,5 +1,6 @@
 const { expect } = require("@jest/globals");
-const listAllExams = require("../api/listAllExams");
+const listAllExams = require("../api/endpointHandlers/utilsLegacy/listAllExams");
+
 describe("mergeAndDeduplicate", () => {
   it("should include exams from both arrays, but no duplicates", () => {
     const array1 = [{ fileId: "1" }, { fileId: "2" }];

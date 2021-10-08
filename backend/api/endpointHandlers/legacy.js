@@ -6,8 +6,8 @@ const {
   resetQueueForImport,
   updateStatusOfEntryInQueue,
 } = require("../importQueue");
-const { listAllExams } = require("../listAllExams");
-const { enrollStudent } = require("../canvasApiClient");
+const { listAllExams } = require("./utilsLegacy/listAllExams");
+const { enrollStudent } = require("../externalApis/canvasApiClient");
 
 async function getExamsEndpoint(req, res, next) {
   // - Canvas is source of truth regarding if a submitted exam is truly imported

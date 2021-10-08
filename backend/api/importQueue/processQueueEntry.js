@@ -1,11 +1,11 @@
 const log = require("skog");
-const canvas = require("./canvasApiClient");
-const tentaApi = require("./tentaApiClient");
+const canvas = require("../externalApis/canvasApiClient");
+const tentaApi = require("../externalApis/tentaApiClient");
 const {
   getFirstPendingFromQueue,
   updateStatusOfEntryInQueue,
-} = require("./importQueue");
-const { ImportError } = require("./error");
+} = require("./index");
+const { ImportError } = require("../error");
 
 const { DEV_FORCE_RANDOM_ERRORS, NODE_ENV } = process.env;
 const FORCE_RANDOM_ERRORS = DEV_FORCE_RANDOM_ERRORS === "TRUE";

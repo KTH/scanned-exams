@@ -1,5 +1,5 @@
 const log = require("skog");
-const canvas = require("./canvasApiClient");
+const canvas = require("./externalApis/canvasApiClient");
 const { AuthError } = require("./error");
 
 async function checkPermissions(courseId, userId) {

@@ -1,11 +1,11 @@
 /** Functions that handle the "import exams" part of the app */
 const log = require("skog");
-const canvas = require("./canvasApiClient");
-const ladok = require("./ladokApiClient");
-const tentaApi = require("./tentaApiClient");
-const { getEntriesFromQueue } = require("./importQueue");
+const canvas = require("../../externalApis/canvasApiClient");
+const ladok = require("../../externalApis/ladokApiClient");
+const tentaApi = require("../../externalApis/tentaApiClient");
+const { getEntriesFromQueue } = require("../../importQueue");
 
-const { EndpointError } = require("./error");
+const { EndpointError } = require("../../error");
 
 /**
  * Get the "ladokId" that is associated with a given course. It throws in case
