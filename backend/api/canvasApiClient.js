@@ -28,7 +28,9 @@ const TEMPLATES = {
 // NOTE:
 // This solution is temporal. It is only if Course ID in Test
 // are different from the Course ID in production
-if (process.env.CANVAS_API_URL.startsWith("https://kth.test.instructure.com")) {
+if (
+  process.env.CANVAS_API_URL?.startsWith("https://kth.test.instructure.com")
+) {
   TEMPLATES.assignment = {
     en: "courses/33462/assignments/177929",
     sv: "courses/33462/assignments/178046",
