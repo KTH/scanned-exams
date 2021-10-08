@@ -131,12 +131,49 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
     .map((submission) => submission.user?.sis_user_id);
 }
 
+function incrementSummary(summary, status, error) {
+  // eslint-disable-next-line no-param-reassign
+  summary.total++;
+
+  // eslint-disable-next-line no-param-reassign
+  if (summary[status] === undefined) summary[status] = 0;
+  // eslint-disable-next-line no-param-reassign
+  summary[status]++;
+
+  if (error !== undefined) {
+    const errorType = error.type;
+    if (summary.errorsByType[errorType] === undefined) {
+      // eslint-disable-next-line no-param-reassign
+      summary.errorsByType[errorType] = 1;
+    } else {
+      // eslint-disable-next-line no-param-reassign
+      summary.errorsByType[errorType]++;
+    }
+  }
+}
+
 async function listAllExams(courseId) {
   const ladokId = await getLadokId(courseId);
-  const allScannedExams = await listScannedExams(courseId, ladokId);
-  const studentsWithExamsInCanvas =
-    (await listStudentsWithExamsInCanvas(courseId, ladokId)) || [];
-  const examsInImportQueue = (await getEntriesFromQueue(courseId)) || [];
+  let [allScannedExams, studentsWithExamsInCanvas, examsInImportQueue] =
+    await Promise.all([
+      listScannedExams(courseId, ladokId),
+      listStudentsWithExamsInCanvas(courseId, ladokId),
+      getEntriesFromQueue(courseId),
+    ]);
+
+  // Make sure these are arrays
+  allScannedExams = allScannedExams || [];
+  studentsWithExamsInCanvas = studentsWithExamsInCanvas || [];
+  examsInImportQueue = examsInImportQueue || [];
+
+  const summary = {
+    total: 0,
+    new: 0,
+    pending: 0,
+    imported: 0,
+    errors: 0,
+    errorsByType: {},
+  };
 
   const listOfExamsToHandle = allScannedExams.map((exam) => {
     const foundInCanvas = studentsWithExamsInCanvas.find(
@@ -171,6 +208,8 @@ async function listAllExams(courseId) {
       }
     }
 
+    incrementSummary(summary, status, errorDetails);
+
     return {
       id: exam.fileId,
       student: exam.student,
@@ -179,17 +218,9 @@ async function listAllExams(courseId) {
     };
   });
 
-  // TODO: Fix this stub when we know want frontend wants, needs a method in import  queue
-  // const summary = {
-  //   new: 0,
-  //   pending: 0,
-  //   errors: 0,
-  //   total: 0,
-  // };
-
   return {
     result: listOfExamsToHandle,
-    // summary
+    summary,
   };
 }
 
