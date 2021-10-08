@@ -1,10 +1,11 @@
 /** Functions that handle the "import exams" part of the app */
 const log = require("skog");
-const canvas = require("./canvasApiClient");
-const tentaApi = require("./tentaApiClient");
-const { getEntriesFromQueue } = require("./importQueue");
+const canvas = require("../../externalApis/canvasApiClient");
+const ladok = require("../../externalApis/ladokApiClient");
+const tentaApi = require("../../externalApis/tentaApiClient");
+const { getEntriesFromQueue } = require("../../importQueue");
 
-const { EndpointError } = require("./error");
+const { EndpointError } = require("../../error");
 
 /**
  * Get the "ladokId" that is associated with a given course. It throws in case
@@ -42,12 +43,56 @@ async function getLadokId(courseId) {
   return ladokIds[0];
 }
 
+async function listScannedExamsWithOldFormat(ladokId) {
+  const aktivitetstillfalle = await ladok
+    .getAktivitetstillfalle(ladokId)
+    .catch(() => {
+      throw new EndpointError({
+        type: "invalid_activity",
+        statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
+        message: `Not valid Ladok activitestillfälle [${ladokId}]`,
+        details: {
+          ladokId,
+        },
+      });
+    });
+
+  const { activities, examDate } = aktivitetstillfalle;
+
+  const examsWithOldFormat = [];
+  for (const { courseCode, examCode } of activities) {
+    examsWithOldFormat.push(
+      // eslint-disable-next-line no-await-in-loop
+      ...(await tentaApi.examListByDate({ courseCode, examCode, examDate }))
+    );
+  }
+
+  return examsWithOldFormat;
+}
+
+function mergeAndDeduplicate(array1, array2) {
+  const exams = [...array1, ...array2];
+  const allIds = exams.map((e) => e.fileId);
+  const uniqueIds = Array.from(new Set(allIds));
+
+  return uniqueIds.map((id) => exams.find((e) => e.fileId === id));
+}
+
 /** Returns a list of scanned exams (i.e. in Windream) given its ladokId */
 async function listScannedExams(courseId, ladokId) {
-  const allScannedExams = await tentaApi.examListByLadokId(ladokId);
+  const examsWithNewFormat = await tentaApi.examListByLadokId(ladokId);
+  const examsWithOldFormat = await listScannedExamsWithOldFormat(ladokId);
+
+  // Note: Since we are fetching exams based on {courseCode, examCode, examDate}
+  // (old format) and ladok ID (new format), we can find exams in Windream that
+  // have both formats. Hence, we need to deduplicate
+  const allScannedExams = mergeAndDeduplicate(
+    examsWithNewFormat,
+    examsWithOldFormat
+  );
 
   log.info(
-    `Obtained exams for course [${courseId}] ladokId [${ladokId}]: ${allScannedExams.length}`
+    `Obtained exams for course [${courseId}] ladokId [${ladokId}] with new format ${examsWithNewFormat.length} / old format: ${examsWithOldFormat.length} / total (without duplicates) ${allScannedExams.length}`
   );
 
   return allScannedExams;
@@ -151,4 +196,5 @@ async function listAllExams(courseId) {
 module.exports = {
   listScannedExams,
   listAllExams,
+  mergeAndDeduplicate,
 };
