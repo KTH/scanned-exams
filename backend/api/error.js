@@ -3,16 +3,39 @@ const log = require("skog");
 /* eslint max-classes-per-file: */
 
 /**
+ * Common ancestor of all operational errors allowing
+ * for more catch all checks.
+ */
+class OperationalError extends Error {
+  constructor(name, statusCode, type, message, details, err) {
+    super(message);
+    this.name = name;
+    this.statusCode = statusCode;
+    this.type = type;
+    this.details = details;
+    this.err = err;
+  }
+}
+
+/**
+ * Error for recoverable programmer errors.
+ * These are errors that don't require us to crash the app.
+ */
+class RecoverableError extends Error {
+  constructor({ message = "We encountered an error in our code.", err }) {
+    super(message);
+    this.name = "RecoverableError";
+    this.err = err;
+  }
+}
+
+/**
  * AuthError should be handled by the frontend
  * api client.
  */
-class AuthError extends Error {
-  constructor({ type, message, details }) {
-    super(message);
-    this.name = "AuthError";
-    this.type = type;
-    this.statusCode = 401;
-    this.details = details;
+class AuthError extends OperationalError {
+  constructor({ type, message, details, err }) {
+    super("AuthError", 401, type, message, details, err);
   }
 }
 
@@ -21,14 +44,20 @@ class AuthError extends Error {
  * handled by the frontend code that calls the
  * actual endpoint.
  */
-class EndpointError extends Error {
+class EndpointError extends OperationalError {
   // Errors that must be handled by frontend
-  constructor({ type, statusCode, message, details }) {
-    super(message);
-    this.name = "EndpointError";
-    this.type = type;
-    this.statusCode = statusCode;
-    this.details = details;
+  constructor({ type, statusCode, message, details, err }) {
+    super("EndpointError", statusCode, type, message, details, err);
+  }
+}
+
+/**
+ * AuthError should be handled by the frontend
+ * api client.
+ */
+class LadokApiError extends OperationalError {
+  constructor({ type, message, details, err }) {
+    super("LadokApiError", 503, type, message, details, err);
   }
 }
 
@@ -36,12 +65,9 @@ class EndpointError extends Error {
  * All errors of type "ImportError" are known problems that happened when
  * importing an exam to Canvas
  */
-class ImportError extends Error {
-  constructor({ type, message, details }) {
-    super(message);
-    this.name = "ImportError";
-    this.type = type;
-    this.details = details;
+class ImportError extends OperationalError {
+  constructor({ type, message, details, err }) {
+    super("ImportError", 503, type, message, details, err);
   }
 }
 
@@ -50,8 +76,20 @@ function errorHandler(err, req, res, next) {
     log.info(err);
   } else if (err?.name === "AuthError") {
     log.warn(err);
+  } else if (err.err) {
+    // If we have included an .err object it should always be logged
+    // because it is a serious error that needs to be fixed.
+    log.error(
+      err.err,
+      `(${err.name}${err.type ? "/" + err.type : ""}) ${err.message}`
+    );
   } else {
     log.error(err);
+  }
+
+  // Add error details if provided for debugging
+  if (err.details) {
+    log.debug(err.details);
   }
 
   if (res.headersSent) {
@@ -72,7 +110,10 @@ function errorHandler(err, req, res, next) {
 
 module.exports = {
   errorHandler,
+  OperationalError,
+  RecoverableError,
   AuthError,
   EndpointError,
   ImportError,
+  LadokApiError,
 };
