@@ -117,6 +117,11 @@ router.post("/courses/:id/students", addUserToCourseEndpoint);
 /**
  * New endpoints
  */
+// Get status of import queue
+router.get(
+  "/courses/:courseId/import-queue",
+  require("./endpointHandlers/getCourseImportStatus")
+);
 
 router.use(errorHandler);
 module.exports = router;
