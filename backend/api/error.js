@@ -199,7 +199,6 @@ function errorHandler(err, req, res, next) {
       _renderErrorMsg(err.name, err.type, err.message)
     );
   } else {
-    // TODO: Best practice in Node.js is TO CRASH on unhandled exceptions.
     log.error(err);
   }
 
