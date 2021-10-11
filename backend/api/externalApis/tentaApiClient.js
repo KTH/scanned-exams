@@ -36,7 +36,7 @@ async function examListByLadokId(ladokId) {
     },
     responseType: "json",
   }).catch((err) => {
-    throw TentaApiError({
+    throw new TentaApiError({
       err,
     });
   });
