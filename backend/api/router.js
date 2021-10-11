@@ -1,5 +1,5 @@
 const express = require("express");
-const log = require("skog");
+const log = require("skog").default;
 const { errorHandler, EndpointError } = require("./error");
 
 const { checkPermissionsMiddleware } = require("./permission");

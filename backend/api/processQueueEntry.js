@@ -1,4 +1,4 @@
-const log = require("skog");
+const log = require("skog").default;
 const canvas = require("./canvasApiClient");
 const tentaApi = require("./tentaApiClient");
 const {

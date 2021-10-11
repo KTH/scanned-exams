@@ -1,4 +1,4 @@
-const log = require("skog");
+const log = require("skog").default;
 const tentaApiClient = require("./api/tentaApiClient");
 
 async function tentaApi() {

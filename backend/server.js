@@ -1,7 +1,7 @@
 require("dotenv").config();
-const log = require("skog");
+const { default: log, initializeLogger, skogMiddleware } = require("skog");
 
-log.init.pino({
+initializeLogger({
   app: "scanned-exams",
 });
 
@@ -67,7 +67,7 @@ server.use(
   })
 );
 
-server.use(log.middleware);
+server.use(skogMiddleware);
 server.use((req, res, next) => {
   log.child(
     {

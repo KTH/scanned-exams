@@ -3,7 +3,7 @@ const { Issuer, generators } = require("openid-client");
 
 const router = express.Router();
 const { URL } = require("url");
-const log = require("skog");
+const log = require("skog").default;
 
 const OAUTH_REDIRECT_URI = new URL(
   "/scanned-exams/auth/callback",

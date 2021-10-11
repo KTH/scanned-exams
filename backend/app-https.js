@@ -1,6 +1,6 @@
 const fs = require("fs");
 const https = require("https");
-const log = require("skog");
+const log = require("skog").default;
 const server = require("./server");
 
 const { startBackgroundImport } = require("./importWorker");

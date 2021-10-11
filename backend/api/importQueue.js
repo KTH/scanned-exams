@@ -1,5 +1,5 @@
 const { MongoClient } = require("mongodb");
-const log = require("skog");
+const log = require("skog").default;
 
 const { MONGODB_CONNECTION_STRING } = process.env;
 const DB_QUEUE_NAME = "import_queue";

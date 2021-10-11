@@ -36,7 +36,7 @@
     "mongodb": "^4.1.1",
     "openid-client": "^4.6.0",
     "pino": "^6.11.2",
-    "skog": "^2.1.0"
+    "skog": "^3.0.0-1"
   },
   "devDependencies": {
     "@jest/globals": "^26.6.2",

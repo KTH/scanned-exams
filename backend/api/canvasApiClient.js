@@ -1,7 +1,7 @@
 const CanvasApi = require("@kth/canvas-api").default;
 const FormData = require("formdata-node").default;
 const got = require("got");
-const log = require("skog");
+const log = require("skog").default;
 const { getAktivitetstillfalle } = require("./ladokApiClient");
 const { EndpointError, ImportError } = require("./error");
 

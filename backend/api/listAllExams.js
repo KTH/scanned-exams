@@ -1,5 +1,5 @@
 /** Functions that handle the "import exams" part of the app */
-const log = require("skog");
+const log = require("skog").default;
 const canvas = require("./canvasApiClient");
 const ladok = require("./ladokApiClient");
 const tentaApi = require("./tentaApiClient");

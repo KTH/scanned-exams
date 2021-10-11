@@ -1,5 +1,5 @@
 const got = require("got");
-const log = require("skog");
+const log = require("skog").default;
 const { Readable } = require("stream");
 
 const client = got.extend({
