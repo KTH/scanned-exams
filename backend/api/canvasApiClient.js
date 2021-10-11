@@ -1,11 +1,11 @@
-const Canvas = require("@kth/canvas-api");
+const CanvasApi = require("@kth/canvas-api").default;
 const FormData = require("formdata-node").default;
 const got = require("got");
 const log = require("skog");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
 const { EndpointError, ImportError } = require("./error");
 
-const canvas = new Canvas(
+const canvas = new CanvasApi(
   process.env.CANVAS_API_URL,
   process.env.CANVAS_API_ADMIN_TOKEN
 );
@@ -19,7 +19,7 @@ async function getCourse(courseId) {
 
 /** Creates a "good-looking" homepage in Canvas */
 async function createHomepage(courseId) {
-  await canvas.requestUrl(`courses/${courseId}/front_page`, "PUT", {
+  await canvas.request(`courses/${courseId}/front_page`, "PUT", {
     wiki_page: {
       // To make this page, use the Rich Content Editor in Canvas (https://kth.test.instructure.com/courses/30347/pages/welcome-to-the-exam/edit)
       // Then copy the HTML code:
@@ -29,7 +29,7 @@ async function createHomepage(courseId) {
       <p>Once your exam has been graded, you will be able to see the grades and teachers feedback under "Grades".</p>`,
     },
   });
-  return canvas.requestUrl(`courses/${courseId}`, "PUT", {
+  return canvas.request(`courses/${courseId}`, "PUT", {
     course: {
       default_view: "wiki",
     },
@@ -38,7 +38,7 @@ async function createHomepage(courseId) {
 
 /** Publish a course */
 async function publishCourse(courseId) {
-  return canvas.requestUrl(`courses/${courseId}`, "PUT", {
+  return canvas.request(`courses/${courseId}`, "PUT", {
     course: {
       event: "offer",
     },
@@ -47,7 +47,9 @@ async function publishCourse(courseId) {
 
 /** Get the Ladok UID of the examination linked with a canvas course */
 async function getAktivitetstillfalleUIDs(courseId) {
-  const sections = await canvas.list(`courses/${courseId}/sections`).toArray();
+  const sections = await canvas
+    .listItems(`courses/${courseId}/sections`)
+    .toArray();
 
   // For SIS IDs with format "AKT.<ladok id>.<suffix>", take the "<ladok id>"
   const REGEX = /^AKT\.([\w-]+)/;
@@ -64,7 +66,9 @@ async function getAktivitetstillfalleUIDs(courseId) {
 
 // TODO: this function is kept only for backwards-compatibility reasons
 async function getExaminationLadokId(courseId) {
-  const sections = await canvas.list(`courses/${courseId}/sections`).toArray();
+  const sections = await canvas
+    .listItems(`courses/${courseId}/sections`)
+    .toArray();
 
   // For SIS IDs with format "AKT.<ladok id>.<suffix>", take the "<ladok id>"
   const REGEX = /^AKT\.([\w-]+)/;
@@ -88,7 +92,7 @@ async function getExaminationLadokId(courseId) {
 
 async function getValidAssignment(courseId, ladokId) {
   const assignments = await canvas
-    .list(`courses/${courseId}/assignments`)
+    .listItems(`courses/${courseId}/assignments`)
     .toArray();
 
   // TODO: Filter more strictly?
@@ -102,7 +106,7 @@ async function getAssignmentSubmissions(courseId, assignmentId) {
   // GET /api/v1/courses/:course_id/assignments/:assignment_id/submissions
   // ?include=user (to get user obj wth kth id)
   return canvas
-    .list(
+    .listItems(
       `courses/${courseId}/assignments/${assignmentId}/submissions`,
       { include: "user" } // include user obj with kth id
     )
@@ -123,7 +127,7 @@ async function createAssignment(courseId, ladokId) {
   }
 
   return canvas
-    .requestUrl(`courses/${courseId}/assignments`, "POST", {
+    .request(`courses/${courseId}/assignments`, "POST", {
       assignment: {
         name: "Scanned exams",
         description:
@@ -151,7 +155,7 @@ async function createAssignment(courseId, ladokId) {
 
 /** Publish an assignment */
 async function publishAssignment(courseId, assignmentId) {
-  return canvas.requestUrl(
+  return canvas.request(
     `courses/${courseId}/assignments/${assignmentId}`,
     "PUT",
     {
@@ -166,7 +170,7 @@ async function unlockAssignment(courseId, assignmentId) {
   const TOMORROW = new Date();
   TOMORROW.setDate(TOMORROW.getDate() + 1);
 
-  return canvas.requestUrl(
+  return canvas.request(
     `courses/${courseId}/assignments/${assignmentId}`,
     "PUT",
     {
@@ -181,7 +185,7 @@ async function unlockAssignment(courseId, assignmentId) {
 async function lockAssignment(courseId, assignmentId) {
   const NOW = new Date();
 
-  return canvas.requestUrl(
+  return canvas.request(
     `courses/${courseId}/assignments/${assignmentId}`,
     "PUT",
     {
@@ -205,7 +209,7 @@ async function sendFile({ upload_url, upload_params }, content) {
 
   form.append("attachment", content, upload_params.filename);
 
-  return got.post({
+  return got.default.post({
     url: upload_url,
     body: form.stream,
     headers: form.headers,
@@ -250,7 +254,7 @@ async function uploadExam(
     const reqTokenStart = Date.now();
     // TODO: will return a 400 if the course is unpublished
     const { body: slot } = await canvas
-      .requestUrl(
+      .request(
         `courses/${courseId}/assignments/${assignment.id}/submissions/${user.id}/files`,
         "POST",
         {
@@ -289,7 +293,7 @@ async function uploadExam(
 
     log.debug("Time to upload file: " + (Date.now() - uploadFileStart) + "ms");
 
-    await canvas.requestUrl(
+    await canvas.request(
       `courses/${courseId}/assignments/${assignment.id}/submissions/`,
       "POST",
       {
@@ -336,14 +340,14 @@ async function getRoles(courseId, userId) {
 
   // TODO: error handling for non-existent courseId or userId
   const enrollments = await canvas
-    .list(`courses/${courseId}/enrollments`, { user_id: userId })
+    .listItems(`courses/${courseId}/enrollments`, { user_id: userId })
     .toArray();
 
   return enrollments.map((enr) => enr.role_id);
 }
 
 async function enrollStudent(courseId, userId) {
-  return canvas.requestUrl(`courses/${courseId}/enrollments`, "POST", {
+  return canvas.request(`courses/${courseId}/enrollments`, "POST", {
     enrollment: {
       user_id: `sis_user_id:${userId}`,
       role_id: 3,
