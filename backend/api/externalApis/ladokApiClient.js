@@ -40,7 +40,7 @@ async function getAktivitetstillfalle(ladokId) {
     .get(`resultat/aktivitetstillfalle/${ladokId}`)
     .catch(ladokErrorHandler);
 
-  const body = JSON.parsed(res.body);
+  const body = JSON.parse(res.body);
 
   return {
     activities: body.Kopplingar.map((k) => ({

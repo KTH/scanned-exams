@@ -83,12 +83,18 @@ function listExamErrorHandler(err) {
 }
 
 module.exports = async function getCourseImportStatus(req, res, next) {
-  const { id } = req.params;
+  const { courseId } = req.params;
   try {
-    const { summary } = await listAllExams(id).catch(listExamErrorHandler);
+    const { summary } = await listAllExams(courseId).catch(
+      listExamErrorHandler
+    );
+    const { pending } = summary;
 
     return res.send({
-      ...summary,
+      status: pending > 0 ? "working" : "idle",
+      stats: {
+        ...summary,
+      },
     });
   } catch (err) {
     if (isOperationalOrRecoverableError(err)) return next(err);
