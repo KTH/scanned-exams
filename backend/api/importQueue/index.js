@@ -1,5 +1,6 @@
 const { MongoClient } = require("mongodb");
 const log = require("skog");
+const { ImportError } = require("../error");
 
 const { MONGODB_CONNECTION_STRING } = process.env;
 const DB_QUEUE_NAME = "import_queue";
@@ -131,7 +132,9 @@ async function getEntriesFromQueue(courseId) {
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
-    throw err;
+    throw ImportError({
+      err,
+    });
   }
 }
 
