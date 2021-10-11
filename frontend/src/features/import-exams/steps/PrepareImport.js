@@ -21,7 +21,7 @@ export default function PrepareImport({ onGoTo, courseId }) {
 
   // Get status of import worker
   useCourseImportStatus(courseId, {
-    onSuccess(status) {
+    onSuccess({ status }) {
       setQueueStatus(status);
     },
   });

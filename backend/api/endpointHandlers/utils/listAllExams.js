@@ -173,7 +173,7 @@ async function listAllExams(courseId) {
     new: 0,
     pending: 0,
     imported: 0,
-    errors: 0,
+    error: 0,
     errorsByType: {},
   };
 
