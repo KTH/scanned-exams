@@ -94,14 +94,11 @@ module.exports = async function getCourseImportStatus(req, res, next) {
     if (isOperationalOrRecoverableError(err)) return next(err);
 
     // Convert other errors to EndpointError
+    /* ... */
 
-    // Unhandled errors should crash application in accordance with Node.js best practice:
-    // https://www.joyent.com/node-js/production/design/errors
-    const bestPractice = true;
-    if (bestPractice) {
-      throw err;
-    } else {
-      return next(new RecoverableError({ err }));
-    }
+    // The errors we are left with are wrapped in RecoverableError
+    // to show error middleware that it is considered to be handled
+    // and allowing us to pass useful error messages to the user
+    return next(new RecoverableError({ err }));
   }
 };
