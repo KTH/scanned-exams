@@ -2,6 +2,8 @@ const got = require("got");
 const log = require("skog");
 const { Readable } = require("stream");
 
+const { TentaApiError } = require("../error");
+
 const client = got.extend({
   prefixUrl: process.env.TENTA_API_URL,
   headers: {
@@ -33,6 +35,10 @@ async function examListByLadokId(ladokId) {
       useDatesInSearch: false,
     },
     responseType: "json",
+  }).catch((err) => {
+    throw TentaApiError({
+      err,
+    });
   });
 
   if (!body.documentSearchResults) {

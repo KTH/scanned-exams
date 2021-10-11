@@ -1,10 +1,6 @@
 const log = require("skog");
 const got = require("got");
-const {
-  LadokApiError,
-  OperationalError,
-  RecoverableError,
-} = require("../error");
+const { LadokApiError } = require("../error");
 
 let ladokGot;
 function getLadokGot() {
@@ -39,32 +35,20 @@ function ladokErrorHandler(err) {
 }
 
 async function getAktivitetstillfalle(ladokId) {
-  try {
-    log.debug(`Getting information for aktivitetstillfälle ${ladokId}`);
-    const res = await getLadokGot()
-      .get(`resultat/aktivitetstillfalle/${ladokId}`)
-      .then(() => {
-        throw new Error("bombs away!");
-      })
-      .catch(ladokErrorHandler);
-    const body = JSON.parse(res.body);
+  log.debug(`Getting information for aktivitetstillfälle ${ladokId}`);
+  const res = await getLadokGot()
+    .get(`resultat/aktivitetstillfalle/${ladokId}`)
+    .catch(ladokErrorHandler);
 
-    return {
-      activities: body.Kopplingar.map((k) => ({
-        examCode: k.Aktivitet.Utbildningskod,
-        courseCode: k.Kursinstans.Utbildningskod,
-      })),
-      examDate: body.Datumperiod.Startdatum,
-    };
-  } catch (err) {
-    // Rethrow operational errors as is
-    if (err instanceof OperationalError) {
-      throw err;
-    }
-    // Programmer errors need to be logged and fixed
-    Error.captureStackTrace(err);
-    throw new RecoverableError({ err, details: { stuff: "to know" } });
-  }
+  const body = JSON.parsed(res.body);
+
+  return {
+    activities: body.Kopplingar.map((k) => ({
+      examCode: k.Aktivitet.Utbildningskod,
+      courseCode: k.Kursinstans.Utbildningskod,
+    })),
+    examDate: body.Datumperiod.Startdatum,
+  };
 }
 
 module.exports = {

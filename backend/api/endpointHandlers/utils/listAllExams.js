@@ -5,7 +5,7 @@ const ladok = require("../../externalApis/ladokApiClient");
 const tentaApi = require("../../externalApis/tentaApiClient");
 const { getEntriesFromQueue } = require("../../importQueue");
 
-const { EndpointError } = require("../../error");
+const { LadokApiError } = require("../../error");
 
 /**
  * Get the "ladokId" that is associated with a given course. It throws in case
@@ -17,7 +17,7 @@ async function getLadokId(courseId) {
   const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
 
   if (ladokIds.length === 0) {
-    throw new EndpointError({
+    throw new LadokApiError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       message:
@@ -29,7 +29,7 @@ async function getLadokId(courseId) {
   }
 
   if (ladokIds.lengh > 1) {
-    throw new EndpointError({
+    throw new LadokApiError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       message: "Examrooms with more than one examination are not supported",
@@ -47,7 +47,7 @@ async function listScannedExamsWithOldFormat(ladokId) {
   const aktivitetstillfalle = await ladok
     .getAktivitetstillfalle(ladokId)
     .catch(() => {
-      throw new EndpointError({
+      throw new LadokApiError({
         type: "invalid_activity",
         statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
         message: `Not valid Ladok activitestillfälle [${ladokId}]`,
@@ -106,7 +106,7 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
     .getValidAssignment(courseId, ladokId)
     .then((result) => {
       if (!result) {
-        throw new EndpointError({
+        throw new LadokApiError({
           type: "not_setup_course",
           statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
           message: `The course [${courseId}] has no valid assignment for scanned exams. Probably is not setup correctly`,
