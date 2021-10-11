@@ -153,6 +153,8 @@ function incrementSummary(summary, status, error) {
 }
 
 async function listAllExams(courseId) {
+  // - Canvas is source of truth regarding if a submitted exam is truly imported
+  // - the internal import queue keeps state of pending and last performed import
   const ladokId = await getLadokId(courseId);
   let [allScannedExams, studentsWithExamsInCanvas, examsInImportQueue] =
     await Promise.all([
