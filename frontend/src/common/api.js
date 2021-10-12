@@ -56,6 +56,7 @@ export function useCourseSetup(courseId) {
 
 /** Fetches the API to get information about the setup of a given course */
 export function useCourseImportStatus(courseId, options = {}) {
+  const { runOnce = false } = options;
   return useQuery(
     ["course", courseId, "import", "status"],
     () => apiClient(`courses/${courseId}/import-queue`),
@@ -65,7 +66,7 @@ export function useCourseImportStatus(courseId, options = {}) {
       },
       // We are refetching this periodically so UX changes state if
       // import queue is triggered somewhere else
-      refetchInterval: PROGRESS_REFRESH_INTERVAL * 10,
+      refetchInterval: runOnce ? null : PROGRESS_REFRESH_INTERVAL * 10,
     }
   );
 }
@@ -133,7 +134,7 @@ export function useMutateImportStart(courseId, examsToImport, options = {}) {
       ...options,
       // Passes status object from API as data to callback
       onSuccess(data) {
-        client.invalidateQueries(["course", courseId, "setup"]);
+        client.invalidateQueries(["course", courseId]);
         options.onSuccess?.(data);
       },
     }
@@ -154,7 +155,7 @@ export function useMutateAddStudents(courseId, studentIds, options = {}) {
       ...options,
       // Passes status object from API as data to callback
       onSuccess(data) {
-        client.invalidateQueries(["course", courseId, "setup"]);
+        client.invalidateQueries(["course", courseId]);
         options.onSuccess?.(data);
       },
     }

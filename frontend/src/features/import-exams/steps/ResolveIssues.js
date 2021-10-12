@@ -1,7 +1,6 @@
 import React from "react";
 import { useQueryClient } from "react-query";
 import {
-  useCourseExams,
   useMutateImportStart,
   useMutateAddStudents,
 } from "../../../common/api";
@@ -15,27 +14,23 @@ import {
   ImportQueueProgressBar,
 } from "../../widgets";
 
-export default function ResolveIssues({ onGoTo, courseId }) {
+export default function ResolveIssues({ onGoTo, courseId, queryExams }) {
   const client = useQueryClient();
 
   const [queueStatus, setQueueStatus] = React.useState("idle");
 
   // Get exams available to import
-  const queryExams = useCourseExams(courseId);
-  const {
-    data: dataExams,
-    isLoading: examsLoading,
-    // isError: examsError,
-  } = queryExams;
+  const { data = {}, isFetching: examsLoading } = queryExams;
+  const { result: exams = [] } = data;
 
   const examsSuccessfullyImported =
-    dataExams?.result.filter((exam) => exam.status === "imported") || [];
+    exams.filter((exam) => exam.status === "imported") || [];
   const examsWithMissingStudentError =
-    dataExams?.result.filter(
+    exams.filter(
       (exam) => exam.status === "error" && exam.error.type === "missing_student"
     ) || [];
   const examsWithOtherErrors =
-    dataExams?.result.filter(
+    exams.filter(
       (exam) => exam.status === "error" && exam.error.type !== "missing_student"
     ) || [];
 
@@ -43,13 +38,10 @@ export default function ResolveIssues({ onGoTo, courseId }) {
     examsWithMissingStudentError.map((exam) => exam.error.details.kthId) || [];
 
   // Hook to add students
-  const addStudentsMutation = useMutateAddStudents(courseId, missingStudentIds);
-
-  const {
-    mutate: doAddStudents,
-    // isLoading: addStudentsLoading,
-    // isError: addStudentsError,
-  } = addStudentsMutation;
+  const { mutate: doAddStudents } = useMutateAddStudents(
+    courseId,
+    missingStudentIds
+  );
 
   // Hoook to start import
   const startImportMutation = useMutateImportStart(
@@ -66,11 +58,8 @@ export default function ResolveIssues({ onGoTo, courseId }) {
     }
   );
 
-  const {
-    mutate: doStartImport,
-    isLoading: startImportLoading,
-    // isError: startImportError,
-  } = startImportMutation;
+  const { mutate: doStartImport, isLoading: startImportLoading } =
+    startImportMutation;
 
   if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
@@ -96,7 +85,8 @@ export default function ResolveIssues({ onGoTo, courseId }) {
             onDone={() => {
               // Clear the query cache to avoid synching issues
               client.resetQueries(["course", courseId]);
-              onGoTo("result");
+              // Return flow control to ImportFlow.js
+              onGoTo(undefined);
             }}
           />
         </div>
@@ -107,7 +97,6 @@ export default function ResolveIssues({ onGoTo, courseId }) {
   return (
     <div className="max-w-2xl">
       <H2>Resolve Issues</H2>
-
       <div className={cssInfoBox}>
         <h2 className="font-semibold text-lg">
           We encountered errors during the import.
@@ -150,6 +139,8 @@ export default function ResolveIssues({ onGoTo, courseId }) {
           exams: examsWithMissingStudentError,
           isLoading: startImportLoading,
           onFix: async () => {
+            // Lock flow control to this page (returns on progress done)
+            onGoTo("issues");
             await doAddStudents();
             doStartImport();
           },
@@ -160,13 +151,16 @@ export default function ResolveIssues({ onGoTo, courseId }) {
           <ExamErrorRow exam={exam} rowNr={index + 1} />
         ))}
       </div>
-
       <div className="mt-8">
         {examsWithOtherErrors.length > 0 && (
           <SecondaryButton
             className="sm:w-auto"
             waiting={startImportLoading}
-            onClick={doStartImport}
+            onClick={() => {
+              // Lock flow control to this page (returns on progress done)
+              onGoTo("issues");
+              doStartImport();
+            }}
           >
             Re-import rows with errors
           </SecondaryButton>
@@ -184,7 +178,7 @@ function renderMissingStudents({ exams, isLoading, onFix }) {
     <>
       <div className="mt-8">
         {exams.map((exam, index) => (
-          <ExamErrorRow exam={exam} rowNr={index + 1} />
+          <ExamErrorRow key={exam.id} exam={exam} rowNr={index + 1} />
         ))}
       </div>
       <div className="mt-8">

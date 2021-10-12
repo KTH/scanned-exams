@@ -1,8 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useQueryClient } from "react-query";
 import {
   useCourseImportStatus,
-  useCourseExams,
   useMutateImportStart,
 } from "../../../common/api";
 import {
@@ -10,11 +9,10 @@ import {
   LoadingPage,
   PrimaryButton,
   P,
-  cssInfoBox,
   ImportQueueProgressBar,
 } from "../../widgets";
 
-export default function PrepareImport({ onGoTo, courseId }) {
+export default function PrepareImport({ onGoTo, courseId, queryExams }) {
   const [queueStatus, setQueueStatus] = React.useState("idle");
 
   const client = useQueryClient();
@@ -28,50 +26,29 @@ export default function PrepareImport({ onGoTo, courseId }) {
   // TODO: Handle errors?
 
   // Get exams available to import
-  const queryExams = useCourseExams(courseId);
   const { data = {}, isFetching: examsLoading } = queryExams;
   const { result: exams = [] } = data;
 
   const examsToImport = exams.filter((exam) => exam.status === "new") || [];
   const examsWithError = exams.filter((exam) => exam.status === "error") || [];
-  const examsPending = exams.filter((exam) => exam.status === "pending") || [];
 
   const allExamsToImportOnNextTry = [...examsToImport, ...examsWithError];
 
   // Hoook to start import
-  const startImportMutation = useMutateImportStart(
-    courseId,
-    allExamsToImportOnNextTry,
-    {
+  const { mutate: doStartImport, isLoading: startImportLoading } =
+    useMutateImportStart(courseId, allExamsToImportOnNextTry, {
       onSuccess({ status }) {
         // status lets us know if the queue is working or still idle
         setQueueStatus(status);
       },
-    }
-  );
-  const { mutate: doStartImport, isLoading: startImportLoading } =
-    startImportMutation;
-  // TODO: Handle error queue is busy
-
-  // Show error page if we don't have new exams to import but
-  // have errors
-  useEffect(() => {
-    if (examsToImport.length === 0) {
-      if (examsWithError.length > 0) {
-        onGoTo("issues");
-      } else if (exams.length > 0 && examsPending.length === 0) {
-        // We have done a successful import but nothing new waiting
-        onGoTo("result");
-      }
-    }
-  });
+    });
 
   if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
-  const nrofExamsWithErrors = examsWithError?.length;
-  const nrofExamsToImport = (examsToImport?.length || 0) + nrofExamsWithErrors;
+  const nrofExamsWithErrors = examsWithError.length;
+  const nrofExamsToImport = (examsToImport.length || 0) + nrofExamsWithErrors;
 
   if (queueStatus === "working") {
     return (
@@ -104,7 +81,9 @@ export default function PrepareImport({ onGoTo, courseId }) {
           <PrimaryButton
             className="sm:w-96"
             waiting={startImportLoading}
-            onClick={doStartImport}
+            onClick={() => {
+              doStartImport();
+            }}
           >
             Start import!
           </PrimaryButton>

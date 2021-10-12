@@ -3,7 +3,6 @@ import { useCourseImportStatus } from "../../../common/api";
 import {
   H2,
   LoadingPage,
-  PrimaryButton,
   SecondaryButton,
   P,
   cssInfoBox,
@@ -12,18 +11,14 @@ import {
 
 export default function VerifyResults({ onGoTo, courseId }) {
   // Get exams available to import
-  const queryExams = useCourseImportStatus(courseId);
-  const {
-    data: { stats } = {},
-    isLoading: examsLoading,
-    isError: examsError,
-  } = queryExams;
+  const { data = {}, isLoading: examsLoading } =
+    useCourseImportStatus(courseId);
+  const { stats = {} } = data;
+  const { error, imported } = stats;
 
   if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
-
-  const { error, imported } = stats || {};
 
   return (
     <div className="max-w-2xl">
