@@ -14,13 +14,17 @@ import {
   ImportQueueProgressBar,
 } from "../../widgets";
 
-export default function ResolveIssues({ onGoTo, courseId, queryExams }) {
+export default function ResolveIssues({
+  onForceShowStep,
+  courseId,
+  queryExams,
+}) {
   const client = useQueryClient();
 
   const [queueStatus, setQueueStatus] = React.useState("idle");
 
   // Get exams available to import
-  const { data = {}, isFetching: examsLoading } = queryExams;
+  const { data = {}, isLoading: examsLoading } = queryExams;
   const { result: exams = [] } = data;
 
   const examsSuccessfullyImported =
@@ -46,9 +50,6 @@ export default function ResolveIssues({ onGoTo, courseId, queryExams }) {
   // Hoook to start import
   const startImportMutation = useMutateImportStart(
     courseId,
-    // Fix missing student errors during import, this will also
-    // attempt to import exams with other errors in case they
-    // can be fixed too by reimporting.
     [...examsWithMissingStudentError, ...examsWithOtherErrors],
     {
       onSuccess({ status }) {
@@ -85,8 +86,9 @@ export default function ResolveIssues({ onGoTo, courseId, queryExams }) {
             onDone={() => {
               // Clear the query cache to avoid synching issues
               client.resetQueries(["course", courseId]);
+              setQueueStatus("idle");
               // Return flow control to ImportFlow.js
-              onGoTo(undefined);
+              onForceShowStep(undefined);
             }}
           />
         </div>
@@ -140,7 +142,7 @@ export default function ResolveIssues({ onGoTo, courseId, queryExams }) {
           isLoading: startImportLoading,
           onFix: async () => {
             // Lock flow control to this page (returns on progress done)
-            onGoTo("issues");
+            onForceShowStep("issues");
             await doAddStudents();
             doStartImport();
           },
@@ -158,14 +160,17 @@ export default function ResolveIssues({ onGoTo, courseId, queryExams }) {
             waiting={startImportLoading}
             onClick={() => {
               // Lock flow control to this page (returns on progress done)
-              onGoTo("issues");
+              onForceShowStep("issues");
               doStartImport();
             }}
           >
             Re-import rows with errors
           </SecondaryButton>
         )}
-        <PrimaryButton className="sm:w-56" onClick={() => onGoTo("result")}>
+        <PrimaryButton
+          className="sm:w-56"
+          onClick={() => onForceShowStep("result")}
+        >
           Show Summary
         </PrimaryButton>
       </div>
