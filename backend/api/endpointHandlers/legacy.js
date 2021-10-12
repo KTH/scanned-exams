@@ -88,10 +88,10 @@ async function startExportEndpoint(req, res, next) {
         });
     }
 
-    // Return the queue status object so stats can be updated
-    // in frontend
-    const statusObj = await getStatusFromQueue(courseId);
-    return res.status(200).send(statusObj);
+    // Let client know if we are working or idle
+    return res.status(200).send({
+      status: req.body.length > 0 ? "working" : "idle",
+    });
   } catch (err) {
     return next(err);
   }
