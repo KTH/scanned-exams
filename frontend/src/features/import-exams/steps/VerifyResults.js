@@ -9,10 +9,12 @@ import {
   cssSuccessBox,
 } from "../../widgets";
 
-export default function VerifyResults({ onGoTo, courseId }) {
+export default function VerifyResults({ onForceShowStep, courseId }) {
   // Get exams available to import
-  const { data = {}, isLoading: examsLoading } =
-    useCourseImportStatus(courseId);
+  const { data = {}, isLoading: examsLoading } = useCourseImportStatus(
+    courseId,
+    { repeatAtInterval: true }
+  );
   const { stats = {} } = data;
   const { error, imported } = stats;
 
@@ -32,7 +34,7 @@ export default function VerifyResults({ onGoTo, courseId }) {
         {error > 0 && (
           <SecondaryButton
             className="sm:w-auto"
-            onClick={() => onGoTo("issues")}
+            onClick={() => onForceShowStep("issues")}
           >
             Show Errors
           </SecondaryButton>

@@ -12,18 +12,21 @@ import {
   ImportQueueProgressBar,
 } from "../../widgets";
 
-export default function PrepareImport({ onGoTo, courseId, queryExams }) {
-  const [queueStatus, setQueueStatus] = React.useState("idle");
+export default function PrepareImport({
+  onForceShowStep,
+  courseId,
+  queryExams,
+}) {
+  const [queueStatus, setQueueStatus] = React.useState(undefined);
 
   const client = useQueryClient();
 
-  // Get status of import worker
-  useCourseImportStatus(courseId, {
+  // Make sure queueStatus is set properly on first render
+  const { isLoading: statusLoading } = useCourseImportStatus(courseId, {
     onSuccess({ status }) {
       setQueueStatus(status);
     },
   });
-  // TODO: Handle errors?
 
   // Get exams available to import
   const { data = {}, isFetching: examsLoading } = queryExams;
@@ -43,7 +46,7 @@ export default function PrepareImport({ onGoTo, courseId, queryExams }) {
       },
     });
 
-  if (examsLoading) {
+  if (queueStatus === undefined || examsLoading || statusLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
@@ -61,6 +64,9 @@ export default function PrepareImport({ onGoTo, courseId, queryExams }) {
             onDone={() => {
               // Clear the query cache to avoid synching issues
               client.removeQueries(["course", courseId]);
+              setQueueStatus("idle");
+              // Return flow control to ImportFlow.js
+              onForceShowStep(undefined);
             }}
           />
         </div>
@@ -81,9 +87,7 @@ export default function PrepareImport({ onGoTo, courseId, queryExams }) {
           <PrimaryButton
             className="sm:w-96"
             waiting={startImportLoading}
-            onClick={() => {
-              doStartImport();
-            }}
+            onClick={doStartImport}
           >
             Start import!
           </PrimaryButton>

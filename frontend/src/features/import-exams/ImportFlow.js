@@ -20,18 +20,8 @@ const stepIndex = {
   issues: 1,
   result: 2,
 };
-export default function ImportScreen({ courseId }) {
-  const [forceStep, setForceStep] = React.useState(undefined);
 
-  // Get exams available to import so it loads in parallell with
-  // status check
-  const queryExams = useCourseExams(courseId);
-
-  const { data = {}, isLoading: statusLoading } = useCourseImportStatus(
-    courseId,
-    { runOnce: true }
-  );
-  const { stats = {} } = data;
+function _getCurrentStepIndex(stats, forceStep) {
   const {
     total: totalExams = 0,
     new: newExams = 0,
@@ -50,25 +40,55 @@ export default function ImportScreen({ courseId }) {
   }
 
   let showStepIndex;
-  if (forceStep === undefined && !statusLoading) {
+  if (forceStep === undefined) {
     showStepIndex = stepIndex[currStep];
   } else {
     // Allow us to take manual steps
     showStepIndex = forceStep;
   }
 
+  return showStepIndex;
+}
+
+export default function ImportScreen({ courseId }) {
+  const [forceStep, setForceStep] = React.useState(undefined);
+
+  // Get exams available to import so it loads in parallell with status check
+  const queryExams = useCourseExams(courseId);
+
+  // Check status of import queue
+  const { data = {}, isLoading: statusLoading } =
+    useCourseImportStatus(courseId);
+  const { stats = {} } = data;
+
+  // Determine current active step
+  const showStepIndex = statusLoading
+    ? undefined
+    : _getCurrentStepIndex(stats, forceStep);
+
+  // Determine if steps are done
+  const {
+    imported: importedExams,
+    total: totalExams,
+    new: newExams,
+    error: errorExams,
+  } = stats;
+  const importDone = !statusLoading && newExams === 0;
+  const issuesDone = !statusLoading && errorExams === 0;
+  const verifyDone = !statusLoading && totalExams === importedExams;
+
   return (
     <div className="container mx-auto my-8">
       <div className="">
         <div className="mb-8">
           <StepList currentStep={showStepIndex}>
-            <Step index={0} done={showStepIndex > 0}>
+            <Step index={0} done={importDone}>
               <StepText short="Step 1" long="1. Import" />
             </Step>
-            <Step index={1} done={showStepIndex > 1}>
+            <Step index={1} done={issuesDone}>
               <StepText short="Step 2" long="2. Resolve Issues" />
             </Step>
-            <Step index={2} done={totalExams === importedExams}>
+            <Step index={2} done={verifyDone}>
               <StepText short="Step 3" long="3. Verify Result" />
             </Step>
           </StepList>
@@ -97,7 +117,7 @@ function _renderContent({ courseId, showStepIndex, setForceStep, queryExams }) {
         <PrepareImport
           courseId={courseId}
           queryExams={queryExams}
-          onGoTo={(stepName) => setForceStep(stepIndex[stepName])}
+          onForceShowStep={(stepName) => setForceStep(stepIndex[stepName])}
         />
       );
     case 1:
@@ -105,14 +125,14 @@ function _renderContent({ courseId, showStepIndex, setForceStep, queryExams }) {
         <ResolveIIssues
           courseId={courseId}
           queryExams={queryExams}
-          onGoTo={(stepName) => setForceStep(stepIndex[stepName])}
+          onForceShowStep={(stepName) => setForceStep(stepIndex[stepName])}
         />
       );
     case 2:
       return (
         <VerifyResults
           courseId={courseId}
-          onGoTo={(stepName) => setForceStep(stepIndex[stepName])}
+          onForceShowStep={(stepName) => setForceStep(stepIndex[stepName])}
         />
       );
     default:

@@ -56,7 +56,7 @@ export function useCourseSetup(courseId) {
 
 /** Fetches the API to get information about the setup of a given course */
 export function useCourseImportStatus(courseId, options = {}) {
-  const { runOnce = false } = options;
+  const { repeatAtInterval = false } = options;
   return useQuery(
     ["course", courseId, "import", "status"],
     () => apiClient(`courses/${courseId}/import-queue`),
@@ -66,7 +66,7 @@ export function useCourseImportStatus(courseId, options = {}) {
       },
       // We are refetching this periodically so UX changes state if
       // import queue is triggered somewhere else
-      refetchInterval: runOnce ? null : PROGRESS_REFRESH_INTERVAL * 10,
+      refetchInterval: repeatAtInterval ? PROGRESS_REFRESH_INTERVAL * 10 : null,
     }
   );
 }
