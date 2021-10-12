@@ -40,8 +40,11 @@ async function getLadokId(courseId) {
 /** Get setup status of a Canvas course given its ID */
 async function getSetupStatus(courseId) {
   const ladokId = await getLadokId(courseId);
-  const course = await canvas.getCourse(courseId);
-  const assignment = await canvas.getValidAssignment(courseId, ladokId);
+
+  const [course, assignment] = await Promise.all([
+    canvas.getCourse(courseId),
+    canvas.getValidAssignment(courseId, ladokId),
+  ]);
 
   return {
     coursePublished: course.workflow_state === "available",
