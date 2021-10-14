@@ -148,7 +148,33 @@ function isOperationalOrRecoverableError(err) {
   return err instanceof OperationalError || err instanceof RecoverableError;
 }
 
-function _renderErrorMsg(name, type, message) {
+// Find a wrapped programmer error
+function getOrigProgrammerError(error) {
+  const { err } = error;
+  let result;
+  if (isOperationalOrRecoverableError(err)) {
+    // .err is an OperationalError so need to check if
+    // that in turn constains a wrapped error
+    result = getOrigProgrammerError(err);
+  } else if (err instanceof Error) {
+    result = err;
+  }
+  return result;
+}
+
+// Find the innermost wrapped operational or recoverable error
+function getMostSignificantError(error) {
+  const { err } = error;
+  if (isOperationalOrRecoverableError(err)) {
+    // If we have wrapped an Operational or Recoverable error
+    // that is the cause and what should be logged
+    return getMostSignificantError(err);
+  }
+
+  return error;
+}
+
+function _formatErrorMsg(name, type, message) {
   return `(${name}${type ? "/" + type : ""}) ${message}`;
 }
 
@@ -164,51 +190,52 @@ function errorHandler(err, req, res, next) {
   if (err instanceof AuthError) {
     // Simple auth errors
     log.warn(err);
+    // Add error details if provided for debugging
+    if (err.details) log.debug(err.details);
   } else if (err instanceof EndpointError) {
-    // Endpoint errors
-    if (
-      // This is a normal EndpointError that we only need to keep stats on
-      err.err === undefined ||
-      (err.err instanceof OperationalError && err.err.err === undefined)
-    ) {
-      log.info(err);
-    } else if (
-      // This a serious error where the inner error needs to be logged and fixed
-      err.err instanceof OperationalError ||
-      err.err instanceof RecoverableError
-    ) {
-      const innerErr = err.err;
-      log.error(
-        innerErr.err, // Stack trace
-        _renderErrorMsg(innerErr.name, innerErr.type, innerErr.message)
-      );
-      // Add error details if provided for debugging
-      if (innerErr.details) log.debug(innerErr.details);
+    /**
+     * An EndpointError can be caused in four ways:
+     * 1. Thrown by endpoint handler but there was no error in the code
+     * 2. Thrown by endpoint handler due to an error in the code
+     * 3. An [Name]ApiError was caught which wasn't caused by an error in the code
+     * 4. An [Name]ApiError was caught which in turn was caused by an error in the code
+     *
+     * Alternative 2 & 4 will have a wrapped programmer error.
+     */
+    // Since EndpointErrors can wrap other errors we want to make sure we log the most significant error
+    // and the underlying programmer error if one exists
+    const logErr = getMostSignificantError(err);
+    const progErr = getOrigProgrammerError(err);
+
+    if (progErr === undefined) {
+      // If the EndpointError wasn't caused by a programmer error we only need to inform about it.
+      log.info(logErr);
     } else {
-      // This is a serious error that was thrown in the endpoint handler
+      // If it was a programmer error it needs to be logged and fixed.
       log.error(
-        err.err, // Stack trace
-        _renderErrorMsg(err.name, err.type, err.message)
+        progErr, // this provides a stack trace for the original error that needs to be fixed
+        _formatErrorMsg(logErr.name, logErr.type, logErr.message)
       );
     }
-  } else if (
-    err.err instanceof OperationalError ||
-    err.err instanceof RecoverableError
-  ) {
-    // This is a serious error that wasn't wrapper in an EndpointError
+    // Add error details if provided for debugging.
+    if (logErr.details) log.debug(logErr.details);
+  } else if (isOperationalOrRecoverableError(err)) {
+    // These errors should always be wrapped in EndpointError so we log the
+    // outer most error to know what we have missed in our endpoint code
     log.warn(
       "This error should be wrapped in an EndpointError for consistency"
     );
+
     log.error(
-      err.err, // Stack trace
-      _renderErrorMsg(err.name, err.type, err.message)
+      getOrigProgrammerError(err), // this provides a stack trace for the original error that needs to be fixed
+      _formatErrorMsg(err.name, err.type, err.message)
     );
+    // Add error details if provided for debugging
+    if (err.details) log.debug(err.details);
   } else {
+    // All other passed errors should always be logged as error
     log.error(err);
   }
-
-  // Add error details if provided for debugging
-  if (err.details) log.debug(err.details);
 
   if (res.headersSent) {
     return next(err);
@@ -228,6 +255,8 @@ function errorHandler(err, req, res, next) {
 
 module.exports = {
   errorHandler,
+  getMostSignificantError,
+  getOrigProgrammerError,
   isOperationalOrRecoverableError,
   OperationalError,
   RecoverableError,
