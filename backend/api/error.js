@@ -123,11 +123,12 @@ class ImportError extends OperationalError {
    */
   constructor({
     type = "unhandled_error",
+    statusCode = 503,
     message = "There was an error when accessing the import queue",
     details,
     err,
   }) {
-    super("ImportError", 503, type, message, details, err);
+    super("ImportError", statusCode, type, message, details, err);
   }
 }
 
