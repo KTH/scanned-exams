@@ -26,8 +26,10 @@ class OperationalError extends Error {
 
 class RecoverableError extends Error {
   /**
-   * Error for recoverable programmer errors.
-   * These are errors that don't require us to crash the app.
+   * Error for recoverable programmer errors. These are errors that don't require us to crash the app,
+   * but unexpected. It can be thrown at any layer of the application. If it is caught in an
+   * endpoint handler you should wrap it in an EndpointError with a user friendly message. If it is
+   * thrown by an endpoint handler it is a bug that should be fixed.
    * @param {object} param0 Error params
    * @param {String} param0.message Human readable error message for display in frontend
    * @param {Error} param0.err The original error that caused this error
@@ -41,7 +43,7 @@ class RecoverableError extends Error {
 
 class AuthError extends OperationalError {
   /**
-   * Authntication error that should be handled by the frontend
+   * Authentication error that should be handled by the frontend
    * api client.
    * @param {object} param0 Error params
    * @param {String} param0.type Subtype of error
@@ -73,11 +75,12 @@ class EndpointError extends OperationalError {
 
 class LadokApiError extends OperationalError {
   /**
-   * LadokApiError
+   * LadokApiError – all errors that can occur when accessing the external system. This should be
+   * thrown at the LadokApi-integration layer.
    * @param {object} param0 Error params
    * @param {String} param0.type Subtype of error
    * @param {Number} param0.statusCode HTTP status code of response
-   * @param {String} param0.message Human readable error message for display in frontend
+   * @param {String} param0.message Error message for programmer
    * @param {object} param0.details Additional error details for used by programmer
    * @param {Error} param0.err The original error that caused this error
    */
@@ -88,11 +91,12 @@ class LadokApiError extends OperationalError {
 
 class TentaApiError extends OperationalError {
   /**
-   * LadokApiError
+   * TentaApiError – all errors that can occur when accessing the external system. This should be
+   * thrown at the TentaApi-integration layer.
    * @param {object} param0 Error params
    * @param {String} param0.type Subtype of error
    * @param {Number} param0.statusCode HTTP status code of response
-   * @param {String} param0.message Human readable error message for display in frontend
+   * @param {String} param0.message Error message for programmer
    * @param {object} param0.details Additional error details for used by programmer
    * @param {Error} param0.err The original error that caused this error
    */
@@ -109,11 +113,11 @@ class TentaApiError extends OperationalError {
 
 class ImportError extends OperationalError {
   /**
-   * All errors of type "ImportError" are known problems that happened when
-   * importing an exam to Canvas
+   * ImportError – all errors that can occur when performing operations on the import queue.
+   * This should be thrown at the import queue-integration layer.
    * @param {object} param0 Error params
    * @param {String} param0.type Subtype of error
-   * @param {String} param0.message Human readable error message for display in frontend
+   * @param {String} param0.message Error message for programmer
    * @param {object} param0.details Additional error details for used by programmer
    * @param {Error} param0.err The original error that caused this error
    */
