@@ -131,7 +131,8 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
     .map((submission) => submission.user?.sis_user_id);
 }
 
-function incrementSummary(summary, status, error) {
+function calcNewSummary({ ...summaryProps }, status, error) {
+  const summary = { ...summaryProps };
   // eslint-disable-next-line no-param-reassign
   summary.total++;
 
@@ -150,6 +151,7 @@ function incrementSummary(summary, status, error) {
       summary.errorsByType[errorType]++;
     }
   }
+  return summary;
 }
 
 async function listAllExams(courseId) {
@@ -168,7 +170,7 @@ async function listAllExams(courseId) {
   studentsWithExamsInCanvas = studentsWithExamsInCanvas || [];
   examsInImportQueue = examsInImportQueue || [];
 
-  const summary = {
+  let summary = {
     total: 0,
     new: 0,
     pending: 0,
@@ -210,7 +212,7 @@ async function listAllExams(courseId) {
       }
     }
 
-    incrementSummary(summary, status, errorDetails);
+    summary = calcNewSummary(summary, status, errorDetails);
 
     return {
       id: exam.fileId,
