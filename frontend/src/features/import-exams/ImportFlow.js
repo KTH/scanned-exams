@@ -21,7 +21,11 @@ const stepIndex = {
   result: 2,
 };
 
-function _getCurrentStepIndex(stats, forceStep) {
+function _getCurrentStepIndex(stats, forceStepIndex) {
+  if (forceStepIndex !== undefined) {
+    return forceStepIndex;
+  }
+
   const {
     total: totalExams = 0,
     new: newExams = 0,
@@ -39,15 +43,7 @@ function _getCurrentStepIndex(stats, forceStep) {
     currStep = "result";
   }
 
-  let showStepIndex;
-  if (forceStep === undefined) {
-    showStepIndex = stepIndex[currStep];
-  } else {
-    // Allow us to take manual steps
-    showStepIndex = forceStep;
-  }
-
-  return showStepIndex;
+  return stepIndex[currStep];
 }
 
 export default function ImportScreen({ courseId }) {
