@@ -1,5 +1,5 @@
 const log = require("skog");
-const { EndpointError } = require("../error");
+const { EndpointError, ImportError } = require("../error");
 const {
   getStatusFromQueue,
   addEntryToQueue,
@@ -72,12 +72,8 @@ async function startExportEndpoint(req, res, next) {
       })
         // eslint-disable-next-line no-await-in-loop
         .catch(async (err) => {
-          if (
-            err.message.startsWith(
-              "Add to queue failed becuase entry exist for this fileId"
-            )
-          ) {
-            // We get an error if it already exists so setting it to pending
+          if (err instanceof ImportError && err.type === "entry_exists") {
+            // We get an error that already exists so setting it to pending
             await updateStatusOfEntryInQueue(
               {
                 fileId,

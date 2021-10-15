@@ -168,7 +168,11 @@ async function resetQueueForImport(courseId) {
     });
   } catch (err) {
     log.error({ err });
-    throw new Error("Error removing finished entries");
+    throw new ImportError({
+      type: "delete_error",
+      statusCode: 420,
+      message: "Error removing finished entries",
+    });
   }
 }
 
@@ -200,11 +204,18 @@ async function addEntryToQueue(entry) {
       return typedEntry;
     }
     // TODO: Should we check reason?
-    throw Error("Could not insert entry into queue");
+    throw ImportError({
+      type: "insert_error",
+      statusCode: 420,
+      message: "Could not insert entry into queue",
+    });
   } catch (err) {
-    throw Error(
-      `Add to queue failed becuase entry exist for this fileId '${typedEntry.fileId}'`
-    );
+    throw new ImportError({
+      type: "entry_exists",
+      statusCode: 409,
+      message: `Add to queue failed because entry exist for this fileId '${typedEntry.fileId}'`,
+      err,
+    });
   }
 }
 
@@ -282,11 +293,19 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
         typedEntry
       );
       if (!res.acknowledged) {
-        throw Error(`Update import queue didn't get acknowledge from Mongodb.`);
+        throw new ImportError({
+          type: "update_error",
+          statusCode: 420,
+          message: `Update import queue didn't get acknowledge from Mongodb.`,
+        });
       }
 
       if (res.matchedCount < 1) {
-        throw Error(`Entry ${entry.fileId} in import queue not found.`);
+        throw new ImportError({
+          type: "not_found",
+          statusCode: 404,
+          message: `Entry ${entry.fileId} in import queue not found.`,
+        });
       }
 
       // Return updated object
