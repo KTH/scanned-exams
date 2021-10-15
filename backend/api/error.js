@@ -73,10 +73,26 @@ class EndpointError extends OperationalError {
   }
 }
 
+class CanvasApiError extends OperationalError {
+  /**
+   * CanvasApiError – all errors that can occur when accessing the external system. This should be
+   * thrown at the integration layer.
+   * @param {object} param0 Error params
+   * @param {String} param0.type Subtype of error
+   * @param {Number} param0.statusCode HTTP status code of response
+   * @param {String} param0.message Error message for programmer
+   * @param {object} param0.details Additional error details for used by programmer
+   * @param {Error} param0.err The original error that caused this error
+   */
+  constructor({ type, statusCode = 503, message, details, err }) {
+    super("CanvasApiError", statusCode, type, message, details, err);
+  }
+}
+
 class LadokApiError extends OperationalError {
   /**
    * LadokApiError – all errors that can occur when accessing the external system. This should be
-   * thrown at the LadokApi-integration layer.
+   * thrown at the integration layer.
    * @param {object} param0 Error params
    * @param {String} param0.type Subtype of error
    * @param {Number} param0.statusCode HTTP status code of response
@@ -92,7 +108,7 @@ class LadokApiError extends OperationalError {
 class TentaApiError extends OperationalError {
   /**
    * TentaApiError – all errors that can occur when accessing the external system. This should be
-   * thrown at the TentaApi-integration layer.
+   * thrown at the integration layer.
    * @param {object} param0 Error params
    * @param {String} param0.type Subtype of error
    * @param {Number} param0.statusCode HTTP status code of response
@@ -114,7 +130,7 @@ class TentaApiError extends OperationalError {
 class ImportError extends OperationalError {
   /**
    * ImportError – all errors that can occur when performing operations on the import queue.
-   * This should be thrown at the import queue-integration layer.
+   * This should be thrown at the integration layer.
    * @param {object} param0 Error params
    * @param {String} param0.type Subtype of error
    * @param {String} param0.message Error message for programmer
@@ -263,6 +279,7 @@ module.exports = {
   AuthError,
   EndpointError,
   ImportError,
+  CanvasApiError,
   LadokApiError,
   TentaApiError,
 };
