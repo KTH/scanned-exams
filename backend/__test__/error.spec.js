@@ -9,6 +9,7 @@ const {
   AuthError,
   EndpointError,
   ImportError,
+  CanvasApiError,
   LadokApiError,
   TentaApiError,
 } = require("../api/error");
@@ -118,6 +119,20 @@ describe("Errors", () => {
       expect(err instanceof OperationalError).toBe(true);
       expect(err.name).toBe("EndpointError");
       expect(err.statusCode).toBe(500);
+    }
+  });
+  it("CanvasApiError", () => {
+    try {
+      throw new CanvasApiError({
+        type: "test_error",
+        message: "message",
+        details: { foo: "bar" },
+        err: new Error("test"),
+      });
+    } catch (err) {
+      expect(err instanceof OperationalError).toBe(true);
+      expect(err.name).toBe("CanvasApiError");
+      expect(err.statusCode).toBe(503);
     }
   });
   it("LadokApiError", () => {
