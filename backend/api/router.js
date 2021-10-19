@@ -46,60 +46,49 @@ router.get("/me", (req, res, next) => {
 });
 
 router.get("/courses/:id/setup", async (req, res, next) => {
-  try {
-    const status = await getSetupStatus(req.params.id);
-    res.send(status);
-  } catch (err) {
-    next(err);
-  }
+  getSetupStatus(req.params.id)
+    .then((status) => res.send(status))
+    .catch(next);
 });
 
 router.post("/courses/:id/setup/create-homepage", async (req, res, next) => {
-  try {
-    await createSpecialHomepage(req.params.id);
-
-    res.send({
-      message: "done!",
-    });
-  } catch (err) {
-    next(err);
-  }
+  createSpecialHomepage(req.params.id)
+    .then(() => {
+      res.send({
+        message: "done!",
+      });
+    })
+    .catch(next);
 });
 
 router.post("/courses/:id/setup/publish-course", async (req, res, next) => {
-  try {
-    await publishCourse(req.params.id);
-
-    res.send({
-      message: "done!",
-    });
-  } catch (err) {
-    next(err);
-  }
+  publishCourse(req.params.id)
+    .then(() => {
+      res.send({
+        message: "done!",
+      });
+    })
+    .catch(next);
 });
 
 router.post("/courses/:id/setup/create-assignment", async (req, res, next) => {
-  try {
-    await createSpecialAssignment(req.params.id);
-
-    return res.send({
-      message: "done!",
-    });
-  } catch (err) {
-    return next(err);
-  }
+  createSpecialAssignment(req.params.id)
+    .then(() => {
+      res.send({
+        message: "done!",
+      });
+    })
+    .catch(next);
 });
 
 router.post("/courses/:id/setup/publish-assignment", async (req, res, next) => {
-  try {
-    await publishSpecialAssignment(req.params.id);
-
-    return res.send({
-      message: "done!",
-    });
-  } catch (err) {
-    return next(err);
-  }
+  publishSpecialAssignment(req.params.id)
+    .then(() => {
+      res.send({
+        message: "done!",
+      });
+    })
+    .catch(next);
 });
 
 /**
