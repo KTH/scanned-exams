@@ -221,12 +221,9 @@ async function addEntryToQueue(entry) {
 
 async function getStatusFromQueue(courseId) {
   try {
-    // Open collection
     const collImportQueue = await getImportQueueCollection();
     const cursor = collImportQueue.find({ courseId });
 
-    // Calculate status
-    // TODO: This should be done by aggregation and setting indexes
     let pending = 0;
     let error = 0;
     let total = 0;
@@ -249,10 +246,7 @@ async function getStatusFromQueue(courseId) {
       }
     });
     const progress = total - pending;
-    const statusObj = new QueueStatus({ status, total, progress, error });
-
-    // Return a typed status object
-    return statusObj;
+    return new QueueStatus({ status, total, progress, error });
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
