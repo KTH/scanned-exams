@@ -226,26 +226,27 @@ async function getStatusFromQueue(courseId) {
 
     let pending = 0;
     let error = 0;
-    let total = 0;
-    let status = "idle";
+    let imported = 0;
+
     await cursor.forEach((doc) => {
       switch (doc.status) {
         case "pending":
-          total++;
           pending++;
-          status = "working";
           break;
         case "error":
-          total++;
           error++;
           break;
         case "imported":
-          total++;
+          imported++;
           break;
         default: // noop
       }
     });
-    const progress = total - pending;
+
+    const status = pending === 0 ? "idle" : "working";
+    const total = pending + error + imported;
+    const progress = error + imported;
+
     return new QueueStatus({ status, total, progress, error });
   } catch (err) {
     // TODO: Handle errors
