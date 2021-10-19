@@ -5,7 +5,7 @@ Application that downloads exams from the "Windream/AlcomREST tenta API" and upl
 ---
 
 ## Vocabulary
-These are common words and phrases that should be used in the app.
+These are common words and phrases that should be used in the app for UX consistency.
 
 KTH Import Exams? -- name of app (don't use: scanned exams?)
 Exam room -- bla bla (don't use: xx, yy, zz)
@@ -13,6 +13,10 @@ Exam -- bla bla
 Teacher? --
 Student? --
 Missing student? --
+Windream? -- external system exams are imported from (don't use: tenta api?)
+Ladok? --
+Canvas? --
+Speed Grader? --
 
 ## Getting started
 
