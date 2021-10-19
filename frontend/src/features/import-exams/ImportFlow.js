@@ -1,7 +1,7 @@
 import React from "react";
 import { Step, StepList } from "../StepList";
 import { LoadingPage } from "../widgets";
-import { useCourseExams, useCourseImportStatus } from "../../common/api";
+import { useCourseImportStatus } from "../../common/api";
 import PrepareImport from "./steps/PrepareImport";
 import ResolveIIssues from "./steps/ResolveIssues";
 import VerifyResults from "./steps/VerifyResults";
@@ -49,9 +49,6 @@ function _getCurrentStepIndex(stats, forceStepIndex) {
 export default function ImportScreen({ courseId }) {
   const [forceStep, setForceStep] = React.useState(undefined);
 
-  // Get exams available to import so it loads in parallell with status check
-  const queryExams = useCourseExams(courseId);
-
   // Check status of import queue
   const { data = {}, isLoading: statusLoading } =
     useCourseImportStatus(courseId);
@@ -95,7 +92,6 @@ export default function ImportScreen({ courseId }) {
               courseId,
               showStepIndex,
               setForceStep,
-              queryExams,
             })}
       </div>
     </div>
@@ -106,13 +102,12 @@ function _renderLoader() {
   return <LoadingPage>Loading...</LoadingPage>;
 }
 
-function _renderContent({ courseId, showStepIndex, setForceStep, queryExams }) {
+function _renderContent({ courseId, showStepIndex, setForceStep }) {
   switch (showStepIndex) {
     case 0:
       return (
         <PrepareImport
           courseId={courseId}
-          queryExams={queryExams}
           onForceShowStep={(stepName) => setForceStep(stepIndex[stepName])}
         />
       );
@@ -120,7 +115,6 @@ function _renderContent({ courseId, showStepIndex, setForceStep, queryExams }) {
       return (
         <ResolveIIssues
           courseId={courseId}
-          queryExams={queryExams}
           onForceShowStep={(stepName) => setForceStep(stepIndex[stepName])}
         />
       );
