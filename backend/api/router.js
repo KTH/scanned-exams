@@ -15,6 +15,7 @@ const {
   startExportEndpoint,
   addUserToCourseEndpoint,
 } = require("./endpointHandlers/legacy");
+const { getStatusFromQueue } = require("./importQueue");
 
 const router = express.Router();
 
@@ -110,10 +111,11 @@ router.post("/courses/:id/students", addUserToCourseEndpoint);
  * New endpoints
  */
 // Get status of import queue
-router.get(
-  "/courses/:courseId/import-queue",
-  require("./endpointHandlers/getCourseImportStatus")
-);
+router.get("/courses/:courseId/import-queue", (req, res, next) => {
+  getStatusFromQueue(req.params.courseId)
+    .then((status) => res.send(status))
+    .catch(next);
+});
 
 router.use(errorHandler);
 module.exports = router;
