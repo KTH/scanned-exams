@@ -1,9 +1,7 @@
 const express = require("express");
 const log = require("skog");
 const { errorHandler, EndpointError } = require("./error");
-
-const { checkPermissionsMiddleware } = require("./permission");
-
+const { checkPermissions } = require("./permission");
 const {
   getSetupStatus,
   createSpecialHomepage,
@@ -11,7 +9,6 @@ const {
   createSpecialAssignment,
   publishSpecialAssignment,
 } = require("./endpointHandlers/setupCourse");
-
 const {
   getExamsEndpoint,
   getStatusEndpoint,
@@ -21,7 +18,13 @@ const {
 
 const router = express.Router();
 
-router.use("/courses/:id", checkPermissionsMiddleware);
+router.use("/courses/:id", (req, res, next) => {
+  checkPermissions(req.params.id, req.session.userId)
+    .then(() => {
+      next();
+    })
+    .catch(next);
+});
 
 /**
  * Returns data from the logged in user.
