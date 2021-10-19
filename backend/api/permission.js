@@ -38,15 +38,13 @@ async function checkPermissions(courseId, userId) {
       },
     });
   }
+
+  log.debug(`Authorized. User ${userId} in course ${courseId}`);
 }
 
 async function checkPermissionsMiddleware(req, res, next) {
-  const { id: courseId } = req.params;
-  const { userId } = req.session;
-
-  checkPermissions(courseId, userId)
+  checkPermissions(req.params.id, req.session.userId)
     .then(() => {
-      log.debug(`Authorized. User ${userId} in course ${courseId}`);
       next();
     })
     .catch(next);
