@@ -120,7 +120,9 @@ router.get("/courses/:courseId/import-queue", (req, res, next) => {
 
 // Add items to the import queue
 router.post("/courses/:courseId/import-queue", (req, res, next) => {
-  addEntriesToQueue(req.params.courseId, req.body);
+  addEntriesToQueue(req.params.courseId, req.body)
+    .then((response) => res.body(response))
+    .catch(next);
 });
 
 // Get errors in the import queue
