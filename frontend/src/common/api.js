@@ -71,6 +71,30 @@ export function useCourseImportStatus(courseId, options = {}) {
   );
 }
 
+export function useImportQueueErrors(courseId) {
+  return useQuery(["course", courseId, "import", "errors"], () =>
+    apiClient(`courses/${courseId}/import-queue/errors`)
+  );
+}
+
+export function useMutateFixImportQueueErrors(courseId, examsToFix) {
+  return useMutation(() =>
+    apiClient(`courses/${courseId}/import-queue/errors/fix`, {
+      method: "POST",
+      body: examsToFix.map((exam) => exam.id),
+    })
+  );
+}
+
+export function useMutateIgnoreImportQueueErrors(courseId, examsToIgnore) {
+  return useMutation(() =>
+    apiClient(`courses/${courseId}/import-queue/errors/ignore`, {
+      method: "POST",
+      body: examsToIgnore.map((exam) => exam.id),
+    })
+  );
+}
+
 /** Fetches the API to get information about the exams of a given course */
 export function useCourseExams(courseId) {
   return useQuery(["course", courseId, "exams"], () =>
