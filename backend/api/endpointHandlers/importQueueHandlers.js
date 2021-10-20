@@ -67,7 +67,7 @@ async function fixErrorsInQueue(courseId, fileIds) {
   if (!Array.isArray(fileIds)) {
     throw new EndpointError({
       type: "missing_body",
-      message: "This endpoint expects to get a list of fileIds to import",
+      message: "This endpoint expects to get a list of fileIds",
       statusCode: 400, // Bad Request
     });
   }
@@ -89,13 +89,39 @@ async function fixErrorsInQueue(courseId, fileIds) {
       // eslint-disable-next-line no-await-in-loop
       await enrollStudent(courseId, entry.userKthId);
       // Add entry to the queue (since its already there, we update the status to "working")
-      // eslint-disable-next-line no-await-in-loop
-      await updateStatusOfEntryInQueue(entry, "working");
-    } else {
-      // Remove from Queue
-      // eslint-disable-next-line no-await-in-loop
-      await removeEntryFromQueue(entry);
     }
+
+    // eslint-disable-next-line no-await-in-loop
+    await updateStatusOfEntryInQueue(entry, "working");
+  }
+
+  return {
+    message: "done",
+  };
+}
+
+async function ignoreErrorsInQueue(courseId, fileIds) {
+  const { status } = await getStatusFromQueue(courseId);
+
+  if (!Array.isArray(fileIds)) {
+    throw new EndpointError({
+      type: "missing_body",
+      message: "This endpoint expects to get a list of fileIds",
+      statusCode: 400, // Bad Request
+    });
+  }
+
+  if (status !== "idle") {
+    throw new EndpointError({
+      type: "queue_not_idle",
+      message: "Can't fix errors for this course when the queue is working",
+      statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
+    });
+  }
+
+  for (const fileId of fileIds) {
+    // eslint-disable-next-line no-await-in-loop
+    await removeEntryFromQueue({ fileId });
   }
 
   return {
@@ -115,5 +141,6 @@ module.exports = {
   addEntriesToQueue,
   getErrorsInQueue,
   fixErrorsInQueue,
+  ignoreErrorsInQueue,
   resetQueue,
 };

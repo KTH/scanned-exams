@@ -21,6 +21,7 @@ const {
   getErrorsInQueue,
   fixErrorsInQueue,
   resetQueue,
+  ignoreErrorsInQueue,
 } = require("./endpointHandlers/importQueueHandlers");
 
 const router = express.Router();
@@ -143,6 +144,16 @@ router.post("/courses/:courseId/import-queue/errors/fix", (req, res, next) => {
     .then((status) => res.body(status))
     .catch(next);
 });
+
+// Ignore errors in the import queue (delete from the queue)
+router.post(
+  "/courses/:courseId/import-queue/errors/ignore",
+  (req, res, next) => {
+    ignoreErrorsInQueue(req.params.courseId, req.body)
+      .then((status) => res.body(status))
+      .catch(next);
+  }
+);
 
 // Empty import queue
 router.delete("/courses/:courseId/import-queue", (req, res, next) => {
