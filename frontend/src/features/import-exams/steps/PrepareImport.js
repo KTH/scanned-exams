@@ -1,10 +1,10 @@
 import React from "react";
-import { useMutateImportStart } from "../../../common/api";
+import { useCourseExams, useMutateImportStart } from "../../../common/api";
 import { H2, LoadingPage, PrimaryButton, P } from "../../widgets";
 
-export default function PrepareImport({ courseId, queryExams }) {
+export default function PrepareImport({ courseId }) {
   // Get exams available to import
-  const { data = {}, isFetching: examsLoading } = queryExams;
+  const { data = {}, isFetching: examsLoading } = useCourseExams(courseId);
   const { result: exams = [] } = data;
 
   const examsToImport = exams.filter((exam) => exam.status === "new") || [];
