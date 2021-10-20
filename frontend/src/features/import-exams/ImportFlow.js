@@ -5,6 +5,7 @@ import { useCourseImportStatus } from "../../common/api";
 import PrepareImport from "./steps/PrepareImport";
 import ResolveIIssues from "./steps/ResolveIssues";
 import VerifyResults from "./steps/VerifyResults";
+import ImportInProgress from "./steps/ImportInProgress";
 
 function StepText({ long, short }) {
   return (
@@ -17,58 +18,40 @@ function StepText({ long, short }) {
 
 const stepIndex = {
   import: 0,
+  working: 0,
   issues: 1,
   result: 2,
 };
 
-function _getCurrentStepIndex(stats, forceStepIndex) {
-  if (forceStepIndex !== undefined) {
-    return forceStepIndex;
+function getImportQueueStep(data) {
+  if (!data) {
+    return undefined;
   }
 
-  const {
-    total: totalExams = 0,
-    new: newExams = 0,
-    pending: pendingExams = 0,
-    imported: importedExams = 0,
-    error: errorExams = 0,
-  } = stats;
+  const { status, total, error } = data;
 
-  let currStep = "import";
-  if (pendingExams > 0 || newExams > 0 || totalExams === 0) {
-    currStep = "import";
-  } else if (errorExams > 0) {
-    currStep = "issues";
-  } else if (totalExams === importedExams) {
-    currStep = "result";
+  if (status === "working") {
+    return "working";
+  } else if (error > 0) {
+    return "error";
+  } else if (total > 0) {
+    return "result";
+  } else {
+    return "import";
   }
-
-  return stepIndex[currStep];
 }
 
 export default function ImportScreen({ courseId }) {
-  const [forceStep, setForceStep] = React.useState(undefined);
-
-  // Check status of import queue
-  const { data = {}, isLoading: statusLoading } =
-    useCourseImportStatus(courseId);
-  const { stats = {} } = data;
+  const { data, isLoading: statusLoading } = useCourseImportStatus(courseId);
 
   // Determine current active step
-  const showStepIndex = statusLoading
-    ? undefined
-    : _getCurrentStepIndex(stats, forceStep);
+  const showStep = statusLoading ? undefined : getImportQueueStep(data);
+  const showStepIndex = stepIndex[showStep];
 
   // Determine if steps are done
-  const {
-    imported: importedExams,
-    total: totalExams,
-    new: newExams,
-    error: errorExams,
-  } = stats;
-  const importDone = !statusLoading && newExams === 0;
-  const issuesDone = !statusLoading && errorExams === 0;
-  const verifyDone = !statusLoading && totalExams === importedExams;
+  const importDone = showStepIndex > 0;
+  const issuesDone = showStepIndex > 1;
+  const verifyDone = showStepIndex > 2;
 
   return (
     <div className="container mx-auto my-8">
@@ -86,45 +69,27 @@ export default function ImportScreen({ courseId }) {
             </Step>
           </StepList>
         </div>
-        {statusLoading && forceStep === undefined
-          ? _renderLoader()
-          : _renderContent({
-              courseId,
-              showStepIndex,
-              setForceStep,
-            })}
+        {_renderContent({
+          courseId,
+          showStep,
+          progress: data?.progress ?? 0,
+          total: data?.progress ?? 0,
+        })}
       </div>
     </div>
   );
 }
 
-function _renderLoader() {
-  return <LoadingPage>Loading...</LoadingPage>;
-}
-
-function _renderContent({ courseId, showStepIndex, setForceStep }) {
-  switch (showStepIndex) {
-    case 0:
-      return (
-        <PrepareImport
-          courseId={courseId}
-          onForceShowStep={(stepName) => setForceStep(stepIndex[stepName])}
-        />
-      );
-    case 1:
-      return (
-        <ResolveIIssues
-          courseId={courseId}
-          onForceShowStep={(stepName) => setForceStep(stepIndex[stepName])}
-        />
-      );
-    case 2:
-      return (
-        <VerifyResults
-          courseId={courseId}
-          onForceShowStep={(stepName) => setForceStep(stepIndex[stepName])}
-        />
-      );
+function _renderContent({ courseId, showStep, total, progress }) {
+  switch (showStep) {
+    case "import":
+      return <PrepareImport courseId={courseId} />;
+    case "working":
+      return <ImportInProgress progress={progress} total={total} />;
+    case "issues":
+      return <ResolveIIssues courseId={courseId} />;
+    case "results":
+      return <VerifyResults courseId={courseId} />;
     default:
       return <LoadingPage>Loading...</LoadingPage>;
   }

@@ -1,6 +1,6 @@
 import { H2 } from "../../widgets";
 
-export default function ImportQueueProgressBar({ progress, total }) {
+export default function ImportInProgress({ progress, total }) {
   const perc = Math.round((progress / total) * 100);
 
   return (
