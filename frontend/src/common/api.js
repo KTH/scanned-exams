@@ -109,6 +109,22 @@ export function useMutateIgnoreImportQueueErrors(courseId, examsToIgnore) {
   );
 }
 
+export function useMutateResetImportQueue(courseId) {
+  const client = useQueryClient();
+
+  return useMutation(
+    () =>
+      apiClient(`courses/${courseId}/import-queue/`, {
+        method: "DELETE",
+      }),
+    {
+      onSuccess() {
+        client.invalidateQueries(["course", courseId, "import"]);
+      },
+    }
+  );
+}
+
 /** Fetches the API to get information about the exams of a given course */
 export function useCourseExams(courseId) {
   return useQuery(["course", courseId, "exams"], () =>
