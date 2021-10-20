@@ -158,7 +158,7 @@ router.post(
 // Empty import queue
 router.delete("/courses/:courseId/import-queue", (req, res, next) => {
   resetQueue(req.params.courseId)
-    .then((status) => res.body(status))
+    .then((status) => res.send(status))
     .catch(next);
 });
 
