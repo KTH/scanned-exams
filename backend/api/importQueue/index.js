@@ -334,6 +334,22 @@ async function getFirstPendingFromQueue() {
   }
 }
 
+async function removeEntryFromQueue(entry) {
+  try {
+    const collImportQueue = await getImportQueueCollection();
+    await collImportQueue.deleteOne({
+      fileId: entry.fileId,
+    });
+  } catch (err) {
+    log.error({ err });
+    throw new ImportError({
+      type: "delete_error",
+      statusCode: 420,
+      message: "Error removing finished entries",
+    });
+  }
+}
+
 module.exports = {
   QueueEntry,
   QueueStatus,
@@ -345,5 +361,6 @@ module.exports = {
   getFirstPendingFromQueue,
   resetQueueForImport,
   getImportQueueCollection,
+  removeEntryFromQueue,
   databaseClient,
 };
