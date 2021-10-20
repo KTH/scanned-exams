@@ -2,6 +2,7 @@ const {
   addEntryToQueue,
   getStatusFromQueue,
   updateStatusOfEntryInQueue,
+  getEntriesFromQueue,
 } = require("../importQueue");
 const { EndpointError } = require("../error");
 
@@ -50,6 +51,13 @@ async function addEntriesToQueue(courseId, fileIds) {
   };
 }
 
+async function getErrorsInQueue(courseId) {
+  const exams = await getEntriesFromQueue(courseId);
+
+  return exams.filter((exam) => exam.status === "error");
+}
+
 module.exports = {
   addEntriesToQueue,
+  getErrorsInQueue,
 };
