@@ -8,13 +8,11 @@ export default function PrepareImport({ courseId }) {
   const { result: exams = [] } = data;
 
   const examsToImport = exams.filter((exam) => exam.status === "new") || [];
-  const examsWithError = exams.filter((exam) => exam.status === "error") || [];
-
-  const allExamsToImportOnNextTry = [...examsToImport, ...examsWithError];
+  const numberOfExamsToImport = examsToImport.length;
 
   // Hoook to start import
   const { mutate: doStartImport, isLoading: startImportLoading } =
-    useMutateImportStart(courseId, allExamsToImportOnNextTry);
+    useMutateImportStart(courseId, examsToImport);
 
   if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
@@ -24,12 +22,10 @@ export default function PrepareImport({ courseId }) {
     <div className="max-w-2xl">
       <H2>Prepare Import</H2>
       <P>
-        There are <b>{nrofExamsToImport} exams</b> available to import.{" "}
-        {nrofExamsWithErrors > 0 &&
-          `Note: ${nrofExamsWithErrors} of these are exams that previously failed to be imported. They are listed in "Resolve Issues", click button "Next" to see them.`}
+        There are <b>{numberOfExamsToImport} exams</b> available to import.{" "}
       </P>
       <div className="mt-8">
-        {nrofExamsToImport > 0 && (
+        {numberOfExamsToImport > 0 && (
           <PrimaryButton
             className="sm:w-96"
             waiting={startImportLoading}

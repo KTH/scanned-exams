@@ -28,13 +28,13 @@ function getImportQueueStep(data) {
     return undefined;
   }
 
-  const { status, total, error } = data;
+  const { status, working } = data;
 
   if (status === "working") {
     return "working";
-  } else if (error > 0) {
+  } else if (working.error > 0) {
     return "error";
-  } else if (total > 0) {
+  } else if (working.total > 0) {
     return "result";
   } else {
     return "import";
@@ -72,8 +72,8 @@ export default function ImportScreen({ courseId }) {
         {_renderContent({
           courseId,
           showStep,
-          progress: data?.progress ?? 0,
-          total: data?.progress ?? 0,
+          progress: data?.working?.progress ?? 0,
+          total: data?.working?.total ?? 0,
         })}
       </div>
     </div>
@@ -88,8 +88,8 @@ function _renderContent({ courseId, showStep, total, progress }) {
       return <ImportInProgress progress={progress} total={total} />;
     case "issues":
       return <ResolveIssues courseId={courseId} />;
-    case "results":
-      return <VerifyResults courseId={courseId} />;
+    case "result":
+      return <VerifyResults courseId={courseId} total={total} />;
     default:
       return <LoadingPage>Loading...</LoadingPage>;
   }
