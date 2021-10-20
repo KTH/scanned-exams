@@ -120,7 +120,7 @@ class QueueStatus {
 /**
  * Get list of exams in import queue for given course
  * @param {String} courseId
- * @returns Mongodb cursor with results
+ * @returns an array of QueueEntry objects
  */
 async function getEntriesFromQueue(courseId) {
   try {
@@ -128,7 +128,9 @@ async function getEntriesFromQueue(courseId) {
     const collImportQueue = await getImportQueueCollection();
     const cursor = collImportQueue.find({ courseId });
 
-    return await cursor.toArray();
+    const entries = await cursor.toArray();
+
+    return entries.map((entry) => new QueueEntry(entry));
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
