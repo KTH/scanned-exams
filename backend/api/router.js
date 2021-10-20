@@ -127,21 +127,21 @@ router.get("/courses/:courseId/import-queue", (req, res, next) => {
 // Add items to the import queue
 router.post("/courses/:courseId/import-queue", (req, res, next) => {
   addEntriesToQueue(req.params.courseId, req.body)
-    .then((response) => res.body(response))
+    .then((response) => res.send(response))
     .catch(next);
 });
 
 // Get errors in the import queue
 router.get("/courses/:courseId/import-queue/errors", (req, res, next) => {
   getErrorsInQueue(req.params.courseId)
-    .then((entries) => res.body(entries))
+    .then((entries) => res.send(entries))
     .catch(next);
 });
 
 // Solve errors in the import queue
 router.post("/courses/:courseId/import-queue/errors/fix", (req, res, next) => {
   fixErrorsInQueue(req.params.courseId, req.body)
-    .then((status) => res.body(status))
+    .then((status) => res.send(status))
     .catch(next);
 });
 
@@ -150,7 +150,7 @@ router.post(
   "/courses/:courseId/import-queue/errors/ignore",
   (req, res, next) => {
     ignoreErrorsInQueue(req.params.courseId, req.body)
-      .then((status) => res.body(status))
+      .then((status) => res.send(status))
       .catch(next);
   }
 );
