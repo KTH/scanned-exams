@@ -1,5 +1,4 @@
 import React from "react";
-import { useQueryClient } from "react-query";
 import {
   useMutateImportStart,
   useMutateAddStudents,
@@ -11,7 +10,6 @@ import {
   SecondaryButton,
   P,
   cssInfoBox,
-  ImportQueueProgressBar,
 } from "../../widgets";
 
 export default function ResolveIssues({
@@ -19,10 +17,6 @@ export default function ResolveIssues({
   courseId,
   queryExams,
 }) {
-  const client = useQueryClient();
-
-  const [queueStatus, setQueueStatus] = React.useState("idle");
-
   // Get exams available to import
   const { data = {}, isLoading: examsLoading } = queryExams;
   const { result: exams = [] } = data;
@@ -48,16 +42,10 @@ export default function ResolveIssues({
   );
 
   // Hoook to start import
-  const startImportMutation = useMutateImportStart(
-    courseId,
-    [...examsWithMissingStudentError, ...examsWithOtherErrors],
-    {
-      onSuccess({ status }) {
-        // status lets us know if the queue is working or still idle
-        setQueueStatus(status);
-      },
-    }
-  );
+  const startImportMutation = useMutateImportStart(courseId, [
+    ...examsWithMissingStudentError,
+    ...examsWithOtherErrors,
+  ]);
 
   const { mutate: doStartImport, isLoading: startImportLoading } =
     startImportMutation;
@@ -69,32 +57,6 @@ export default function ResolveIssues({
   const nrofMissingStudents = examsWithMissingStudentError.length;
   const nrofOtherErrors = examsWithOtherErrors.length;
   const nrofImported = examsSuccessfullyImported.length;
-  const nrofExamsToResolve = nrofMissingStudents + nrofOtherErrors;
-
-  if (queueStatus === "working") {
-    return (
-      <div className="max-w-2xl">
-        <H2>Resolve in progress...</H2>
-        <p>
-          Re-importing exams with issues. Please stay on this page during this
-          process.
-        </p>
-        <div className="mt-8">
-          <ImportQueueProgressBar
-            courseId={courseId}
-            defaultTotal={nrofExamsToResolve}
-            onDone={() => {
-              // Clear the query cache to avoid synching issues
-              client.resetQueries(["course", courseId]);
-              setQueueStatus("idle");
-              // Return flow control to ImportFlow.js
-              onForceShowStep(undefined);
-            }}
-          />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-2xl">
