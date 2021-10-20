@@ -5,6 +5,7 @@ const {
   getEntriesFromQueue,
   getEntryFromQueue,
   removeEntryFromQueue,
+  resetQueueForImport,
 } = require("../importQueue");
 const { EndpointError } = require("../error");
 const { enrollStudent } = require("../externalApis/canvasApiClient");
@@ -102,8 +103,17 @@ async function fixErrorsInQueue(courseId, fileIds) {
   };
 }
 
+async function resetQueue(courseId) {
+  await resetQueueForImport(courseId);
+
+  return {
+    message: "done",
+  };
+}
+
 module.exports = {
   addEntriesToQueue,
   getErrorsInQueue,
   fixErrorsInQueue,
+  resetQueue,
 };

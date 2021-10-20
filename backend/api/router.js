@@ -20,6 +20,7 @@ const {
   addEntriesToQueue,
   getErrorsInQueue,
   fixErrorsInQueue,
+  resetQueue,
 } = require("./endpointHandlers/importQueueHandlers");
 
 const router = express.Router();
@@ -145,7 +146,9 @@ router.post("/courses/:courseId/import-queue/errors/fix", (req, res, next) => {
 
 // Empty import queue
 router.delete("/courses/:courseId/import-queue", (req, res, next) => {
-  //
+  resetQueue(req.params.courseId)
+    .then((status) => res.body(status))
+    .catch(next);
 });
 
 router.use(errorHandler);
