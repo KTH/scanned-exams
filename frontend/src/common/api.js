@@ -78,20 +78,34 @@ export function useImportQueueErrors(courseId) {
 }
 
 export function useMutateFixImportQueueErrors(courseId, examsToFix) {
-  return useMutation(() =>
-    apiClient(`courses/${courseId}/import-queue/errors/fix`, {
-      method: "POST",
-      body: examsToFix.map((exam) => exam.id),
-    })
+  return useMutation(
+    () =>
+      apiClient(`courses/${courseId}/import-queue/errors/fix`, {
+        method: "POST",
+        body: examsToFix.map((exam) => exam.id),
+      }),
+    {
+      onSuccess() {
+        client.invalidateQueries(["course", courseId, "import"]);
+      },
+    }
   );
 }
 
 export function useMutateIgnoreImportQueueErrors(courseId, examsToIgnore) {
-  return useMutation(() =>
-    apiClient(`courses/${courseId}/import-queue/errors/ignore`, {
-      method: "POST",
-      body: examsToIgnore.map((exam) => exam.id),
-    })
+  const client = useQueryClient();
+
+  return useMutation(
+    () =>
+      apiClient(`courses/${courseId}/import-queue/errors/ignore`, {
+        method: "POST",
+        body: examsToIgnore.map((exam) => exam.id),
+      }),
+    {
+      onSuccess() {
+        client.invalidateQueries(["course", courseId, "import"]);
+      },
+    }
   );
 }
 

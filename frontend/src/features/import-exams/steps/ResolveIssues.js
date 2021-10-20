@@ -1,7 +1,8 @@
 import React from "react";
 import {
-  useMutateImportStart,
-  useMutateAddStudents,
+  useImportQueueErrors,
+  useMutateFixImportQueueErrors,
+  useMutateIgnoreImportQueueErrors,
 } from "../../../common/api";
 import {
   H2,
@@ -9,140 +10,54 @@ import {
   PrimaryButton,
   SecondaryButton,
   P,
-  cssInfoBox,
 } from "../../widgets";
 
-export default function ResolveIssues({
-  onForceShowStep,
-  courseId,
-  queryExams,
-}) {
-  // Get exams available to import
-  const { data = {}, isLoading: examsLoading } = queryExams;
-  const { result: exams = [] } = data;
-
-  const examsSuccessfullyImported =
-    exams.filter((exam) => exam.status === "imported") || [];
-  const examsWithMissingStudentError =
-    exams.filter(
-      (exam) => exam.status === "error" && exam.error.type === "missing_student"
-    ) || [];
-  const examsWithOtherErrors =
-    exams.filter(
-      (exam) => exam.status === "error" && exam.error.type !== "missing_student"
-    ) || [];
-
-  const missingStudentIds =
-    examsWithMissingStudentError.map((exam) => exam.error.details.kthId) || [];
-
-  // Hook to add students
-  const { mutate: doAddStudents } = useMutateAddStudents(
-    courseId,
-    missingStudentIds
+export default function ResolveIssues({ courseId }) {
+  const { data: exams = [], isFetching } = useImportQueueErrors(courseId);
+  const examsWithMissingStudentError = exams.filter(
+    (exam) => exam.error?.type === "missing_student"
+  );
+  const examsWithOtherErrors = exams.filter(
+    (exam) => exam.error?.type !== "missing_student"
   );
 
-  // Hoook to start import
-  const startImportMutation = useMutateImportStart(courseId, [
-    ...examsWithMissingStudentError,
-    ...examsWithOtherErrors,
-  ]);
-
-  const { mutate: doStartImport, isLoading: startImportLoading } =
-    startImportMutation;
-
-  if (examsLoading) {
+  if (isFetching) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
-  const nrofMissingStudents = examsWithMissingStudentError.length;
-  const nrofOtherErrors = examsWithOtherErrors.length;
-  const nrofImported = examsSuccessfullyImported.length;
+  if (examsWithMissingStudentError.length > 0) {
+    return (
+      <MissingStudents
+        courseId={courseId}
+        exams={examsWithMissingStudentError}
+      />
+    );
+  } else if (examsWithOtherErrors.length > 0) {
+    return <OtherErrors courseId={courseId} exams={examsWithOtherErrors} />;
+  }
 
-  return (
-    <div className="max-w-2xl">
-      <H2>Resolve Issues</H2>
-      <div className={cssInfoBox}>
-        <h2 className="font-semibold text-lg">
-          We encountered errors during the import.
-        </h2>
-        {nrofImported > 0 && (
-          <P>
-            <b>You successfully imported {nrofImported} exams.</b> These are now
-            available for grading in Canvas along with any previously imported
-            exams.
-          </P>
-        )}
-        {nrofMissingStudents > 0 && (
-          <P>
-            <b>
-              You have {nrofMissingStudents} exams where the student hasn&apos;t
-              yet been added to your course.
-            </b>{" "}
-            These are marked &quot;missing student&quot; and since they have a
-            user in Canvas this issue can be fixed by{" "}
-            <b>clicking &quot;Fix missing students!&quot;</b>.
-          </P>
-        )}
-        {nrofOtherErrors > 0 && (
-          <P>
-            <b>
-              You have {nrofOtherErrors} exams that can&apos;t be imported at
-              this time.
-            </b>{" "}
-            This is due to issues we can&apos;t automatically solve and they are
-            marked with &quot;Unhandled error&quot;. Once the issues with these
-            exams have been solved click &quot;Re-import rows...&quot; to retry
-            importing these exams. Contact IT-support if you don&apos;t know how
-            to resolve these issues.
-          </P>
-        )}
-      </div>
-      {/* Render missing students */}
-      {examsWithMissingStudentError.length > 0 &&
-        renderMissingStudents({
-          exams: examsWithMissingStudentError,
-          isLoading: startImportLoading,
-          onFix: async () => {
-            // Lock flow control to this page (returns on progress done)
-            onForceShowStep("issues");
-            await doAddStudents();
-            doStartImport();
-          },
-        })}
-      {/* Render other import errors */}
-      <div className="mt-8">
-        {examsWithOtherErrors.map((exam, index) => (
-          <ExamErrorRow exam={exam} rowNr={index + 1} />
-        ))}
-      </div>
-      <div className="mt-8">
-        {examsWithOtherErrors.length > 0 && (
-          <SecondaryButton
-            className="sm:w-auto"
-            waiting={startImportLoading}
-            onClick={() => {
-              // Lock flow control to this page (returns on progress done)
-              onForceShowStep("issues");
-              doStartImport();
-            }}
-          >
-            Re-import rows with errors
-          </SecondaryButton>
-        )}
-        <PrimaryButton
-          className="sm:w-56"
-          onClick={() => onForceShowStep("result")}
-        >
-          Show Summary
-        </PrimaryButton>
-      </div>
-    </div>
+  throw new Error(
+    "Internal error. `ResolveIssues` should not be rendered when there are no errors in the import queue"
   );
 }
 
-function renderMissingStudents({ exams, isLoading, onFix }) {
+function MissingStudents({ courseId, exams }) {
+  const { mutate: doFixMissingStudents } = useMutateFixImportQueueErrors(
+    courseId,
+    exams
+  );
+  const { mutate: doIgnoreMissingStudents } = useMutateIgnoreImportQueueErrors(
+    courseId,
+    exams
+  );
+
   return (
-    <>
+    <div>
+      <h3 className="font-semibold text-lg">Missing students</h3>
+      <P>
+        There are {exams.length} exams where the student hasn&apos;t yet been
+        added to your exam room.
+      </P>
       <div className="mt-8">
         {exams.map((exam, index) => (
           <ExamErrorRow key={exam.id} exam={exam} rowNr={index + 1} />
@@ -151,13 +66,63 @@ function renderMissingStudents({ exams, isLoading, onFix }) {
       <div className="mt-8">
         <PrimaryButton
           className="sm:w-auto"
-          waiting={isLoading}
-          onClick={onFix}
+          onClick={() => doFixMissingStudents()}
         >
-          Fix Missing Students!
+          Add students and import exams
         </PrimaryButton>
+        <SecondaryButton
+          className="sm:w-auto"
+          onClick={() => doIgnoreMissingStudents()}
+        >
+          Ignore this problem
+        </SecondaryButton>
       </div>
-    </> /**/
+    </div>
+  );
+}
+
+function OtherErrors({ courseId, exams }) {
+  const { mutate: doFixOtherErrors } = useMutateFixImportQueueErrors(
+    courseId,
+    exams
+  );
+  const { mutate: doIgnoreOtherErrors } = useMutateIgnoreImportQueueErrors(
+    courseId,
+    exams
+  );
+
+  return (
+    <div>
+      <h3 className="font-semibold text-lg">Missing students</h3>
+      <P>
+        <b>
+          There are {exams.length} exams that can&apos;t be imported at this
+          time.
+        </b>{" "}
+        This is due to issues we can&apos;t automatically solve. Once the issues
+        with these exams have been solved click &quot;Try to import again&quot;
+        to retry importing these exams.
+      </P>
+      <P>
+        Contact IT-support if you don&apos;t know how to resolve these issues.
+      </P>
+      <div className="mt-8">
+        {exams.map((exam, index) => (
+          <ExamErrorRow key={exam.id} exam={exam} rowNr={index + 1} />
+        ))}
+      </div>
+      <div className="mt-8">
+        <PrimaryButton className="sm:w-auto" onClick={() => doFixOtherErrors()}>
+          Try to import again
+        </PrimaryButton>
+        <SecondaryButton
+          className="sm:w-auto"
+          onClick={() => doIgnoreOtherErrors()}
+        >
+          Ignore this problem
+        </SecondaryButton>
+      </div>
+    </div>
   );
 }
 
