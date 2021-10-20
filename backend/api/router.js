@@ -16,6 +16,7 @@ const {
   addUserToCourseEndpoint,
 } = require("./endpointHandlers/legacy");
 const { getStatusFromQueue } = require("./importQueue");
+const { addEntriesToQueue } = require("./endpointHandlers/importQueueHandlers");
 
 const router = express.Router();
 
@@ -115,6 +116,26 @@ router.get("/courses/:courseId/import-queue", (req, res, next) => {
   getStatusFromQueue(req.params.courseId)
     .then((status) => res.send(status))
     .catch(next);
+});
+
+// Add items to the import queue
+router.post("/courses/:courseId/import-queue", (req, res, next) => {
+  addEntriesToQueue(req.params.courseId, req.body);
+});
+
+// Get errors in the import queue
+router.get("/courses/:courseId/import-queue/errors", (req, res, next) => {
+  //
+});
+
+// Solve errors in the import queue
+router.post("/courses/:courseId/import-queue/errors/fix", (req, res, next) => {
+  //
+});
+
+// Empty import queue
+router.delete("/courses/:courseId/import-queue", (req, res, next) => {
+  //
 });
 
 router.use(errorHandler);
