@@ -51,7 +51,7 @@ export default function SetupScreen({
               <StepText short="Step 2" long="2. Publish examroom" />
             </Step>
             <Step index={2} done={assignmentCreated}>
-              <StepText short="Step 3" long="3. Prepare the assignment" />
+              <StepText short="Step 3" long="3. Create the assignment" />
             </Step>
             <Step index={3} done={assignmentPublished}>
               <StepText short="Step 4" long="4. Publish assignment" />
