@@ -71,23 +71,6 @@ export function useCourseImportStatus(courseId, options = {}) {
   );
 }
 
-/** Ping API on import progress */
-export function useCourseImportProgress(courseId, options = {}) {
-  return useQuery(
-    ["course", courseId, "import", "status"],
-    () => apiClient(`courses/${courseId}/import-queue`),
-    {
-      onSuccess({ stats } = {}) {
-        const { total, imported, error } = stats;
-        if (imported + error >= total) {
-          options.onDone?.();
-        }
-      },
-      refetchInterval: options.cancel ? false : PROGRESS_REFRESH_INTERVAL,
-    }
-  );
-}
-
 /** Fetches the API to get information about the exams of a given course */
 export function useCourseExams(courseId) {
   return useQuery(["course", courseId, "exams"], () =>
@@ -126,7 +109,7 @@ export function useMutateImportStart(courseId, examsToImport, options = {}) {
 
   return useMutation(
     () =>
-      apiClient(`courses/${courseId}/import/start`, {
+      apiClient(`courses/${courseId}/import-queue`, {
         method: "POST",
         body: examsToImport.map((exam) => exam.id),
       }),
@@ -134,7 +117,7 @@ export function useMutateImportStart(courseId, examsToImport, options = {}) {
       ...options,
       // Passes status object from API as data to callback
       onSuccess(data) {
-        client.invalidateQueries(["course", courseId]);
+        client.invalidateQueries(["course", courseId, "import", "status"]);
         options.onSuccess?.(data);
       },
     }
