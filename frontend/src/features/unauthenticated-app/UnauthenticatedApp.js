@@ -12,7 +12,7 @@ export default function UnauthenticatedApp({ courseId }) {
         team at KTH.
       </p>
       <p className="my-6">
-        This app requires you to have a <b>teacher role</b> on this course.
+        This app requires you to have a <b>teacher role</b> in this exam room.
       </p>
       <div className="bg-blue-100 p-6 my-12 flex flex-row items-center justify-center">
         <form method="post" action="/scanned-exams/auth">
