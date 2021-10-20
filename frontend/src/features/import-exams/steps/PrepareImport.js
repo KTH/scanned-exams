@@ -1,33 +1,8 @@
 import React from "react";
-import { useQueryClient } from "react-query";
-import {
-  useCourseImportStatus,
-  useMutateImportStart,
-} from "../../../common/api";
-import {
-  H2,
-  LoadingPage,
-  PrimaryButton,
-  P,
-  ImportQueueProgressBar,
-} from "../../widgets";
+import { useMutateImportStart } from "../../../common/api";
+import { H2, LoadingPage, PrimaryButton, P } from "../../widgets";
 
-export default function PrepareImport({
-  onForceShowStep,
-  courseId,
-  queryExams,
-}) {
-  const [queueStatus, setQueueStatus] = React.useState(undefined);
-
-  const client = useQueryClient();
-
-  // Make sure queueStatus is set properly on first render
-  const { isLoading: statusLoading } = useCourseImportStatus(courseId, {
-    onSuccess({ status }) {
-      setQueueStatus(status);
-    },
-  });
-
+export default function PrepareImport({ courseId, queryExams }) {
   // Get exams available to import
   const { data = {}, isFetching: examsLoading } = queryExams;
   const { result: exams = [] } = data;
@@ -39,39 +14,10 @@ export default function PrepareImport({
 
   // Hoook to start import
   const { mutate: doStartImport, isLoading: startImportLoading } =
-    useMutateImportStart(courseId, allExamsToImportOnNextTry, {
-      onSuccess({ status }) {
-        // status lets us know if the queue is working or still idle
-        setQueueStatus(status);
-      },
-    });
+    useMutateImportStart(courseId, allExamsToImportOnNextTry);
 
-  if (queueStatus === undefined || examsLoading || statusLoading) {
+  if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
-  }
-
-  const nrofExamsWithErrors = examsWithError.length;
-  const nrofExamsToImport = (examsToImport.length || 0) + nrofExamsWithErrors;
-
-  if (queueStatus === "working") {
-    return (
-      <div className="max-w-2xl">
-        <H2>Import in progress...</H2>
-        <div className="mt-8">
-          <ImportQueueProgressBar
-            courseId={courseId}
-            defaultTotal={nrofExamsToImport}
-            onDone={() => {
-              // Clear the query cache to avoid synching issues
-              client.removeQueries(["course", courseId]);
-              setQueueStatus("idle");
-              // Return flow control to ImportFlow.js
-              onForceShowStep(undefined);
-            }}
-          />
-        </div>
-      </div>
-    );
   }
 
   return (
