@@ -3,7 +3,7 @@ import { Step, StepList } from "../StepList";
 import { LoadingPage } from "../widgets";
 import { useCourseImportStatus } from "../../common/api";
 import PrepareImport from "./steps/PrepareImport";
-import ResolveIIssues from "./steps/ResolveIssues";
+import ResolveIssues from "./steps/ResolveIssues";
 import VerifyResults from "./steps/VerifyResults";
 import ImportInProgress from "./steps/ImportInProgress";
 
@@ -87,7 +87,7 @@ function _renderContent({ courseId, showStep, total, progress }) {
     case "working":
       return <ImportInProgress progress={progress} total={total} />;
     case "issues":
-      return <ResolveIIssues courseId={courseId} />;
+      return <ResolveIssues courseId={courseId} />;
     case "results":
       return <VerifyResults courseId={courseId} />;
     default:
