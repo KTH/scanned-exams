@@ -36,9 +36,10 @@ export default function ResolveIssues({ courseId }) {
     return <OtherErrors courseId={courseId} exams={examsWithOtherErrors} />;
   }
 
-  throw new Error(
-    "Internal error. `ResolveIssues` should not be rendered when there are no errors in the import queue"
-  );
+  // We should not render anything at this point
+  // However the "parent" container might not be updated during a second
+
+  return <div></div>;
 }
 
 function MissingStudents({ courseId, exams }) {

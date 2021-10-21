@@ -78,6 +78,8 @@ export function useImportQueueErrors(courseId) {
 }
 
 export function useMutateFixImportQueueErrors(courseId, examsToFix) {
+  const client = useQueryClient();
+
   return useMutation(
     () =>
       apiClient(`courses/${courseId}/import-queue/errors/fix`, {
