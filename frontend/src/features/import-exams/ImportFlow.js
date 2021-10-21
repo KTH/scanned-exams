@@ -33,7 +33,7 @@ function getImportQueueStep(data) {
   if (status === "working") {
     return "working";
   } else if (working.error > 0) {
-    return "error";
+    return "issues";
   } else if (working.total > 0) {
     return "result";
   } else {

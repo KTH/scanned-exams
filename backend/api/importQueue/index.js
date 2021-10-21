@@ -48,7 +48,7 @@ class QueueEntry {
   constructor({
     fileId,
     courseId,
-    userKthId,
+    student,
     status = "new",
     createdAt,
     importStartedAt,
@@ -58,7 +58,11 @@ class QueueEntry {
   }) {
     this.fileId = fileId;
     this.courseId = courseId;
-    this.userKthId = userKthId;
+    this.student = {
+      kthId: student?.kthId,
+      firstName: student?.firstName,
+      lastName: student?.lastName,
+    };
     this.status = status;
     this.createdAt = createdAt || new Date();
     this.importStartedAt = importStartedAt;
@@ -71,7 +75,11 @@ class QueueEntry {
     return {
       fileId: this.fileId,
       courseId: this.courseId,
-      userKthId: this.userKthId,
+      student: {
+        kthId: this.student?.kthId,
+        firstName: this.student?.firstName,
+        lastName: this.student?.lastName,
+      },
       status: this.status,
       createdAt: this.createdAt,
       importStartedAt: this.importStartedAt || null,
@@ -165,7 +173,7 @@ async function resetQueueForImport(courseId) {
     await collImportQueue.deleteMany({
       courseId,
       status: {
-        $in: ["imported", "error"],
+        $in: ["imported", "error", "ignored"],
       },
     });
   } catch (err) {
@@ -257,6 +265,49 @@ async function getStatusFromQueue(courseId) {
   }
 }
 
+async function updateStudentOfEntryInQueue(
+  entry,
+  { kthId, firstName, lastName }
+) {
+  try {
+    const collImportQueue = await getImportQueueCollection();
+    const tmpOld = await collImportQueue.findOne({ fileId: entry.fileId });
+
+    if (!tmpOld) {
+      throw new ImportError({
+        type: "entry_not_found",
+        message: `Entry for fileId [${entry.fileId}] not found.`,
+      });
+    }
+
+    const typedEntry = new QueueEntry(tmpOld);
+
+    typedEntry.student = {
+      kthId,
+      firstName,
+      lastName,
+    };
+
+    const res = await collImportQueue.replaceOne(
+      { fileId: typedEntry.fileId },
+      typedEntry
+    );
+
+    if (!res.acknowledged) {
+      throw new ImportError({
+        type: "update_error",
+        statusCode: 420,
+        message: `Update import queue didn't get acknowledge from Mongodb.`,
+      });
+    }
+
+    return typedEntry;
+  } catch (err) {
+    log.error({ err });
+    throw err;
+  }
+}
+
 async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
   try {
     const collImportQueue = await getImportQueueCollection();
@@ -273,6 +324,10 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
           break;
         case "imported":
           typedEntry.importSuccessAt = new Date();
+          typedEntry.error = null;
+          break;
+        case "ignored":
+          // User has explicitly chosen to ignore this error
           typedEntry.error = null;
           break;
         case "error":
@@ -357,6 +412,7 @@ module.exports = {
   getEntriesFromQueue,
   addEntryToQueue,
   updateStatusOfEntryInQueue,
+  updateStudentOfEntryInQueue,
   getStatusFromQueue,
   getFirstPendingFromQueue,
   resetQueueForImport,

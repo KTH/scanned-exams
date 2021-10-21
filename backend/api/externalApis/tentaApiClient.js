@@ -139,10 +139,14 @@ async function downloadExam(fileId) {
 
   const examDateTime = getValue("e_date");
   const examDate = examDateTime.split("T")[0];
-  const studentKthId = getValue("s_uid");
-  const studentPersNr = getValue("s_pnr");
+  const student = {
+    kthId: getValue("s_uid"),
+    personNumber: getValue("s_pnr"),
+    firstName: getValue("s_firstname"),
+    lastName: getValue("s_lastname"),
+  };
 
-  if (!studentKthId)
+  if (!student.kthId)
     throw new Error(
       `Could not get KTH ID (s_uid) from TentaAPI (windream) for file id "${fileId}".`
     );
@@ -151,8 +155,7 @@ async function downloadExam(fileId) {
     content: Readable.from(
       Buffer.from(body.wdFile.fileAsBase64.toString("utf-8"), "base64")
     ),
-    studentKthId,
-    studentPersNr,
+    student,
     examDate,
   };
 }

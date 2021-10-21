@@ -4,6 +4,7 @@ const tentaApi = require("../externalApis/tentaApiClient");
 const {
   getFirstPendingFromQueue,
   updateStatusOfEntryInQueue,
+  updateStudentOfEntryInQueue,
 } = require("./index");
 const { ImportError } = require("../error");
 
@@ -15,7 +16,7 @@ const IS_DEV = NODE_ENV !== "production";
  * Students that don't exist in UG get a fake personnummer
  * in windream and they need to be graded manually
  */
-function throwIfStudentNotInUg({ fileId, studentPersNr }) {
+function throwIfStudentNotInUg(fileId, studentPersNr) {
   if (studentPersNr.replace(/-/g, "") === "121212121212") {
     throw new ImportError({
       type: "not_in_ug",
@@ -26,26 +27,27 @@ function throwIfStudentNotInUg({ fileId, studentPersNr }) {
 
 async function uploadOneExam({ fileId, courseId }) {
   log.debug(`Course ${courseId} / File ${fileId}. Downloading`);
-  const { content, studentKthId, studentPersNr, examDate } =
-    await tentaApi.downloadExam(fileId);
+  const { content, examDate, student } = await tentaApi.downloadExam(fileId);
 
   // Some business rules
-  throwIfStudentNotInUg({ fileId, studentPersNr });
+  throwIfStudentNotInUg(fileId, student.personNumber);
+
+  updateStudentOfEntryInQueue({ fileId }, student);
 
   log.debug(
-    `Course ${courseId} / File ${fileId} / User ${studentKthId}. Uploading`
+    `Course ${courseId} / File ${fileId} / User ${student.kthId}. Uploading`
   );
   const uploadExamStart = Date.now();
   await canvas.uploadExam(content, {
     courseId,
-    studentKthId,
+    kthId: student.kthId,
     examDate,
     fileId,
   });
   log.debug("Time to upload exam: " + (Date.now() - uploadExamStart) + "ms");
 
   log.info(
-    `Course ${courseId} / File ${fileId} / User ${studentKthId}. Uploaded!`
+    `Course ${courseId} / File ${fileId} / User ${student.kthId}. Uploaded!`
   );
 }
 

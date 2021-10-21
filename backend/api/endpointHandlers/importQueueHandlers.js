@@ -4,7 +4,6 @@ const {
   updateStatusOfEntryInQueue,
   getEntriesFromQueue,
   getEntryFromQueue,
-  removeEntryFromQueue,
   resetQueueForImport,
 } = require("../importQueue");
 const { EndpointError } = require("../error");
@@ -121,7 +120,7 @@ async function ignoreErrorsInQueue(courseId, fileIds) {
 
   for (const fileId of fileIds) {
     // eslint-disable-next-line no-await-in-loop
-    await removeEntryFromQueue({ fileId });
+    await updateStatusOfEntryInQueue({ fileId }, "ignored");
   }
 
   return {

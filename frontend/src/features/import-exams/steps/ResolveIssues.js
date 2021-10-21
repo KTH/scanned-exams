@@ -93,7 +93,7 @@ function OtherErrors({ courseId, exams }) {
 
   return (
     <div>
-      <h3 className="font-semibold text-lg">Missing students</h3>
+      <h3 className="font-semibold text-lg">Other errors</h3>
       <P>
         <b>
           There are {exams.length} exams that can&apos;t be imported at this
@@ -108,7 +108,7 @@ function OtherErrors({ courseId, exams }) {
       </P>
       <div className="mt-8">
         {exams.map((exam, index) => (
-          <ExamErrorRow key={exam.id} exam={exam} rowNr={index + 1} />
+          <ExamErrorRow key={exam.fileId} exam={exam} rowNr={index + 1} />
         ))}
       </div>
       <div className="mt-8">

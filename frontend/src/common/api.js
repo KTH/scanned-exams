@@ -1,7 +1,6 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { assert } from "./utils";
-
-const PROGRESS_REFRESH_INTERVAL = 1000;
 
 export class ApiError extends Error {
   constructor({ type, statusCode, message, details }) {
@@ -56,17 +55,18 @@ export function useCourseSetup(courseId) {
 
 /** Fetches the API to get information about the setup of a given course */
 export function useCourseImportStatus(courseId, options = {}) {
-  const { repeatAtInterval = false } = options;
+  const [repeat, setRepeat] = useState(false);
+
   return useQuery(
     ["course", courseId, "import", "status"],
     () => apiClient(`courses/${courseId}/import-queue`),
     {
       onSuccess({ status } = {}) {
+        setRepeat(status === "working");
         options.onSuccess?.({ status });
       },
-      // We are refetching this periodically so UX changes state if
-      // import queue is triggered somewhere else
-      refetchInterval: repeatAtInterval ? PROGRESS_REFRESH_INTERVAL * 10 : null,
+
+      refetchInterval: repeat ? 1000 : null,
     }
   );
 }
@@ -82,7 +82,7 @@ export function useMutateFixImportQueueErrors(courseId, examsToFix) {
     () =>
       apiClient(`courses/${courseId}/import-queue/errors/fix`, {
         method: "POST",
-        body: examsToFix.map((exam) => exam.id),
+        body: examsToFix.map((exam) => exam.fileId),
       }),
     {
       onSuccess() {
@@ -99,7 +99,7 @@ export function useMutateIgnoreImportQueueErrors(courseId, examsToIgnore) {
     () =>
       apiClient(`courses/${courseId}/import-queue/errors/ignore`, {
         method: "POST",
-        body: examsToIgnore.map((exam) => exam.id),
+        body: examsToIgnore.map((exam) => exam.fileId),
       }),
     {
       onSuccess() {
