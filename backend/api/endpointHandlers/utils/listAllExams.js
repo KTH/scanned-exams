@@ -141,7 +141,7 @@ function calcNewSummary({ ...summaryProps }, status, error) {
   // eslint-disable-next-line no-param-reassign
   summary[status]++;
 
-  if (error !== undefined) {
+  if (error) {
     const errorType = error.type;
     if (summary.errorsByType[errorType] === undefined) {
       // eslint-disable-next-line no-param-reassign

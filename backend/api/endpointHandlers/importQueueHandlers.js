@@ -86,12 +86,12 @@ async function fixErrorsInQueue(courseId, fileIds) {
     if (entry.error?.type === "missing_student") {
       // Add student to Canvas
       // eslint-disable-next-line no-await-in-loop
-      await enrollStudent(courseId, entry.userKthId);
+      await enrollStudent(courseId, entry.student.kthId);
       // Add entry to the queue (since its already there, we update the status to "working")
     }
 
     // eslint-disable-next-line no-await-in-loop
-    await updateStatusOfEntryInQueue(entry, "working");
+    await updateStatusOfEntryInQueue(entry, "pending");
   }
 
   return {

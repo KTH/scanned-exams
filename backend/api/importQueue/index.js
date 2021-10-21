@@ -94,17 +94,27 @@ class QueueStatus {
   /**
    * Status of import queue
    * @param {String} param0.status idle|working
-   * @param {int} param0.total total number being processed
-   * @param {int} param0.progress total number pending import
-   * @param {int} param0.error total number of errors
+   * @param {int} param0.total
+   * @param {int} param0.progress
+   * @param {int} param0.error
+   * @param {int} param0.ignored
    */
-  constructor({ status, total, progress = 0, error = 0 }) {
+  constructor({
+    status,
+    total,
+    progress = 0,
+    error = 0,
+    ignored = 0,
+    imported = 0,
+  }) {
     this.status = status;
     if (total !== undefined) {
       this.working = {
         error,
         progress,
         total,
+        imported,
+        ignored,
       };
     }
   }
@@ -117,6 +127,8 @@ class QueueStatus {
           progress: this.working.progress,
           total: this.working.total,
           error: this.working.error,
+          ignored: this.working.ignored,
+          imported: this.working.imported,
         },
       };
     }
@@ -237,6 +249,7 @@ async function getStatusFromQueue(courseId) {
     let pending = 0;
     let error = 0;
     let imported = 0;
+    let ignored = 0;
 
     await cursor.forEach((doc) => {
       switch (doc.status) {
@@ -249,15 +262,25 @@ async function getStatusFromQueue(courseId) {
         case "imported":
           imported++;
           break;
+        case "ignored":
+          ignored++;
+          break;
         default: // noop
       }
     });
 
     const status = pending === 0 ? "idle" : "working";
-    const total = pending + error + imported;
-    const progress = error + imported;
+    const total = pending + error + imported + ignored;
+    const progress = error + imported + ignored;
 
-    return new QueueStatus({ status, total, progress, error });
+    return new QueueStatus({
+      status,
+      total,
+      progress,
+      error,
+      imported,
+      ignored,
+    });
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });

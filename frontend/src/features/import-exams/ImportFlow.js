@@ -74,13 +74,22 @@ export default function ImportScreen({ courseId }) {
           showStep,
           progress: data?.working?.progress ?? 0,
           total: data?.working?.total ?? 0,
+          ignored: data?.working.ignored ?? 0,
+          imported: data?.working.imported ?? 0,
         })}
       </div>
     </div>
   );
 }
 
-function _renderContent({ courseId, showStep, total, progress }) {
+function _renderContent({
+  courseId,
+  showStep,
+  total,
+  imported,
+  ignored,
+  progress,
+}) {
   switch (showStep) {
     case "import":
       return <PrepareImport courseId={courseId} />;
@@ -89,7 +98,13 @@ function _renderContent({ courseId, showStep, total, progress }) {
     case "issues":
       return <ResolveIssues courseId={courseId} />;
     case "result":
-      return <VerifyResults courseId={courseId} total={total} />;
+      return (
+        <VerifyResults
+          courseId={courseId}
+          imported={imported}
+          ignored={ignored}
+        />
+      );
     default:
       return <LoadingPage>Loading...</LoadingPage>;
   }

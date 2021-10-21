@@ -2,13 +2,13 @@ import React from "react";
 import { useMutateResetImportQueue } from "../../../common/api";
 import { H2, SecondaryButton, P, PrimaryButton } from "../../widgets";
 
-export default function VerifyResults({ courseId, total }) {
+export default function VerifyResults({ courseId, imported, ignored }) {
   const { mutate: doResetImportQueue } = useMutateResetImportQueue(courseId);
 
   return (
     <div className="max-w-2xl">
       <H2>Verify Results</H2>
-      <div className="mt-8">{total} exams have been imported to Canvas</div>
+      <div className="mt-8">{imported} exams have been imported to Canvas</div>
       <div className="mt-8">
         <SecondaryButton
           className="sm:w-auto"
