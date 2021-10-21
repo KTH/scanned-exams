@@ -9,12 +9,6 @@ const {
   createSpecialAssignment,
   publishSpecialAssignment,
 } = require("./endpointHandlers/setupCourse");
-const {
-  getExamsEndpoint,
-  getStatusEndpoint,
-  startExportEndpoint,
-  addUserToCourseEndpoint,
-} = require("./endpointHandlers/legacy");
 const { getStatusFromQueue } = require("./importQueue");
 const {
   addEntriesToQueue,
@@ -23,6 +17,7 @@ const {
   resetQueue,
   ignoreErrorsInQueue,
 } = require("./endpointHandlers/importQueueHandlers");
+const { listAllExams } = require("./endpointHandlers/listAllExams");
 
 const router = express.Router();
 
@@ -106,13 +101,11 @@ router.post("/courses/:id/setup/publish-assignment", async (req, res, next) => {
  * Legacy endpoints
  */
 // Get list of exams for given course
-router.get("/courses/:id/exams", getExamsEndpoint);
-// Get the import process status
-router.get("/courses/:id/import/status", getStatusEndpoint);
-// Start the import process
-router.post("/courses/:id/import/start", startExportEndpoint);
-// Add student to Canvas course
-router.post("/courses/:id/students", addUserToCourseEndpoint);
+router.get("/courses/:id/exams", (req, res, next) => {
+  listAllExams(req.params.id)
+    .then((response) => res.send(response))
+    .catch(next);
+});
 
 /**
  * New endpoints
