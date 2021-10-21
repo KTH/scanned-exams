@@ -1,7 +1,8 @@
 import React from "react";
 import { useMutateResetImportQueue } from "../../../common/api";
-import { H2, SecondaryButton, P, PrimaryButton } from "../../widgets";
+import { H2, SecondaryButton } from "../../widgets";
 
+// TODO: do something with `ignored` (errors that are not fixed)
 export default function VerifyResults({ courseId, imported, ignored }) {
   const { mutate: doResetImportQueue } = useMutateResetImportQueue(courseId);
 
