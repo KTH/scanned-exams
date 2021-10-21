@@ -97,9 +97,6 @@ router.post("/courses/:id/setup/publish-assignment", async (req, res, next) => {
     .catch(next);
 });
 
-/**
- * Legacy endpoints
- */
 // Get list of exams for given course
 router.get("/courses/:id/exams", (req, res, next) => {
   listAllExams(req.params.id)
@@ -107,9 +104,6 @@ router.get("/courses/:id/exams", (req, res, next) => {
     .catch(next);
 });
 
-/**
- * New endpoints
- */
 // Get status of import queue
 router.get("/courses/:courseId/import-queue", (req, res, next) => {
   getStatusFromQueue(req.params.courseId)
