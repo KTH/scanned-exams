@@ -40,7 +40,7 @@ async function uploadOneExam({ fileId, courseId }) {
   const uploadExamStart = Date.now();
   await canvas.uploadExam(content, {
     courseId,
-    kthId: student.kthId,
+    studentKthId: student.kthId,
     examDate,
     fileId,
   });
