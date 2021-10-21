@@ -36,8 +36,12 @@ export default function ResolveIssues({ courseId }) {
     return <OtherErrors courseId={courseId} exams={examsWithOtherErrors} />;
   }
 
-  // We should not render anything at this point
-  // However the "parent" container might not be updated during a second
+  // If render reaches this point, it probably means that there are no errors
+  // in the import queue but the parent container still thinks that there are
+  // errors
+
+  // We don't need to throw any error or show any spinner since it should be
+  // fixed automatically in one second or less
 
   return <div></div>;
 }
