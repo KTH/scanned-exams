@@ -45,13 +45,13 @@ export default function SetupScreen({
         <div className="mb-8">
           <StepList currentStep={currentStep}>
             <Step index={0} done={homepageCreated}>
-              <StepText short="Step 1" long="1. Prepare the homepage" />
+              <StepText short="Step 1" long="1. Prepare homepage" />
             </Step>
             <Step index={1} done={coursePublished}>
               <StepText short="Step 2" long="2. Publish examroom" />
             </Step>
             <Step index={2} done={assignmentCreated}>
-              <StepText short="Step 3" long="3. Create the assignment" />
+              <StepText short="Step 3" long="3. Create assignment" />
             </Step>
             <Step index={3} done={assignmentPublished}>
               <StepText short="Step 4" long="4. Publish assignment" />
