@@ -30,9 +30,6 @@ Frontend:
     npm run build
     ```
 
-
-Open two terminals. One for the app in the backend and one for the "TentaAPI mock"
-
 In the "backend" terminal:
 
 1. Go to the `backend` directory.
@@ -66,14 +63,6 @@ In the "backend" terminal:
    npm install
    npm start
    ```
-
-In the "TentaAPI mock" terminal
-
-1. Go to the `tentaapi-mock` directory.
-2. Run `npm start`
-
-
-🎉  **DONE!** Now you can [search for the course "XY0101" in Canvas](https://kth.test.instructure.com/accounts/1?search_term=AKT.cfcb7186-94f1-4ad1-812d-1e2fba7b36d3) and launch the app from there
 
 ---
 

@@ -121,11 +121,15 @@ router.get("/courses/:id/exams", async (req, res, next) => {
 });
 
 // Get the import process status
-router.get("/courses/:id/import/status", async (req, res) => {
-  const courseId = req.params.id;
-  const status = await getStatusFromQueue(courseId);
+router.get("/courses/:id/import/status", async (req, res, next) => {
+  try {
+    const courseId = req.params.id;
+    const status = await getStatusFromQueue(courseId);
 
-  res.send(status);
+    return res.send(status);
+  } catch (err) {
+    return next(err);
+  }
 });
 
 // Start the import process
@@ -154,57 +158,65 @@ router.post("/courses/:id/import/start", async (req, res, next) => {
     );
   }
 
-  await resetQueueForImport(courseId);
+  try {
+    await resetQueueForImport(courseId);
 
-  for (const fileId of req.body) {
-    // eslint-disable-next-line no-await-in-loop
-    await addEntryToQueue({
-      fileId,
-      courseId,
-      status: "pending",
-    })
+    for (const fileId of req.body) {
       // eslint-disable-next-line no-await-in-loop
-      .catch(async (err) => {
-        if (
-          err.message.startsWith(
-            "Add to queue failed becuase entry exist for this fileId"
-          )
-        ) {
-          // We get an error if it already exists so setting it to pending
-          await updateStatusOfEntryInQueue(
-            {
-              fileId,
-            },
-            "pending"
-          );
-        }
-      });
-  }
+      await addEntryToQueue({
+        fileId,
+        courseId,
+        status: "pending",
+      })
+        // eslint-disable-next-line no-await-in-loop
+        .catch(async (err) => {
+          if (
+            err.message.startsWith(
+              "Add to queue failed becuase entry exist for this fileId"
+            )
+          ) {
+            // We get an error if it already exists so setting it to pending
+            await updateStatusOfEntryInQueue(
+              {
+                fileId,
+              },
+              "pending"
+            );
+          }
+        });
+    }
 
-  // Return the queue status object so stats can be updated
-  // in frontend
-  const statusObj = await getStatusFromQueue(courseId);
-  return res.status(200).send(statusObj);
+    // Return the queue status object so stats can be updated
+    // in frontend
+    const statusObj = await getStatusFromQueue(courseId);
+    return res.status(200).send(statusObj);
+  } catch (err) {
+    return next(err);
+  }
 });
 
-router.post("/courses/:id/students", async (req, res) => {
+router.post("/courses/:id/students", async (req, res, next) => {
   const students = req.body;
 
-  for (const kthId of students) {
-    // eslint-disable-next-line no-await-in-loop
-    await enrollStudent(req.params.id, kthId).catch((err) => {
-      // We are catching this error so it doesn't stop adding
-      // remaining students in list.
-      log.error(
-        { err },
-        "An error occured when trying to add a student to Canvas"
-      );
-    });
-  }
+  try {
+    for (const kthId of students) {
+      // eslint-disable-next-line no-await-in-loop
+      await enrollStudent(req.params.id, kthId).catch((err) => {
+        // We are catching this error so it doesn't stop adding
+        // remaining students in list.
+        log.error(
+          { err },
+          "An error occured when trying to add a student to Canvas"
+        );
+      });
+    }
 
-  res.status(200).send({
-    message: "done!",
-  });
+    return res.status(200).send({
+      message: "done!",
+    });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 router.use(errorHandler);

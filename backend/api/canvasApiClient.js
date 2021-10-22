@@ -127,6 +127,16 @@ async function createAssignment(courseId, ladokId, language = "en") {
   const examination = await getAktivitetstillfalle(ladokId);
   const { body: template } = await canvas.get(TEMPLATES.assignment[language]);
 
+  const examinationDate = new Date(`${examination.examDate}T00:00:00`);
+
+  if (examinationDate > new Date()) {
+    throw new EndpointError({
+      type: "future_exam",
+      statusCode: 400,
+      message: `You can not create the assignment now. Please run the app again after the exam date, i.e. on ${examination.examDate} or later`,
+    });
+  }
+
   return canvas
     .requestUrl(`courses/${courseId}/assignments`, "POST", {
       assignment: {
@@ -145,7 +155,7 @@ async function createAssignment(courseId, ladokId, language = "en") {
         notify_of_update: false,
         lock_at: new Date().toISOString(),
         // IMPORTANT: do NOT pass a time zone in the "due_at" field
-        due_at: `${examination.examDate}T23:59:59`,
+        due_at: `${examination.examDate}T00:00:00`,
         // TODO: take the grading standard from TentaAPI
         //       grading_standard_id: 1,
       },
@@ -235,7 +245,10 @@ async function hasSubmission({ courseId, assignmentId, userId }) {
   }
 }
 
-async function uploadExam(content, { courseId, studentKthId, examDate }) {
+async function uploadExam(
+  content,
+  { courseId, studentKthId, examDate, fileId }
+) {
   try {
     const { body: user } = await canvas.get(
       `users/sis_user_id:${studentKthId}`
@@ -260,7 +273,7 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
       )
       .catch((err) => {
         if (err.response?.statusCode === 404) {
-          // Student is missing in Canvas
+          // Student is missing in Canvas, we can fix this
           throw new ImportError({
             type: "missing_student",
             message: "Student is missing in examroom",
@@ -268,9 +281,17 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
               kthId: studentKthId,
             },
           });
+        } else {
+          // Other errors from Canvas API that we don't know how to fix
+          throw new ImportError({
+            type: "import_error",
+            message: `Canvas returned an error when importing this exam (windream fileId: ${fileId})`,
+            details: {
+              kthId: studentKthId,
+              fileId,
+            },
+          });
         }
-
-        throw err;
       });
 
     log.debug(
