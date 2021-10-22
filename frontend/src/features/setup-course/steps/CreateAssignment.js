@@ -15,7 +15,7 @@ export default function CreateAssignment({ courseId }) {
     <div>
       <H2>Create Assignment</H2>
       <P>
-        We need to create an assignment which exams will be imported to. You can
+        We need to create an assignment. This is where the scanned exams will be imported as submissions. You can
         leave the setup and edit the assignment once it has been created.
       </P>
       <P>

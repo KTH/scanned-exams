@@ -123,7 +123,7 @@ export default function ResolveIssues({ onGoTo, courseId }) {
           <P>
             <b>
               You have {nrofMissingStudents} exams where the student hasn&apos;t
-              yet been added to your course.
+              yet been added to your exam room.
             </b>{" "}
             These are marked &quot;missing student&quot; and since they have a
             user in Canvas this issue can be fixed by{" "}
