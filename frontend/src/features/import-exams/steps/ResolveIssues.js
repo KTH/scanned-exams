@@ -86,7 +86,7 @@ export default function ResolveIssues({ onGoTo, courseId }) {
       <div className="max-w-2xl">
         <H2>Resolve in progress...</H2>
         <p>
-          Some students has written the exam, but aren't enrolled in the exam room. Enrolling them and importing their exams. 
+          Some students have written the exam, but aren't enrolled in the exam room. Enrolling them and importing their exams. 
       Please stay on this page during this
           process.
         </p>
