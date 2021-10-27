@@ -154,8 +154,10 @@ async function createAssignment(courseId, ladokId, language = "en") {
         grading_type: "letter_grade",
         notify_of_update: false,
         lock_at: new Date().toISOString(),
-        // IMPORTANT: do NOT pass a time zone in the "due_at" field
-        due_at: `${examination.examDate}T00:00:00`,
+        // NOTES:
+        // 1. We don't pass "Z" because we want the due date to be 00:00 local time.
+        // 2. Canvas converts "00:00:00" times to "23:59:59". Because of that, we need to pass "00:01:00".
+        due_at: `${examination.examDate}T00:01:00`,
         // TODO: take the grading standard from TentaAPI
         //       grading_standard_id: 1,
       },
