@@ -61,64 +61,6 @@ async function examListByLadokId(ladokId) {
   return list;
 }
 
-/** Get a list of all exam files for a given exam */
-async function examListByDate({ courseCode, examDate, examCode }) {
-  log.debug(
-    `Getting exams with the "old format" ${courseCode} ${examDate} ${examCode}`
-  );
-  const { body } = await client("windream/search/documents/false", {
-    method: "POST",
-    json: {
-      searchIndiceses: [
-        {
-          index: "c_code",
-          value: courseCode,
-          useWildcard: false,
-        },
-        {
-          index: "e_code",
-          value: examCode,
-          useWildcard: false,
-        },
-        {
-          index: "e_date",
-          value: examDate,
-          useWildcard: false,
-        },
-      ],
-      includeDocumentIndicesesInResponse: true,
-      includeSystemIndicesesInResponse: false,
-      useDatesInSearch: false,
-    },
-    responseType: "json",
-  });
-
-  if (!body.documentSearchResults) {
-    log.debug(`No exams found for ${courseCode} ${examDate} ${examCode}`);
-    return [];
-  }
-
-  const list = [];
-
-  for (const result of body.documentSearchResults) {
-    // Helper function to get the value of the attribute called "index"
-    // we have written it because they are in an array instead of an object
-    const getValue = (index) =>
-      result.documentIndiceses.find((di) => di.index === index)?.value;
-
-    list.push({
-      fileId: result.fileId,
-      student: {
-        id: getValue("s_uid"),
-        firstName: getValue("s_firstname"),
-        lastName: getValue("s_lastname"),
-      },
-    });
-  }
-
-  return list;
-}
-
 /** Download the exam with ID "fileId". Returns its content as a ReadableStream */
 async function downloadExam(fileId) {
   log.info(`Downloading file ${fileId}...`);
@@ -148,7 +90,6 @@ async function downloadExam(fileId) {
 }
 
 module.exports = {
-  examListByDate,
   examListByLadokId,
   downloadExam,
   getVersion,
