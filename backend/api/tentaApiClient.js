@@ -126,8 +126,6 @@ async function downloadExam(fileId) {
     responseType: "json",
   });
 
-  // TODO: Throw descriptibe error if we don't get expected data
-
   const getValue = (index) =>
     body.wdFile.objectIndiceses.find((di) => di.index === index)?.value;
 
@@ -136,10 +134,8 @@ async function downloadExam(fileId) {
   const studentKthId = getValue("s_uid");
   const studentPersNr = getValue("s_pnr");
 
-  if (!studentKthId)
-    throw new Error(
-      `Could not get KTH ID (s_uid) from TentaAPI (windream) for file id "${fileId}".`
-    );
+  // Accepting all exams we get from Windreams to allow errors to
+  // be presented to the end user.
 
   return {
     content: Readable.from(

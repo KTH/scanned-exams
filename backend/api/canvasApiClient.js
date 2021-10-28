@@ -321,10 +321,14 @@ async function uploadExam(
   } catch (err) {
     if (err.type === "missing_student") {
       log.warn(`User ${studentKthId} is missing in Canvas course ${courseId}`);
+    } else if (!studentKthId) {
+      log.warn(
+        `User is missing KTH ID, needs du be manually graded: Windream fileid ${fileId} / course ${courseId}`
+      );
     } else {
       log.error(
         { err },
-        `Error when uploading an exam ${studentKthId} / course ${courseId}`
+        `Error when uploading exam: KTH ID ${studentKthId} / course ${courseId}`
       );
     }
     throw err;
