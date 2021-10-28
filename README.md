@@ -4,6 +4,20 @@ Application that downloads exams from the "Windream/AlcomREST tenta API" and upl
 
 ---
 
+## Vocabulary
+These are common words and phrases that should be used in the app for UX consistency.
+
+- KTH Import Exams? -- name of app (don't use: scanned exams?)
+- Exam room -- The Canvas course where the app is installed and run. An exam room is one-to-one mapped to an aktivitetstillfälle in Ladok. (_don't_ use Course since that means something entirely different in Ladok. Don't use courseroom either, since that is something different.)
+- Exam -- bla bla
+- Teacher? --
+- Student? --
+- Missing student? --
+- Windream? -- external system exams are imported from (don't use: tenta api?)
+- Ladok? --
+- Canvas? --
+- Speed Grader? --
+
 ## Getting started
 
 Pre-requirements
@@ -29,9 +43,6 @@ Frontend:
     npm install
     npm run build
     ```
-
-
-Open two terminals. One for the app in the backend and one for the "TentaAPI mock"
 
 In the "backend" terminal:
 
@@ -66,14 +77,6 @@ In the "backend" terminal:
    npm install
    npm start
    ```
-
-In the "TentaAPI mock" terminal
-
-1. Go to the `tentaapi-mock` directory.
-2. Run `npm start`
-
-
-🎉  **DONE!** Now you can [search for the course "XY0101" in Canvas](https://kth.test.instructure.com/accounts/1?search_term=AKT.cfcb7186-94f1-4ad1-812d-1e2fba7b36d3) and launch the app from there
 
 ---
 

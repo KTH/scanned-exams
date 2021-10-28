@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useQueryClient } from "react-query";
 import {
   useCourseImportStatus,
@@ -29,12 +29,12 @@ export default function PrepareImport({ onGoTo, courseId }) {
 
   // Get exams available to import
   const queryExams = useCourseExams(courseId);
-  const { data: exams = { result: [] }, isLoading: examsLoading } = queryExams;
+  const { data = {}, isFetching: examsLoading } = queryExams;
+  const { result: exams = [] } = data;
 
-  const examsToImport =
-    exams.result.filter((exam) => exam.status === "new") || [];
-  const examsWithError =
-    exams.result.filter((exam) => exam.status === "error") || [];
+  const examsToImport = exams.filter((exam) => exam.status === "new") || [];
+  const examsWithError = exams.filter((exam) => exam.status === "error") || [];
+  const examsPending = exams.filter((exam) => exam.status === "pending") || [];
 
   const allExamsToImportOnNextTry = [...examsToImport, ...examsWithError];
 
@@ -55,14 +55,16 @@ export default function PrepareImport({ onGoTo, courseId }) {
 
   // Show error page if we don't have new exams to import but
   // have errors
-  if (examsToImport.length === 0) {
-    if (examsWithError.length > 0) {
-      onGoTo("issues");
-    } else if (exams.length > 0) {
-      // We have done a successful import but nothing new waiting
-      onGoTo("result");
+  useEffect(() => {
+    if (examsToImport.length === 0) {
+      if (examsWithError.length > 0) {
+        onGoTo("issues");
+      } else if (exams.length > 0 && examsPending.length === 0) {
+        // We have done a successful import but nothing new waiting
+        onGoTo("result");
+      }
     }
-  }
+  });
 
   if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
@@ -82,7 +84,6 @@ export default function PrepareImport({ onGoTo, courseId }) {
             onDone={() => {
               // Clear the query cache to avoid synching issues
               client.removeQueries(["course", courseId]);
-              onGoTo("issues");
             }}
           />
         </div>

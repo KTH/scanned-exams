@@ -25,9 +25,11 @@ export default function ResolveIssues({ onGoTo, courseId }) {
   const {
     data: dataExams,
     isLoading: examsLoading,
-    isError: examsError,
+    // isError: examsError,
   } = queryExams;
 
+  const examsSuccessfullyImported =
+    dataExams?.result.filter((exam) => exam.status === "imported") || [];
   const examsWithMissingStudentError =
     dataExams?.result.filter(
       (exam) => exam.status === "error" && exam.error.type === "missing_student"
@@ -45,8 +47,8 @@ export default function ResolveIssues({ onGoTo, courseId }) {
 
   const {
     mutate: doAddStudents,
-    isLoading: addStudentsLoading,
-    isError: addStudentsError,
+    // isLoading: addStudentsLoading,
+    // isError: addStudentsError,
   } = addStudentsMutation;
 
   // Hoook to start import
@@ -67,24 +69,25 @@ export default function ResolveIssues({ onGoTo, courseId }) {
   const {
     mutate: doStartImport,
     isLoading: startImportLoading,
-    isError: startImportError,
+    // isError: startImportError,
   } = startImportMutation;
 
   if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
-  const nrofExamsToResolve =
-    examsWithOtherErrors.length + examsWithMissingStudentError.length;
+  const nrofMissingStudents = examsWithMissingStudentError.length;
+  const nrofOtherErrors = examsWithOtherErrors.length;
+  const nrofImported = examsSuccessfullyImported.length;
+  const nrofExamsToResolve = nrofMissingStudents + nrofOtherErrors;
 
   if (queueStatus === "working") {
     return (
       <div className="max-w-2xl">
         <H2>Resolve in progress...</H2>
         <p>
-          Fixing issues with your latest import. This adds missing students and
-          also attempts to fix other import errors. Please stay on this page
-          during this process.
+          Re-importing exams with issues. Please stay on this page during this
+          process.
         </p>
         <div className="mt-8">
           <ImportQueueProgressBar
@@ -104,52 +107,60 @@ export default function ResolveIssues({ onGoTo, courseId }) {
   return (
     <div className="max-w-2xl">
       <H2>Resolve Issues</H2>
-      <P>
-        There are <b>{nrofExamsToResolve} exams</b> that encountered issues
-        during import.
-      </P>
-      {nrofExamsToResolve === 0 && (
-        <P>
-          <b>DONE!</b> You can safely proceed to the summary to verify the
-          status of all your imports.
-        </P>
-      )}
-      {nrofExamsToResolve > 0 && (
-        <>
-          <div className={cssInfoBox}>
-            <p>We encountered errors during the import.</p>
-            <P>
-              <b>You can start grading exams</b> that have been imported to the
-              assignment even if not all of them where succesfully imported.
-            </P>
-            <P>
-              <b>Exams marked with "missing student"</b> can be fixed by
-              clicking the button "Fix missing students!".
-            </P>
-            <P>
-              <b>Exams marked with other errors</b> might need further
-              investigation. Contact IT-support or click "Re-import rows..." if you
-              believe the issue has been resolved.
-            </P>
-          </div>
-          {/* Render missing students */}
-          {examsWithMissingStudentError.length > 0 &&
-            renderMissingStudents({
-              exams: examsWithMissingStudentError,
-              isLoading: startImportLoading,
-              onFix: async () => {
-                await doAddStudents();
-                doStartImport();
-              },
-            })}
-          {/* Render other import errors */}
-          <div className="mt-8">
-            {examsWithOtherErrors.map((exam, index) => (
-              <ExamErrorRow exam={exam} rowNr={index + 1} />
-            ))}
-          </div>
-        </> /**/
-      )}
+
+      <div className={cssInfoBox}>
+        <h2 className="font-semibold text-lg">
+          We encountered errors during the import.
+        </h2>
+        {nrofImported > 0 && (
+          <P>
+            <b>You successfully imported {nrofImported} exams.</b> These are now
+            available for grading in Canvas along with any previously imported
+            exams.
+          </P>
+        )}
+        {nrofMissingStudents > 0 && (
+          <P>
+            <b>
+              You have {nrofMissingStudents} exams where the student hasn&apos;t
+              yet been added to your exam room.
+            </b>{" "}
+            These are marked &quot;missing student&quot; and since they have a
+            user in Canvas this issue can be fixed by{" "}
+            <b>clicking &quot;Fix missing students!&quot;</b>.
+          </P>
+        )}
+        {nrofOtherErrors > 0 && (
+          <P>
+            <b>
+              You have {nrofOtherErrors} exams that can&apos;t be imported at
+              this time.
+            </b>{" "}
+            This is due to issues we can&apos;t automatically solve and they are
+            marked with &quot;Unhandled error&quot;. Once the issues with these
+            exams have been solved click &quot;Re-import rows...&quot; to retry
+            importing these exams. Contact IT-support if you don&apos;t know how
+            to resolve these issues.
+          </P>
+        )}
+      </div>
+      {/* Render missing students */}
+      {examsWithMissingStudentError.length > 0 &&
+        renderMissingStudents({
+          exams: examsWithMissingStudentError,
+          isLoading: startImportLoading,
+          onFix: async () => {
+            await doAddStudents();
+            doStartImport();
+          },
+        })}
+      {/* Render other import errors */}
+      <div className="mt-8">
+        {examsWithOtherErrors.map((exam, index) => (
+          <ExamErrorRow exam={exam} rowNr={index + 1} />
+        ))}
+      </div>
+
       <div className="mt-8">
         {examsWithOtherErrors.length > 0 && (
           <SecondaryButton

@@ -10,6 +10,21 @@ const canvas = new Canvas(
   process.env.CANVAS_API_ADMIN_TOKEN
 );
 
+/**
+ * These endpoints have the content used as a template when creating the
+ * homepage and assignment.
+ */
+const TEMPLATES = {
+  assignment: {
+    en: "courses/33450/assignments/178066",
+    sv: "courses/33450/assignments/178752",
+  },
+  homepage: {
+    en: "courses/33450/pages/151311",
+    sv: "courses/33450/pages/151959",
+  },
+};
+
 /** Get data from one canvas course */
 async function getCourse(courseId) {
   const { body } = await canvas.get(`courses/${courseId}`);
@@ -18,15 +33,14 @@ async function getCourse(courseId) {
 }
 
 /** Creates a "good-looking" homepage in Canvas */
-async function createHomepage(courseId) {
+async function createHomepage(courseId, language = "en") {
+  const { body: template } = await canvas.get(TEMPLATES.homepage[language]);
+
   await canvas.requestUrl(`courses/${courseId}/front_page`, "PUT", {
     wiki_page: {
       // To make this page, use the Rich Content Editor in Canvas (https://kth.test.instructure.com/courses/30347/pages/welcome-to-the-exam/edit)
-      // Then copy the HTML code:
-      body: `<p>Welcome to the Canvas page for the exam results</p>
-      <p>This course will be used to grade your exams digitally. This means that, after your exams are scanned, they will be uploaded in this Canvas course</p>
-      <p>&nbsp;</p>
-      <p>Once your exam has been graded, you will be able to see the grades and teachers feedback under "Grades".</p>`,
+      body: template.body,
+      title: template.title,
     },
   });
   return canvas.requestUrl(`courses/${courseId}`, "PUT", {
@@ -109,15 +123,25 @@ async function getAssignmentSubmissions(courseId, assignmentId) {
     .toArray();
 }
 
-async function createAssignment(courseId, ladokId) {
+async function createAssignment(courseId, ladokId, language = "en") {
   const examination = await getAktivitetstillfalle(ladokId);
+  const { body: template } = await canvas.get(TEMPLATES.assignment[language]);
+
+  const examinationDate = new Date(`${examination.examDate}T00:00:00`);
+
+  if (examinationDate > new Date()) {
+    throw new EndpointError({
+      type: "future_exam",
+      statusCode: 400,
+      message: `You can not create the assignment now. Please run the app again after the exam date, i.e. on ${examination.examDate} or later`,
+    });
+  }
 
   return canvas
     .requestUrl(`courses/${courseId}/assignments`, "POST", {
       assignment: {
-        name: "Scanned exams",
-        description:
-          'This is an assignment created automatically by importing scanned exams to Canvas. The grade posting policy is set to "Manual" which makes it possible to grade all submissions before publishing the student feedback for all students at once.',
+        name: template.name,
+        description: template.description,
         // "on_paper" allows us to create an assignment where students cannot
         // submit anything. This will be converted to "online_upload" when
         // we actually submit something (when calling `unlockAssignment`)
@@ -236,7 +260,10 @@ async function hasSubmission({ courseId, assignmentId, userId }) {
   }
 }
 
-async function uploadExam(content, { courseId, studentKthId, examDate }) {
+async function uploadExam(
+  content,
+  { courseId, studentKthId, examDate, fileId }
+) {
   try {
     const { body: user } = await canvas.get(
       `users/sis_user_id:${studentKthId}`
@@ -261,7 +288,7 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
       )
       .catch((err) => {
         if (err.response?.statusCode === 404) {
-          // Student is missing in Canvas
+          // Student is missing in Canvas, we can fix this
           throw new ImportError({
             type: "missing_student",
             message: "Student is missing in examroom",
@@ -269,9 +296,17 @@ async function uploadExam(content, { courseId, studentKthId, examDate }) {
               kthId: studentKthId,
             },
           });
+        } else {
+          // Other errors from Canvas API that we don't know how to fix
+          throw new ImportError({
+            type: "import_error",
+            message: `Canvas returned an error when importing this exam (windream fileId: ${fileId})`,
+            details: {
+              kthId: studentKthId,
+              fileId,
+            },
+          });
         }
-
-        throw err;
       });
 
     log.debug(

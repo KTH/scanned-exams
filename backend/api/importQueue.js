@@ -11,8 +11,11 @@ const databaseClient = new MongoClient(MONGODB_CONNECTION_STRING, {
   minPoolSize: 1,
 });
 
-// Note: `databaseConnection` is a promise and must be awaited to be used
-const databaseConnection = databaseClient.connect();
+let databaseConnection;
+function connectToDatabase() {
+  databaseConnection = databaseConnection || databaseClient.connect();
+  return databaseConnection;
+}
 
 /**
  * Return the Import Queue collection.
@@ -20,7 +23,9 @@ const databaseConnection = databaseClient.connect();
  * It also connects to the database if it's not already connected
  */
 async function getImportQueueCollection() {
-  await databaseConnection;
+  // Note: `databaseConnection` is a promise and must be awaited to be used
+  // Instansiate once, but not before it is used the first time
+  await connectToDatabase();
 
   return databaseClient.db().collection(DB_QUEUE_NAME);
 }
@@ -159,9 +164,7 @@ async function resetQueueForImport(courseId) {
       },
     });
   } catch (err) {
-    log.warn(
-      "resetQueueForImport failet with error. If this happens once in isolation it is okay, this method is called every time we start an import.");
-    log.error(err);
+    log.error({ err });
     throw new Error("Error removing finished entries");
   }
 }

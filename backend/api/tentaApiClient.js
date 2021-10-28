@@ -16,7 +16,7 @@ async function getVersion() {
 }
 
 async function examListByLadokId(ladokId) {
-  log.info(`Getting exams for Ladok ID ${ladokId}`);
+  log.debug(`Getting exams for Ladok ID ${ladokId}`);
 
   const { body } = await client("windream/search/documents/false", {
     method: "POST",
@@ -36,7 +36,7 @@ async function examListByLadokId(ladokId) {
   });
 
   if (!body.documentSearchResults) {
-    log.info(`No exams found for ladok ID ${ladokId}`);
+    log.debug(`No exams found with the "new format" e_ladokid=${ladokId}`);
     return [];
   }
 
@@ -62,8 +62,10 @@ async function examListByLadokId(ladokId) {
 }
 
 /** Get a list of all exam files for a given exam */
-async function examList({ courseCode, examDate, examCode }) {
-  log.debug(`Getting exams for ${courseCode} ${examDate} ${examCode}`);
+async function examListByDate({ courseCode, examDate, examCode }) {
+  log.debug(
+    `Getting exams with the "old format" ${courseCode} ${examDate} ${examCode}`
+  );
   const { body } = await client("windream/search/documents/false", {
     method: "POST",
     json: {
@@ -132,6 +134,7 @@ async function downloadExam(fileId) {
   const examDateTime = getValue("e_date");
   const examDate = examDateTime.split("T")[0];
   const studentKthId = getValue("s_uid");
+  const studentPersNr = getValue("s_pnr");
 
   if (!studentKthId)
     throw new Error(
@@ -143,12 +146,13 @@ async function downloadExam(fileId) {
       Buffer.from(body.wdFile.fileAsBase64.toString("utf-8"), "base64")
     ),
     studentKthId,
+    studentPersNr,
     examDate,
   };
 }
 
 module.exports = {
-  examList,
+  examListByDate,
   examListByLadokId,
   downloadExam,
   getVersion,
