@@ -127,16 +127,6 @@ async function createAssignment(courseId, ladokId, language = "en") {
   const examination = await getAktivitetstillfalle(ladokId);
   const { body: template } = await canvas.get(TEMPLATES.assignment[language]);
 
-  const examinationDate = new Date(`${examination.examDate}T00:00:00`);
-
-  if (examinationDate > new Date()) {
-    throw new EndpointError({
-      type: "future_exam",
-      statusCode: 400,
-      message: `You can not create the assignment now. Please run the app again after the exam date, i.e. on ${examination.examDate} or later`,
-    });
-  }
-
   return canvas
     .requestUrl(`courses/${courseId}/assignments`, "POST", {
       assignment: {
