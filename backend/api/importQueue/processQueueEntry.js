@@ -16,7 +16,7 @@ const IS_DEV = NODE_ENV !== "production";
  * in windream and they need to be graded manually
  */
 function throwIfStudentNotInUg({ fileId, studentPersNr }) {
-  if (studentPersNr.replace(/-/g, "") === "121212121212") {
+  if (studentPersNr && studentPersNr.replace(/-/g, "") === "121212121212") {
     throw new ImportError({
       type: "not_in_ug",
       message: `The student does not have a Canvas account. Please contact IT-support (windream fileId: ${fileId}) - Unhandled error`,
@@ -43,8 +43,8 @@ async function uploadOneExam({ fileId, courseId }) {
     await tentaApi.downloadExam(fileId);
 
   // Some business rules
-  throwIfStudentNotInUg({ fileId, studentPersNr });
   throwIfStudentMissingKTHID({ fileId, studentKthId });
+  throwIfStudentNotInUg({ fileId, studentPersNr });
 
   log.debug(
     `Course ${courseId} / File ${fileId} / User ${studentKthId}. Uploading`
