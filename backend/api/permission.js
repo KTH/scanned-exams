@@ -42,6 +42,15 @@ async function checkPermissions(courseId, userId) {
   log.debug(`Authorized. User ${userId} in course ${courseId}`);
 }
 
+function checkPermissionsMiddleware(req, res, next) {
+  checkPermissions(req.params.id, req.session.userId)
+    .then(() => {
+      next();
+    })
+    .catch(next);
+}
+
 module.exports = {
   checkPermissions,
+  checkPermissionsMiddleware,
 };
