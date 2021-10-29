@@ -45,51 +45,11 @@ router.get("/me", (req, res, next) => {
   return res.status(200).send({ userId });
 });
 
-router.get("/courses/:id/setup", async (req, res, next) => {
-  getSetupStatus(req.params.id)
-    .then((status) => res.send(status))
-    .catch(next);
-});
-
-router.post("/courses/:id/setup/create-homepage", async (req, res, next) => {
-  createSpecialHomepage(req.params.id)
-    .then(() => {
-      res.send({
-        message: "done!",
-      });
-    })
-    .catch(next);
-});
-
-router.post("/courses/:id/setup/publish-course", async (req, res, next) => {
-  publishCourse(req.params.id)
-    .then(() => {
-      res.send({
-        message: "done!",
-      });
-    })
-    .catch(next);
-});
-
-router.post("/courses/:id/setup/create-assignment", async (req, res, next) => {
-  createSpecialAssignment(req.params.id)
-    .then(() => {
-      res.send({
-        message: "done!",
-      });
-    })
-    .catch(next);
-});
-
-router.post("/courses/:id/setup/publish-assignment", async (req, res, next) => {
-  publishSpecialAssignment(req.params.id)
-    .then(() => {
-      res.send({
-        message: "done!",
-      });
-    })
-    .catch(next);
-});
+router.get("/courses/:id/setup", getSetupStatus);
+router.get("/courses/:id/setup/create-homepage", createSpecialHomepage);
+router.post("/courses/:id/setup/publish-course", publishCourse);
+router.post("/courses/:id/setup/create-assignment", createSpecialAssignment);
+router.post("/courses/:id/setup/publish-assignment", publishSpecialAssignment);
 
 // Get list of exams for given course
 router.get("/courses/:id/exams", (req, res, next) => {
