@@ -29,7 +29,7 @@ function throwIfStudentNotInUg(fileId, studentPersNr) {
  * Students has missing entry for KTH ID, probably external
  * and needs to be manually graded
  */
-function throwIfStudentMissingKTHID({ fileId, studentKthId }) {
+function throwIfStudentMissingKTHID(fileId, studentKthId) {
   if (!studentKthId) {
     throw new ImportError({
       type: "missing_kthid",
@@ -44,7 +44,7 @@ async function uploadOneExam({ fileId, courseId }) {
 
   // Some business rules
   throwIfStudentNotInUg(fileId, student.personNumber);
-  throwIfStudentMissingKTHID({ fileId, studentKthId: student.kthId });
+  throwIfStudentMissingKTHID(fileId, student.kthId);
 
   updateStudentOfEntryInQueue({ fileId }, student);
 
