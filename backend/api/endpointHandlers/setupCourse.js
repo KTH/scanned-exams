@@ -38,105 +38,61 @@ async function getLadokId(courseId) {
 }
 
 /** Get setup status of a Canvas course given its ID */
-async function getSetupStatus(req, res, next) {
-  try {
-    const courseId = req.params.id;
-    const ladokId = await getLadokId(courseId);
+async function getSetupStatus(courseId) {
+  const ladokId = await getLadokId(courseId);
 
-    const [course, assignment] = await Promise.all([
-      canvas.getCourse(courseId),
-      canvas.getValidAssignment(courseId, ladokId),
-    ]);
+  const [course, assignment] = await Promise.all([
+    canvas.getCourse(courseId),
+    canvas.getValidAssignment(courseId, ladokId),
+  ]);
 
-    return res.send({
-      coursePublished: course.workflow_state === "available",
-      assignmentCreated: assignment != null,
-      assignmentPublished: assignment?.published || false,
-    });
-  } catch (err) {
-    return next(err);
-  }
+  return {
+    coursePublished: course.workflow_state === "available",
+    assignmentCreated: assignment != null,
+    assignmentPublished: assignment?.published || false,
+  };
 }
 
 /** Create a homepage in Canvas */
-async function createSpecialHomepage(req, res, next) {
-  try {
-    const courseId = req.params.id;
-
-    await canvas.createHomepage(courseId);
-    res.send({
-      message: "done",
-    });
-  } catch (err) {
-    next(err);
-  }
+async function createSpecialHomepage(courseId) {
+  return canvas.createHomepage(courseId);
 }
 
 /** Publish a Canvas course given its ID */
-async function publishCourse(req, res, next) {
-  try {
-    const courseId = req.params.id;
-    await canvas.publishCourse(courseId);
-
-    res.send({
-      message: "done",
-    });
-  } catch (err) {
-    next(err);
-  }
+async function publishCourse(courseId) {
+  return canvas.publishCourse(courseId);
 }
 
 /** Creates a special assignment in a given course */
-async function createSpecialAssignment(req, res, next) {
-  try {
-    const courseId = req.paramss.id;
-    const ladokId = await getLadokId(courseId);
-    const existingAssignment = await canvas.getValidAssignment(
-      courseId,
-      ladokId
-    );
+async function createSpecialAssignment(courseId) {
+  const ladokId = await getLadokId(courseId);
+  const existingAssignment = await canvas.getValidAssignment(courseId, ladokId);
 
-    if (existingAssignment) {
-      throw new EndpointError({
-        type: "assignment_exists",
-        statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
-        message: "The assignment already exists",
-      });
-    }
-
-    await canvas.createAssignment(courseId, ladokId);
-
-    res.send({
-      message: "done",
+  if (existingAssignment) {
+    throw new EndpointError({
+      type: "assignment_exists",
+      statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
+      message: "The assignment already exists",
     });
-  } catch (err) {
-    next(err);
   }
+
+  await canvas.createAssignment(courseId, ladokId);
 }
 
 /** Publish the special assignment in Canvas */
-async function publishSpecialAssignment(req, res, next) {
-  try {
-    const courseId = req.params.id;
-    const ladokId = await getLadokId(courseId);
-    const assignment = await canvas.getValidAssignment(courseId, ladokId);
+async function publishSpecialAssignment(courseId) {
+  const ladokId = await getLadokId(courseId);
+  const assignment = await canvas.getValidAssignment(courseId, ladokId);
 
-    if (!assignment) {
-      throw new EndpointError({
-        type: "assignment_not_found",
-        statusCode: 404,
-        message: "There is no valid assignment that can be published",
-      });
-    }
-
-    await canvas.publishAssignment(courseId, assignment.id);
-
-    res.send({
-      message: "done",
+  if (!assignment) {
+    throw new EndpointError({
+      type: "assignment_not_found",
+      statusCode: 404,
+      message: "There is no valid assignment that can be published",
     });
-  } catch (err) {
-    next(err);
   }
+
+  await canvas.publishAssignment(courseId, assignment.id);
 }
 
 module.exports = {

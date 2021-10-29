@@ -14,7 +14,7 @@ export default function PrepareImport({ courseId }) {
   const { mutate: doStartImport, isLoading: startImportLoading } =
     useMutateImportStart(courseId, examsToImport);
 
-  if (examsLoading) {
+  if (queueStatus === undefined || examsLoading || statusLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 

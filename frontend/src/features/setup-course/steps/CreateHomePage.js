@@ -21,7 +21,7 @@ export default function CreateHomePage({ onDone, courseId }) {
       <P>
         The exam room will be visible for your students, it is important that
         they can see its purpose from the homepage. You can use our recommended
-        homepage or setup the courseroom by yourself
+        homepage or setup the exam room by yourself
       </P>
       <P>
         <em>The examroom will not be published yet</em>

@@ -1,10 +1,19 @@
 /** Functions that handle the "import exams" part of the app */
 const log = require("skog");
+<<<<<<< HEAD:backend/api/endpointHandlers/listAllExams.js
 const canvas = require("../externalApis/canvasApiClient");
+const ladok = require("../externalApis/ladokApiClient");
 const tentaApi = require("../externalApis/tentaApiClient");
 const { getEntriesFromQueue } = require("../importQueue");
 
-const { CanvasApiError } = require("../error");
+const { LadokApiError, CanvasApiError } = require("../error");
+=======
+const canvas = require("../../externalApis/canvasApiClient");
+const tentaApi = require("../../externalApis/tentaApiClient");
+const { getEntriesFromQueue } = require("../../importQueue");
+
+const { CanvasApiError } = require("../../error");
+>>>>>>> v1.1:backend/api/endpointHandlers/utils/listAllExams.js
 
 /**
  * Get the "ladokId" that is associated with a given course. It throws in case
@@ -42,6 +51,44 @@ async function getLadokId(courseId) {
   return ladokIds[0];
 }
 
+<<<<<<< HEAD:backend/api/endpointHandlers/listAllExams.js
+async function listScannedExamsWithOldFormat(ladokId) {
+  const aktivitetstillfalle = await ladok
+    .getAktivitetstillfalle(ladokId)
+    .catch(() => {
+      throw new LadokApiError({
+        type: "invalid_activity",
+        statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
+        message: `Not valid Ladok activitestillfälle [${ladokId}]`,
+        details: {
+          ladokId,
+        },
+      });
+    });
+
+  const { activities, examDate } = aktivitetstillfalle;
+
+  const examsWithOldFormat = [];
+  for (const { courseCode, examCode } of activities) {
+    examsWithOldFormat.push(
+      // eslint-disable-next-line no-await-in-loop
+      ...(await tentaApi.examListByDate({ courseCode, examCode, examDate }))
+    );
+  }
+
+  return examsWithOldFormat;
+}
+
+function mergeAndDeduplicate(array1, array2) {
+  const exams = [...array1, ...array2];
+  const allIds = exams.map((e) => e.fileId);
+  const uniqueIds = Array.from(new Set(allIds));
+
+  return uniqueIds.map((id) => exams.find((e) => e.fileId === id));
+}
+
+=======
+>>>>>>> v1.1:backend/api/endpointHandlers/utils/listAllExams.js
 /** Returns a list of scanned exams (i.e. in Windream) given its ladokId */
 async function listScannedExams(courseId, ladokId) {
   const allScannedExams = await tentaApi.examListByLadokId(ladokId);
@@ -96,7 +143,11 @@ function calcNewSummary({ ...summaryProps }, status, error) {
   // eslint-disable-next-line no-param-reassign
   summary[status]++;
 
+<<<<<<< HEAD:backend/api/endpointHandlers/listAllExams.js
   if (error) {
+=======
+  if (error !== undefined) {
+>>>>>>> v1.1:backend/api/endpointHandlers/utils/listAllExams.js
     const errorType = error.type;
     if (summary.errorsByType[errorType] === undefined) {
       // eslint-disable-next-line no-param-reassign
