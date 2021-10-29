@@ -94,17 +94,18 @@ export function ImportQueueProgressBar({ courseId, defaultTotal, onDone }) {
 
   // Ping backend to get status of current import
   const { data } = useCourseImportProgress(courseId, {
-    onSuccess: ({ working }) => {
+    onDone: () => {
       // We are done, inform the parent
-      if (working.progress >= working.total) {
-        setCancel(true);
-        onDone();
-      }
+      setCancel(true);
+      onDone();
     },
     cancel,
   });
-  const { working } = data || {};
-  const { progress = 0, total = defaultTotal } = working || {};
+
+  const {
+    stats: { total = 0, imported = 0, error = 0 },
+  } = data || {};
+  const progress = imported + error;
 
   const perc = Math.round((progress / total) * 100);
   return (
