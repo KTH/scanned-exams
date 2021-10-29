@@ -65,43 +65,11 @@ router.get("/courses/:courseId/import-queue", (req, res, next) => {
     .catch(next);
 });
 
-// Add items to the import queue
-router.post("/courses/:courseId/import-queue", (req, res, next) => {
-  addEntriesToQueue(req.params.courseId, req.body)
-    .then((response) => res.send(response))
-    .catch(next);
-});
-
-// Get errors in the import queue
-router.get("/courses/:courseId/import-queue/errors", (req, res, next) => {
-  getErrorsInQueue(req.params.courseId)
-    .then((entries) => res.send(entries))
-    .catch(next);
-});
-
-// Solve errors in the import queue
-router.post("/courses/:courseId/import-queue/errors/fix", (req, res, next) => {
-  fixErrorsInQueue(req.params.courseId, req.body)
-    .then((status) => res.send(status))
-    .catch(next);
-});
-
-// Ignore errors in the import queue (delete from the queue)
-router.post(
-  "/courses/:courseId/import-queue/errors/ignore",
-  (req, res, next) => {
-    ignoreErrorsInQueue(req.params.courseId, req.body)
-      .then((status) => res.send(status))
-      .catch(next);
-  }
-);
-
-// Empty import queue
-router.delete("/courses/:courseId/import-queue", (req, res, next) => {
-  resetQueue(req.params.courseId)
-    .then((status) => res.send(status))
-    .catch(next);
-});
+router.post("/courses/:id/import-queue", addEntriesToQueue);
+router.get("/courses/:id/import-queue/errors", getErrorsInQueue);
+router.post("/courses/:id/import-queue/errors/fix", fixErrorsInQueue);
+router.post("/courses/:id/import-queue/errors/ignore", ignoreErrorsInQueue);
+router.delete("/courses/:id/import-queue", resetQueue);
 
 router.use(errorHandler);
 module.exports = router;
