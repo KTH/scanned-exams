@@ -43,6 +43,7 @@ function getImportQueueStep(data) {
 
 export default function ImportScreen({ courseId }) {
   const { data, isLoading: statusLoading } = useCourseImportStatus(courseId);
+  const { working } = data || {};
 
   // Determine current active step
   const showStep = statusLoading ? undefined : getImportQueueStep(data);
@@ -72,10 +73,10 @@ export default function ImportScreen({ courseId }) {
         {_renderContent({
           courseId,
           showStep,
-          progress: data?.working?.progress ?? 0,
-          total: data?.working?.total ?? 0,
-          ignored: data?.working.ignored ?? 0,
-          imported: data?.working.imported ?? 0,
+          progress: working?.progress ?? 0,
+          total: working?.total ?? 0,
+          ignored: working?.ignored ?? 0,
+          imported: working?.imported ?? 0,
         })}
       </div>
     </div>
