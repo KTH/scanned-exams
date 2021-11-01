@@ -109,78 +109,83 @@ function calcNewSummary({ ...summaryProps }, status, error) {
   return summary;
 }
 
-async function listAllExams(courseId) {
-  // - Canvas is source of truth regarding if a submitted exam is truly imported
-  // - the internal import queue keeps state of pending and last performed import
-  const ladokId = await getLadokId(courseId);
-  let [allScannedExams, studentsWithExamsInCanvas, examsInImportQueue] =
-    await Promise.all([
-      listScannedExams(courseId, ladokId),
-      listStudentsWithExamsInCanvas(courseId, ladokId),
-      getEntriesFromQueue(courseId),
-    ]);
+async function listAllExams(req, res, next) {
+  try {
+    const courseId = req.params.id;
+    // - Canvas is source of truth regarding if a submitted exam is truly imported
+    // - the internal import queue keeps state of pending and last performed import
+    const ladokId = await getLadokId(courseId);
+    let [allScannedExams, studentsWithExamsInCanvas, examsInImportQueue] =
+      await Promise.all([
+        listScannedExams(courseId, ladokId),
+        listStudentsWithExamsInCanvas(courseId, ladokId),
+        getEntriesFromQueue(courseId),
+      ]);
 
-  // Make sure these are arrays
-  allScannedExams = allScannedExams || [];
-  studentsWithExamsInCanvas = studentsWithExamsInCanvas || [];
-  examsInImportQueue = examsInImportQueue || [];
+    // Make sure these are arrays
+    allScannedExams = allScannedExams || [];
+    studentsWithExamsInCanvas = studentsWithExamsInCanvas || [];
+    examsInImportQueue = examsInImportQueue || [];
 
-  let summary = {
-    total: 0,
-    new: 0,
-    pending: 0,
-    imported: 0,
-    error: 0,
-    errorsByType: {},
-  };
-
-  const listOfExamsToHandle = allScannedExams.map((exam) => {
-    const foundInCanvas = studentsWithExamsInCanvas.find(
-      (s) => s === exam.student?.id
-    );
-
-    const foundInQueue = examsInImportQueue.find(
-      (examInQueue) => examInQueue.fileId === exam.fileId
-    );
-
-    let status = "new";
-    let errorDetails;
-    if (foundInCanvas) {
-      status = "imported";
-    } else if (foundInQueue) {
-      switch (foundInQueue.status) {
-        case "pending":
-          status = "pending";
-          break;
-        case "error":
-          status = "error";
-          errorDetails = foundInQueue.error;
-          break;
-        case "imported":
-          // It was marked imported but not found in Canvas
-          // Allow user to retry import
-          status = "new";
-          break;
-        default:
-          status = foundInQueue.status;
-          errorDetails = foundInQueue.error;
-      }
-    }
-
-    summary = calcNewSummary(summary, status, errorDetails);
-
-    return {
-      id: exam.fileId,
-      student: exam.student,
-      status,
-      error: errorDetails,
+    let summary = {
+      total: 0,
+      new: 0,
+      pending: 0,
+      imported: 0,
+      error: 0,
+      errorsByType: {},
     };
-  });
 
-  return {
-    result: listOfExamsToHandle,
-    summary,
-  };
+    const listOfExamsToHandle = allScannedExams.map((exam) => {
+      const foundInCanvas = studentsWithExamsInCanvas.find(
+        (s) => s === exam.student?.id
+      );
+
+      const foundInQueue = examsInImportQueue.find(
+        (examInQueue) => examInQueue.fileId === exam.fileId
+      );
+
+      let status = "new";
+      let errorDetails;
+      if (foundInCanvas) {
+        status = "imported";
+      } else if (foundInQueue) {
+        switch (foundInQueue.status) {
+          case "pending":
+            status = "pending";
+            break;
+          case "error":
+            status = "error";
+            errorDetails = foundInQueue.error;
+            break;
+          case "imported":
+            // It was marked imported but not found in Canvas
+            // Allow user to retry import
+            status = "new";
+            break;
+          default:
+            status = foundInQueue.status;
+            errorDetails = foundInQueue.error;
+        }
+      }
+
+      summary = calcNewSummary(summary, status, errorDetails);
+
+      return {
+        id: exam.fileId,
+        student: exam.student,
+        status,
+        error: errorDetails,
+      };
+    });
+
+    res.send({
+      result: listOfExamsToHandle,
+      summary,
+    });
+  } catch (err) {
+    next(err);
+  }
 }
 
 module.exports = {

@@ -9,13 +9,13 @@ const {
   createSpecialAssignment,
   publishSpecialAssignment,
 } = require("./endpointHandlers/setupCourse");
-const { getStatusFromQueue } = require("./importQueue");
 const {
   addEntriesToQueue,
   getErrorsInQueue,
   fixErrorsInQueue,
   resetQueue,
   ignoreErrorsInQueue,
+  getStatusFromQueueHandler,
 } = require("./endpointHandlers/importQueueHandlers");
 const { listAllExams } = require("./endpointHandlers/listAllExams");
 
@@ -51,20 +51,9 @@ router.post("/courses/:id/setup/publish-course", publishCourse);
 router.post("/courses/:id/setup/create-assignment", createSpecialAssignment);
 router.post("/courses/:id/setup/publish-assignment", publishSpecialAssignment);
 
-// Get list of exams for given course
-router.get("/courses/:id/exams", (req, res, next) => {
-  listAllExams(req.params.id)
-    .then((response) => res.send(response))
-    .catch(next);
-});
+router.get("/courses/:id/exams", listAllExams);
 
-// Get status of import queue
-router.get("/courses/:courseId/import-queue", (req, res, next) => {
-  getStatusFromQueue(req.params.courseId)
-    .then((status) => res.send(status))
-    .catch(next);
-});
-
+router.get("/courses/:id/import-queue", getStatusFromQueueHandler);
 router.post("/courses/:id/import-queue", addEntriesToQueue);
 router.get("/courses/:id/import-queue/errors", getErrorsInQueue);
 router.post("/courses/:id/import-queue/errors/fix", fixErrorsInQueue);

@@ -9,6 +9,17 @@ const {
 const { EndpointError } = require("../error");
 const { enrollStudent } = require("../externalApis/canvasApiClient");
 
+async function getStatusFromQueueHandler(req, res, next) {
+  try {
+    const courseId = req.params.id;
+    const status = await getStatusFromQueue(courseId);
+
+    res.send(status);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function addEntriesToQueue(req, res, next) {
   try {
     const courseId = req.params.id;
@@ -173,5 +184,6 @@ module.exports = {
   getErrorsInQueue,
   fixErrorsInQueue,
   ignoreErrorsInQueue,
+  getStatusFromQueueHandler,
   resetQueue,
 };
