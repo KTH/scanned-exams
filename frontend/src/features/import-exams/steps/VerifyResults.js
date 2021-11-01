@@ -15,7 +15,7 @@ export default function VerifyResults({ courseId, imported, ignored }) {
           className="sm:w-auto"
           onClick={() => doResetImportQueue()}
         >
-          Import more
+          Import more...
         </SecondaryButton>
         {/* <PrimaryButton className="sm:w-auto">Log out</PrimaryButton> */}
       </div>
