@@ -46,7 +46,7 @@ router.get("/me", (req, res, next) => {
 });
 
 router.get("/courses/:id/setup", getSetupStatus);
-router.get("/courses/:id/setup/create-homepage", createSpecialHomepage);
+router.post("/courses/:id/setup/create-homepage", createSpecialHomepage);
 router.post("/courses/:id/setup/publish-course", publishCourse);
 router.post("/courses/:id/setup/create-assignment", createSpecialAssignment);
 router.post("/courses/:id/setup/publish-assignment", publishSpecialAssignment);
