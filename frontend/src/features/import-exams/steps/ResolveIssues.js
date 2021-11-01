@@ -61,7 +61,8 @@ function MissingStudents({ courseId, exams }) {
       <h3 className="font-semibold text-lg">Missing students</h3>
       <P>
         There are {exams.length} exams where the student hasn&apos;t yet been
-        added to your exam room.
+        added to your exam room. They are probably drop in students (people who
+        are not registered to the exam but have written it)
       </P>
       <div className="mt-8">
         {exams.map((exam, index) => (
@@ -79,7 +80,7 @@ function MissingStudents({ courseId, exams }) {
           className="sm:w-auto"
           onClick={() => doIgnoreMissingStudents()}
         >
-          Ignore this problem
+          Do not add students
         </SecondaryButton>
       </div>
     </div>
@@ -124,7 +125,7 @@ function OtherErrors({ courseId, exams }) {
           className="sm:w-auto"
           onClick={() => doIgnoreOtherErrors()}
         >
-          Ignore this problem
+          I have contacted IT support
         </SecondaryButton>
       </div>
     </div>
