@@ -11,10 +11,14 @@ export default function PrepareImport({ courseId }) {
   const numberOfExamsToImport = examsToImport.length;
 
   // Hoook to start import
-  const { mutate: doStartImport, isLoading: startImportLoading } =
-    useMutateImportStart(courseId, examsToImport);
+  // Side effect: this causes `ImportFlow` to show a progress bar
+  const {
+    mutate: doStartImport,
+    isLoading: startImportLoading,
+    isSuccess: startImportSuccess,
+  } = useMutateImportStart(courseId, examsToImport);
 
-  if (queueStatus === undefined || examsLoading || statusLoading) {
+  if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
@@ -29,6 +33,7 @@ export default function PrepareImport({ courseId }) {
           <PrimaryButton
             className="sm:w-96"
             waiting={startImportLoading}
+            success={startImportSuccess}
             onClick={doStartImport}
           >
             Start import!
