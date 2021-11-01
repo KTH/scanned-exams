@@ -1,5 +1,6 @@
 const log = require("skog");
 const got = require("got");
+const { LadokApiError } = require("../error");
 
 let ladokGot;
 function getLadokGot() {
@@ -18,10 +19,28 @@ function getLadokGot() {
   return ladokGot;
 }
 
+function ladokErrorHandler(err) {
+  // First our handled errors (these are operatinal errors that are expected)
+  /* ... */
+
+  // And last our unhandled operational errors
+  Error.captureStackTrace(err, ladokErrorHandler);
+  const error = new LadokApiError({
+    type: "unhandled_error",
+    message:
+      "We encountered an error when trying to access the external system Ladok",
+    err,
+  });
+  throw error;
+}
+
 async function getAktivitetstillfalle(ladokId) {
   log.debug(`Getting information for aktivitetstillfälle ${ladokId}`);
-  const res = getLadokGot().get(`resultat/aktivitetstillfalle/${ladokId}`);
-  const body = await res.json();
+  const res = await getLadokGot()
+    .get(`resultat/aktivitetstillfalle/${ladokId}`)
+    .catch(ladokErrorHandler);
+
+  const body = JSON.parse(res.body);
 
   return {
     activities: body.Kopplingar.map((k) => ({
