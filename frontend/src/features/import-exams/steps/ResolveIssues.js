@@ -47,14 +47,16 @@ export default function ResolveIssues({ courseId }) {
 }
 
 function MissingStudents({ courseId, exams }) {
-  const { mutate: doFixMissingStudents } = useMutateFixImportQueueErrors(
-    courseId,
-    exams
-  );
-  const { mutate: doIgnoreMissingStudents } = useMutateIgnoreImportQueueErrors(
-    courseId,
-    exams
-  );
+  const {
+    mutate: doFixMissingStudents,
+    isLoading: addingMissingStudents,
+    isSuccess: missingStudentsAdded,
+  } = useMutateFixImportQueueErrors(courseId, exams);
+  const {
+    mutate: doIgnoreMissingStudents,
+    isLoading: ignoringMissingStudents,
+    isSuccess: missingStudentsIgnored,
+  } = useMutateIgnoreImportQueueErrors(courseId, exams);
 
   return (
     <div>
@@ -72,12 +74,16 @@ function MissingStudents({ courseId, exams }) {
       <div className="mt-8">
         <PrimaryButton
           className="sm:w-auto"
+          working={addingMissingStudents}
+          success={missingStudentsAdded}
           onClick={() => doFixMissingStudents()}
         >
           Add students and import exams
         </PrimaryButton>
         <SecondaryButton
           className="sm:w-auto"
+          working={ignoringMissingStudents}
+          success={missingStudentsIgnored}
           onClick={() => doIgnoreMissingStudents()}
         >
           Do not add students
@@ -88,14 +94,16 @@ function MissingStudents({ courseId, exams }) {
 }
 
 function OtherErrors({ courseId, exams }) {
-  const { mutate: doFixOtherErrors } = useMutateFixImportQueueErrors(
-    courseId,
-    exams
-  );
-  const { mutate: doIgnoreOtherErrors } = useMutateIgnoreImportQueueErrors(
-    courseId,
-    exams
-  );
+  const {
+    mutate: doFixOtherErrors,
+    isLoading: fixingOtherErrors,
+    isSuccess: otherErrorsFixed,
+  } = useMutateFixImportQueueErrors(courseId, exams);
+  const {
+    mutate: doIgnoreOtherErrors,
+    isLoading: ignoringOtherErrors,
+    isSuccess: otherErrorsIgnored,
+  } = useMutateIgnoreImportQueueErrors(courseId, exams);
 
   return (
     <div>
@@ -118,11 +126,18 @@ function OtherErrors({ courseId, exams }) {
         ))}
       </div>
       <div className="mt-8">
-        <PrimaryButton className="sm:w-auto" onClick={() => doFixOtherErrors()}>
+        <PrimaryButton
+          className="sm:w-auto"
+          waiting={fixingOtherErrors}
+          success={otherErrorsFixed}
+          onClick={() => doFixOtherErrors()}
+        >
           Try to import again
         </PrimaryButton>
         <SecondaryButton
           className="sm:w-auto"
+          waiting={ignoringOtherErrors}
+          success={otherErrorsIgnored}
           onClick={() => doIgnoreOtherErrors()}
         >
           I have contacted IT support
