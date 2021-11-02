@@ -6,7 +6,7 @@ async function checkPermissions(courseId, userId) {
   const roles = await canvas.getRoles(courseId, userId).catch((err) => {
     throw new AuthError({
       type: "permission_denied",
-      message: err.message,
+      message: err.message + " Reloading the webpage might resolve this issue.",
     });
   });
 
