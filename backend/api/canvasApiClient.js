@@ -174,8 +174,8 @@ async function publishAssignment(courseId, assignmentId) {
  * something.
  */
 async function unlockAssignment(courseId, assignmentId) {
-  const TOMORROW = new Date();
-  TOMORROW.setDate(TOMORROW.getDate() + 1);
+  const ONE_MINUTE_LATER = new Date();
+  ONE_MINUTE_LATER.setMinutes(ONE_MINUTE_LATER.getMinutes() + 1);
 
   return canvas.requestUrl(
     `courses/${courseId}/assignments/${assignmentId}`,
@@ -184,7 +184,7 @@ async function unlockAssignment(courseId, assignmentId) {
       assignment: {
         submission_types: ["online_upload"],
         allowed_extensions: ["pdf"],
-        lock_at: TOMORROW.toISOString(),
+        lock_at: ONE_MINUTE_LATER.toISOString(),
         published: true,
       },
     }
