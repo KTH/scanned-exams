@@ -264,7 +264,6 @@ async function uploadExam(
     log.debug(
       `Upload Exam: unlocking assignment ${assignment.id} in course ${courseId}`
     );
-    await unlockAssignment(courseId, assignment.id);
 
     const reqTokenStart = Date.now();
     // TODO: will return a 400 if the course is unpublished
@@ -308,6 +307,7 @@ async function uploadExam(
 
     log.debug("Time to upload file: " + (Date.now() - uploadFileStart) + "ms");
 
+    await unlockAssignment(courseId, assignment.id);
     await canvas.requestUrl(
       `courses/${courseId}/assignments/${assignment.id}/submissions/`,
       "POST",
