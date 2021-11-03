@@ -77,6 +77,7 @@ async function downloadExam(fileId) {
   const getValue = (index) =>
     body.wdFile.objectIndiceses.find((di) => di.index === index)?.value;
 
+  const { fileName } = body.wdFile;
   const examDateTime = getValue("e_date");
   const examDate = examDateTime.split("T")[0];
   const studentKthId = getValue("s_uid");
@@ -89,6 +90,7 @@ async function downloadExam(fileId) {
     content: Readable.from(
       Buffer.from(body.wdFile.fileAsBase64.toString("utf-8"), "base64")
     ),
+    fileName,
     studentKthId,
     studentPersNr,
     examDate,
