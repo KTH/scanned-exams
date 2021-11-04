@@ -103,7 +103,7 @@ export const ExamErrorTable = ({ exams }) => (
           <td className="text-left p-2">{exam.fileId}</td>
           {/* TODO: file name */}
           <td className="text-left p-2">
-            {`${exam.student.lastName}, ${exam.student.firstName} (${exam.student.id})`}
+            {`${exam.student.lastName}, ${exam.student.firstName} (${exam.student.kthId})`}
           </td>
           <td className="text-left p-2">{exam.error?.message}</td>
         </tr>
