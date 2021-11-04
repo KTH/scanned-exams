@@ -87,3 +87,27 @@ export const LoadingPage = ({ className, children, ...props }) => (
     {children}
   </div>
 );
+
+export const ExamErrorTable = ({ exams }) => (
+  <table className="w-full mt-6">
+    <thead>
+      <tr>
+        <th className="text-left p-2">Exam ID</th>
+        <th className="text-left p-2">Student</th>
+        <th className="text-left p-2">Error</th>
+      </tr>
+    </thead>
+    <tbody>
+      {exams.map((exam) => (
+        <tr key={exam.fileId}>
+          <td className="text-left p-2">{exam.fileId}</td>
+          {/* TODO: file name */}
+          <td className="text-left p-2">
+            {`${exam.student.lastName}, ${exam.student.firstName} (${exam.student.id})`}
+          </td>
+          <td className="text-left p-2">{exam.error?.message}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+);

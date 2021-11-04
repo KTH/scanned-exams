@@ -10,16 +10,17 @@ import {
   PrimaryButton,
   SecondaryButton,
   P,
+  ExamErrorTable,
 } from "../../widgets";
 
 export default function ResolveIssues({ courseId }) {
   const { data: exams = [], isFetching } = useImportQueueErrors(courseId);
-  const examsWithMissingStudentError = exams.filter(
-    (exam) => exam.error?.type === "missing_student"
-  );
-  const examsWithOtherErrors = exams.filter(
-    (exam) => exam.error?.type !== "missing_student"
-  );
+  const examsWithMissingStudentError = exams
+    .filter((exam) => exam.status === "error")
+    .filter((exam) => exam.error?.type === "missing_student");
+  const examsWithOtherErrors = exams
+    .filter((exam) => exam.status === "error")
+    .filter((exam) => exam.error?.type !== "missing_student");
 
   if (isFetching) {
     return <LoadingPage>Loading...</LoadingPage>;
@@ -67,9 +68,7 @@ function MissingStudents({ courseId, exams }) {
         are not registered to the exam but have written it)
       </P>
       <div className="mt-8">
-        {exams.map((exam, index) => (
-          <ExamErrorRow key={exam.id} exam={exam} rowNr={index + 1} />
-        ))}
+        <ExamErrorTable exams={exams} />
       </div>
       <div className="mt-8">
         <PrimaryButton
@@ -121,9 +120,7 @@ function OtherErrors({ courseId, exams }) {
         Contact IT-support if you don&apos;t know how to resolve these issues.
       </P>
       <div className="mt-8">
-        {exams.map((exam, index) => (
-          <ExamErrorRow key={exam.fileId} exam={exam} rowNr={index + 1} />
-        ))}
+        <ExamErrorTable exams={exams} />
       </div>
       <div className="mt-8">
         <PrimaryButton
@@ -142,23 +139,6 @@ function OtherErrors({ courseId, exams }) {
         >
           I have contacted IT support
         </SecondaryButton>
-      </div>
-    </div>
-  );
-}
-
-function ExamErrorRow({ exam, rowNr }) {
-  return (
-    <div className="flex flex-row mt-1">
-      <div className="p-2 w-8">{rowNr}</div>
-      <div className="p-2 flex-shrink-0 flex-grow-0" style={{ width: "6rem" }}>
-        {exam.student.id}
-      </div>
-      <div className="p-2 flex-shrink-0">
-        {`${exam.student.firstName} ${exam.student.lastName}`}
-      </div>
-      <div className="p-2 flex-grow flex-shrink-0 text-gray-400">
-        {exam.error?.message}
       </div>
     </div>
   );
