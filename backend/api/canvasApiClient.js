@@ -198,14 +198,12 @@ async function unlockAssignment(courseId, assignmentId) {
  * This prevents students to upload things by accident.
  */
 async function lockAssignment(courseId, assignmentId) {
-  const NOW = new Date();
-
   return canvas.requestUrl(
     `courses/${courseId}/assignments/${assignmentId}`,
     "PUT",
     {
       assignment: {
-        lock_at: NOW.toISOString(),
+        submission_types: ["on_paper"],
       },
     }
   );
