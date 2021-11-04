@@ -1,6 +1,7 @@
 import React from "react";
 import { Step, StepList } from "../StepList";
-import { H2, PrimaryButton, SecondaryButton, P } from "../widgets";
+import { LoadingPage } from "../widgets";
+import { useCourseExams, useCourseImportStatus } from "../../common/api";
 import PrepareImport from "./steps/PrepareImport";
 import ResolveIIssues from "./steps/ResolveIssues";
 import VerifyResults from "./steps/VerifyResults";
@@ -19,44 +20,118 @@ const stepIndex = {
   issues: 1,
   result: 2,
 };
+
+function _getCurrentStepIndex(stats, forceStepIndex) {
+  if (forceStepIndex !== undefined) {
+    return forceStepIndex;
+  }
+
+  const {
+    total: totalExams = 0,
+    new: newExams = 0,
+    pending: pendingExams = 0,
+    imported: importedExams = 0,
+    error: errorExams = 0,
+  } = stats;
+
+  let currStep = "import";
+  if (pendingExams > 0 || newExams > 0 || totalExams === 0) {
+    currStep = "import";
+  } else if (errorExams > 0) {
+    currStep = "issues";
+  } else if (totalExams === importedExams) {
+    currStep = "result";
+  }
+
+  return stepIndex[currStep];
+}
+
 export default function ImportScreen({ courseId }) {
-  const [fakeStep, setFakeStep] = React.useState(0);
+  const [forceStep, setForceStep] = React.useState(undefined);
+
+  // Get exams available to import so it loads in parallell with status check
+  const queryExams = useCourseExams(courseId);
+
+  // Check status of import queue
+  const { data = {}, isLoading: statusLoading } =
+    useCourseImportStatus(courseId);
+  const { stats = {} } = data;
+
+  // Determine current active step
+  const showStepIndex = statusLoading
+    ? undefined
+    : _getCurrentStepIndex(stats, forceStep);
+
+  // Determine if steps are done
+  const {
+    imported: importedExams,
+    total: totalExams,
+    new: newExams,
+    error: errorExams,
+  } = stats;
+  const importDone = !statusLoading && newExams === 0;
+  const issuesDone = !statusLoading && errorExams === 0;
+  const verifyDone = !statusLoading && totalExams === importedExams;
 
   return (
     <div className="container mx-auto my-8">
       <div className="">
         <div className="mb-8">
-          <StepList currentStep={fakeStep}>
-            <Step index={0} done={fakeStep > 0}>
+          <StepList currentStep={showStepIndex}>
+            <Step index={0} done={importDone}>
               <StepText short="Step 1" long="1. Import" />
             </Step>
-            <Step index={1} done={fakeStep > 1}>
+            <Step index={1} done={issuesDone}>
               <StepText short="Step 2" long="2. Resolve Issues" />
             </Step>
-            <Step index={2} done={fakeStep > 2}>
+            <Step index={2} done={verifyDone}>
               <StepText short="Step 3" long="3. Verify Result" />
             </Step>
           </StepList>
         </div>
-        {fakeStep === 0 && (
-          <PrepareImport
-            courseId={courseId}
-            onGoTo={(stepName) => setFakeStep(stepIndex[stepName])}
-          />
-        )}
-        {fakeStep === 1 && (
-          <ResolveIIssues
-            courseId={courseId}
-            onGoTo={(stepName) => setFakeStep(stepIndex[stepName])}
-          />
-        )}
-        {fakeStep === 2 && (
-          <VerifyResults
-            courseId={courseId}
-            onGoTo={(stepName) => setFakeStep(stepIndex[stepName])}
-          />
-        )}
+        {statusLoading && forceStep === undefined
+          ? _renderLoader()
+          : _renderContent({
+              courseId,
+              showStepIndex,
+              setForceStep,
+              queryExams,
+            })}
       </div>
     </div>
   );
+}
+
+function _renderLoader() {
+  return <LoadingPage>Loading...</LoadingPage>;
+}
+
+function _renderContent({ courseId, showStepIndex, setForceStep, queryExams }) {
+  switch (showStepIndex) {
+    case 0:
+      return (
+        <PrepareImport
+          courseId={courseId}
+          queryExams={queryExams}
+          onForceShowStep={(stepName) => setForceStep(stepIndex[stepName])}
+        />
+      );
+    case 1:
+      return (
+        <ResolveIIssues
+          courseId={courseId}
+          queryExams={queryExams}
+          onForceShowStep={(stepName) => setForceStep(stepIndex[stepName])}
+        />
+      );
+    case 2:
+      return (
+        <VerifyResults
+          courseId={courseId}
+          onForceShowStep={(stepName) => setForceStep(stepIndex[stepName])}
+        />
+      );
+    default:
+      return <LoadingPage>Loading...</LoadingPage>;
+  }
 }

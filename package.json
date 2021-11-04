@@ -1,6 +1,6 @@
 {
   "name": "scanned-exams",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Scanned exams mono repos",
   "scripts": {
     "test-unit-in-docker": "ID=$(docker build .) && WORKSPACE=$(pwd) LOCAL_IMAGE_ID=$ID docker-compose -f docker-compose-unit-tests.yml up --force-recreate --abort-on-container-exit --always-recreate-deps --no-log-prefix --quiet-pull --build"

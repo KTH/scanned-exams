@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { assert } from "./utils";
 
-const PROGRESS_REFRESH_INTERVAL = 3000;
+const PROGRESS_REFRESH_INTERVAL = 1000;
 
 export class ApiError extends Error {
   constructor({ type, statusCode, message, details }) {
@@ -56,16 +56,17 @@ export function useCourseSetup(courseId) {
 
 /** Fetches the API to get information about the setup of a given course */
 export function useCourseImportStatus(courseId, options = {}) {
+  const { repeatAtInterval = false } = options;
   return useQuery(
     ["course", courseId, "import", "status"],
-    () => apiClient(`courses/${courseId}/import/status`),
+    () => apiClient(`courses/${courseId}/import-queue`),
     {
       onSuccess({ status } = {}) {
-        options.onSuccess?.(status);
+        options.onSuccess?.({ status });
       },
       // We are refetching this periodically so UX changes state if
       // import queue is triggered somewhere else
-      refetchInterval: PROGRESS_REFRESH_INTERVAL * 10,
+      refetchInterval: repeatAtInterval ? PROGRESS_REFRESH_INTERVAL * 10 : null,
     }
   );
 }
@@ -73,11 +74,16 @@ export function useCourseImportStatus(courseId, options = {}) {
 /** Ping API on import progress */
 export function useCourseImportProgress(courseId, options = {}) {
   return useQuery(
-    ["course", courseId, "import", "status", "ping"],
-    () => apiClient(`courses/${courseId}/import/status`),
+    ["course", courseId, "import", "status"],
+    () => apiClient(`courses/${courseId}/import-queue`),
     {
+      onSuccess({ stats } = {}) {
+        const { total, imported, error } = stats;
+        if (imported + error >= total) {
+          options.onDone?.();
+        }
+      },
       refetchInterval: options.cancel ? false : PROGRESS_REFRESH_INTERVAL,
-      ...options,
     }
   );
 }
@@ -128,7 +134,7 @@ export function useMutateImportStart(courseId, examsToImport, options = {}) {
       ...options,
       // Passes status object from API as data to callback
       onSuccess(data) {
-        client.invalidateQueries(["course", courseId, "setup"]);
+        client.invalidateQueries(["course", courseId]);
         options.onSuccess?.(data);
       },
     }
@@ -149,7 +155,7 @@ export function useMutateAddStudents(courseId, studentIds, options = {}) {
       ...options,
       // Passes status object from API as data to callback
       onSuccess(data) {
-        client.invalidateQueries(["course", courseId, "setup"]);
+        client.invalidateQueries(["course", courseId]);
         options.onSuccess?.(data);
       },
     }
