@@ -1,0 +1,33 @@
+SG1220 - 2021-10-28 https://kth.test.instructure.com/courses/33279 - 44 students
+SF1514 - 2021-10-27 https://kth.test.instructure.com/courses/33396 - 138 students - Ninni Carlsund
+SF1512 - 2021-10-27 https://kth.test.instructure.com/courses/33397 - 27 students - Ninni Carlsund
+
+SF1624 Tentamen   - https://kth.test.instructure.com/courses/33388 - 686 students
+SF1624 Omtentamen - https://kth.test.instructure.com/courses/33385 - 144 students
+SF1625 Tentamen   - https://kth.test.instructure.com/courses/33387 - 1078 students
+SF1625 Omtentamen - https://kth.test.instructure.com/courses/33386 - 96 students
+SF1625 Omtentamen - https://kth.test.instructure.com/courses/33368 - 0 students
+SF1683 https://kth.test.instructure.com/courses/33338 - 201 students
+SF2935 https://kth.test.instructure.com/courses/33391 - 76 students
+SH2603 https://kth.test.instructure.com/courses/32765 - 18 students
+SK1114 https://kth.test.instructure.com/courses/32813 - 48 students
+
+SK1108 https://kth.test.instructure.com/courses/32860	82 students
+SK2532 https://kth.test.instructure.com/courses/32825	26 oktober	Marina Zelenina
+SF1627 https://kth.test.instructure.com/courses/33325	25 oktober	Henrik Shah Gholian
+HS1020 https://kth.test.instructure.com/courses/32960	26 oktober
+MF1017 https://kth.test.instructure.com/courses/32810	25 oktober	Hans Johansson
+ITM	MJ1112	https://kth.test.instructure.com/courses/32683	15 oktober	Hans Havtun
+ITM	MJ1112	https://kth.test.instructure.com/courses/33268	15 november	Hans Havtun
+ITM	MJ1112	https://kth.test.instructure.com/courses/33476	29 november	Hans Havtun
+ITM	ME1003	https://kth.test.instructure.com/courses/32978	29 oktober
+ITM	ME1040	https://kth.test.instructure.com/courses/32989	29 oktober	Mohammad Akhbari
+ITM	ME1039	https://kth.test.instructure.com/courses/32990	29 oktober	Terrence Brown
+ITM	ML1500	https://kth.test.instructure.com/courses/33186	22 oktober	Johan Kristofferson
+ITM	ML1500	https://kth.test.instructure.com/courses/33184	22 oktober	Johan Kristofferson
+ITM	MF2030	https://kth.test.instructure.com/courses/32807	25 oktober	Hans Johansson
+ITM	MF2043	https://kth.test.instructure.com/courses/32855	29 oktober	Hans Johansson
+ITM	MG1026	https://kth.test.instructure.com/courses/32756	21 oktober	Mats Bejhem
+ITM	ME2064	https://kth.test.instructure.com/courses/32974	27 oktober	Tomas Sörensson	tomas.sorensson@indek.kth.se	Ja
+ITM	MF2101	https://kth.test.instructure.com/courses/32859	29 oktober	Stefan Björklund	stefan@md.kth.se	Ja
+ITM	MG2029	https://kth.test.instructure.com/courses/32857	29 oktober	Mauro Onori	onori@kth.se	Ja
