@@ -1,7 +1,7 @@
 /** Endpoints to setup a Canvas course */
 
-const canvas = require("./canvasApiClient");
-const { EndpointError } = require("./error");
+const canvas = require("../externalApis/canvasApiClient");
+const { EndpointError } = require("../error");
 
 /**
  * Get the "ladokId" of a given course. It throws in case the course
@@ -40,8 +40,11 @@ async function getLadokId(courseId) {
 /** Get setup status of a Canvas course given its ID */
 async function getSetupStatus(courseId) {
   const ladokId = await getLadokId(courseId);
-  const course = await canvas.getCourse(courseId);
-  const assignment = await canvas.getValidAssignment(courseId, ladokId);
+
+  const [course, assignment] = await Promise.all([
+    canvas.getCourse(courseId),
+    canvas.getValidAssignment(courseId, ladokId),
+  ]);
 
   return {
     coursePublished: course.workflow_state === "available",

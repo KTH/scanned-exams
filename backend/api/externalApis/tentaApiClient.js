@@ -2,6 +2,8 @@ const got = require("got");
 const log = require("skog");
 const { Readable } = require("stream");
 
+const { TentaApiError } = require("../error");
+
 const client = got.extend({
   prefixUrl: process.env.TENTA_API_URL,
   headers: {
@@ -33,68 +35,14 @@ async function examListByLadokId(ladokId) {
       useDatesInSearch: false,
     },
     responseType: "json",
+  }).catch((err) => {
+    throw new TentaApiError({
+      err,
+    });
   });
 
   if (!body.documentSearchResults) {
     log.debug(`No exams found with the "new format" e_ladokid=${ladokId}`);
-    return [];
-  }
-
-  const list = [];
-
-  for (const result of body.documentSearchResults) {
-    // Helper function to get the value of the attribute called "index"
-    // we have written it because they are in an array instead of an object
-    const getValue = (index) =>
-      result.documentIndiceses.find((di) => di.index === index)?.value;
-
-    list.push({
-      fileId: result.fileId,
-      student: {
-        id: getValue("s_uid"),
-        firstName: getValue("s_firstname"),
-        lastName: getValue("s_lastname"),
-      },
-    });
-  }
-
-  return list;
-}
-
-/** Get a list of all exam files for a given exam */
-async function examListByDate({ courseCode, examDate, examCode }) {
-  log.debug(
-    `Getting exams with the "old format" ${courseCode} ${examDate} ${examCode}`
-  );
-  const { body } = await client("windream/search/documents/false", {
-    method: "POST",
-    json: {
-      searchIndiceses: [
-        {
-          index: "c_code",
-          value: courseCode,
-          useWildcard: false,
-        },
-        {
-          index: "e_code",
-          value: examCode,
-          useWildcard: false,
-        },
-        {
-          index: "e_date",
-          value: examDate,
-          useWildcard: false,
-        },
-      ],
-      includeDocumentIndicesesInResponse: true,
-      includeSystemIndicesesInResponse: false,
-      useDatesInSearch: false,
-    },
-    responseType: "json",
-  });
-
-  if (!body.documentSearchResults) {
-    log.debug(`No exams found for ${courseCode} ${examDate} ${examCode}`);
     return [];
   }
 
@@ -126,8 +74,6 @@ async function downloadExam(fileId) {
     responseType: "json",
   });
 
-  // TODO: Throw descriptibe error if we don't get expected data
-
   const getValue = (index) =>
     body.wdFile.objectIndiceses.find((di) => di.index === index)?.value;
 
@@ -136,10 +82,8 @@ async function downloadExam(fileId) {
   const studentKthId = getValue("s_uid");
   const studentPersNr = getValue("s_pnr");
 
-  if (!studentKthId)
-    throw new Error(
-      `Could not get KTH ID (s_uid) from TentaAPI (windream) for file id "${fileId}".`
-    );
+  // Accepting all exams we get from Windreams to allow errors to
+  // be presented to the end user.
 
   return {
     content: Readable.from(
@@ -152,7 +96,6 @@ async function downloadExam(fileId) {
 }
 
 module.exports = {
-  examListByDate,
   examListByLadokId,
   downloadExam,
   getVersion,

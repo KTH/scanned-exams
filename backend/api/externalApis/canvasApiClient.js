@@ -3,7 +3,7 @@ const FormData = require("formdata-node").default;
 const got = require("got");
 const log = require("skog");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
-const { EndpointError, ImportError } = require("./error");
+const { EndpointError, ImportError } = require("../error");
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,
@@ -324,10 +324,14 @@ async function uploadExam(
   } catch (err) {
     if (err.type === "missing_student") {
       log.warn(`User ${studentKthId} is missing in Canvas course ${courseId}`);
+    } else if (!studentKthId) {
+      log.warn(
+        `User is missing KTH ID, needs du be manually graded: Windream fileid ${fileId} / course ${courseId}`
+      );
     } else {
       log.error(
         { err },
-        `Error when uploading an exam ${studentKthId} / course ${courseId}`
+        `Error when uploading exam: KTH ID ${studentKthId} / course ${courseId}`
       );
     }
     throw err;

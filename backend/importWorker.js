@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 const log = require("skog");
-const processQueueEntry = require("./api/processQueueEntry");
+const processQueueEntry = require("./api/importQueue/processQueueEntry");
 
 async function startBackgroundImport() {
   log.info("Start background import");

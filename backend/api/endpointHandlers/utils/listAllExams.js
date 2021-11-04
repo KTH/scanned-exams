@@ -1,11 +1,10 @@
 /** Functions that handle the "import exams" part of the app */
 const log = require("skog");
-const canvas = require("./canvasApiClient");
-const ladok = require("./ladokApiClient");
-const tentaApi = require("./tentaApiClient");
-const { getEntriesFromQueue } = require("./importQueue");
+const canvas = require("../../externalApis/canvasApiClient");
+const tentaApi = require("../../externalApis/tentaApiClient");
+const { getEntriesFromQueue } = require("../../importQueue");
 
-const { EndpointError } = require("./error");
+const { CanvasApiError } = require("../../error");
 
 /**
  * Get the "ladokId" that is associated with a given course. It throws in case
@@ -17,7 +16,7 @@ async function getLadokId(courseId) {
   const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
 
   if (ladokIds.length === 0) {
-    throw new EndpointError({
+    throw new CanvasApiError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       message:
@@ -29,7 +28,7 @@ async function getLadokId(courseId) {
   }
 
   if (ladokIds.lengh > 1) {
-    throw new EndpointError({
+    throw new CanvasApiError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       message: "Examrooms with more than one examination are not supported",
@@ -43,56 +42,12 @@ async function getLadokId(courseId) {
   return ladokIds[0];
 }
 
-async function listScannedExamsWithOldFormat(ladokId) {
-  const aktivitetstillfalle = await ladok
-    .getAktivitetstillfalle(ladokId)
-    .catch(() => {
-      throw new EndpointError({
-        type: "invalid_activity",
-        statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
-        message: `Not valid Ladok activitestillfälle [${ladokId}]`,
-        details: {
-          ladokId,
-        },
-      });
-    });
-
-  const { activities, examDate } = aktivitetstillfalle;
-
-  const examsWithOldFormat = [];
-  for (const { courseCode, examCode } of activities) {
-    examsWithOldFormat.push(
-      // eslint-disable-next-line no-await-in-loop
-      ...(await tentaApi.examListByDate({ courseCode, examCode, examDate }))
-    );
-  }
-
-  return examsWithOldFormat;
-}
-
-function mergeAndDeduplicate(array1, array2) {
-  const exams = [...array1, ...array2];
-  const allIds = exams.map((e) => e.fileId);
-  const uniqueIds = Array.from(new Set(allIds));
-
-  return uniqueIds.map((id) => exams.find((e) => e.fileId === id));
-}
-
 /** Returns a list of scanned exams (i.e. in Windream) given its ladokId */
 async function listScannedExams(courseId, ladokId) {
-  const examsWithNewFormat = await tentaApi.examListByLadokId(ladokId);
-  const examsWithOldFormat = await listScannedExamsWithOldFormat(ladokId);
-
-  // Note: Since we are fetching exams based on {courseCode, examCode, examDate}
-  // (old format) and ladok ID (new format), we can find exams in Windream that
-  // have both formats. Hence, we need to deduplicate
-  const allScannedExams = mergeAndDeduplicate(
-    examsWithNewFormat,
-    examsWithOldFormat
-  );
+  const allScannedExams = await tentaApi.examListByLadokId(ladokId);
 
   log.info(
-    `Obtained exams for course [${courseId}] ladokId [${ladokId}] with new format ${examsWithNewFormat.length} / old format: ${examsWithOldFormat.length} / total (without duplicates) ${allScannedExams.length}`
+    `Obtained exams for course [${courseId}] ladokId [${ladokId}]: ${allScannedExams.length}`
   );
 
   return allScannedExams;
@@ -106,7 +61,7 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
     .getValidAssignment(courseId, ladokId)
     .then((result) => {
       if (!result) {
-        throw new EndpointError({
+        throw new CanvasApiError({
           type: "not_setup_course",
           statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
           message: `The course [${courseId}] has no valid assignment for scanned exams. Probably is not setup correctly`,
@@ -131,12 +86,53 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
     .map((submission) => submission.user?.sis_user_id);
 }
 
+function calcNewSummary({ ...summaryProps }, status, error) {
+  const summary = { ...summaryProps };
+  // eslint-disable-next-line no-param-reassign
+  summary.total++;
+
+  // eslint-disable-next-line no-param-reassign
+  if (summary[status] === undefined) summary[status] = 0;
+  // eslint-disable-next-line no-param-reassign
+  summary[status]++;
+
+  if (error !== undefined) {
+    const errorType = error.type;
+    if (summary.errorsByType[errorType] === undefined) {
+      // eslint-disable-next-line no-param-reassign
+      summary.errorsByType[errorType] = 1;
+    } else {
+      // eslint-disable-next-line no-param-reassign
+      summary.errorsByType[errorType]++;
+    }
+  }
+  return summary;
+}
+
 async function listAllExams(courseId) {
+  // - Canvas is source of truth regarding if a submitted exam is truly imported
+  // - the internal import queue keeps state of pending and last performed import
   const ladokId = await getLadokId(courseId);
-  const allScannedExams = await listScannedExams(courseId, ladokId);
-  const studentsWithExamsInCanvas =
-    (await listStudentsWithExamsInCanvas(courseId, ladokId)) || [];
-  const examsInImportQueue = (await getEntriesFromQueue(courseId)) || [];
+  let [allScannedExams, studentsWithExamsInCanvas, examsInImportQueue] =
+    await Promise.all([
+      listScannedExams(courseId, ladokId),
+      listStudentsWithExamsInCanvas(courseId, ladokId),
+      getEntriesFromQueue(courseId),
+    ]);
+
+  // Make sure these are arrays
+  allScannedExams = allScannedExams || [];
+  studentsWithExamsInCanvas = studentsWithExamsInCanvas || [];
+  examsInImportQueue = examsInImportQueue || [];
+
+  let summary = {
+    total: 0,
+    new: 0,
+    pending: 0,
+    imported: 0,
+    error: 0,
+    errorsByType: {},
+  };
 
   const listOfExamsToHandle = allScannedExams.map((exam) => {
     const foundInCanvas = studentsWithExamsInCanvas.find(
@@ -171,6 +167,8 @@ async function listAllExams(courseId) {
       }
     }
 
+    summary = calcNewSummary(summary, status, errorDetails);
+
     return {
       id: exam.fileId,
       student: exam.student,
@@ -179,22 +177,13 @@ async function listAllExams(courseId) {
     };
   });
 
-  // TODO: Fix this stub when we know want frontend wants, needs a method in import  queue
-  // const summary = {
-  //   new: 0,
-  //   pending: 0,
-  //   errors: 0,
-  //   total: 0,
-  // };
-
   return {
     result: listOfExamsToHandle,
-    // summary
+    summary,
   };
 }
 
 module.exports = {
   listScannedExams,
   listAllExams,
-  mergeAndDeduplicate,
 };

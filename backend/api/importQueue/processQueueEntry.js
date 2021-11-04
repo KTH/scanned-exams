@@ -1,11 +1,11 @@
 const log = require("skog");
-const canvas = require("./canvasApiClient");
-const tentaApi = require("./tentaApiClient");
+const canvas = require("../externalApis/canvasApiClient");
+const tentaApi = require("../externalApis/tentaApiClient");
 const {
   getFirstPendingFromQueue,
   updateStatusOfEntryInQueue,
-} = require("./importQueue");
-const { ImportError } = require("./error");
+} = require("./index");
+const { ImportError } = require("../error");
 
 const { DEV_FORCE_RANDOM_ERRORS, NODE_ENV } = process.env;
 const FORCE_RANDOM_ERRORS = DEV_FORCE_RANDOM_ERRORS === "TRUE";
@@ -16,10 +16,23 @@ const IS_DEV = NODE_ENV !== "production";
  * in windream and they need to be graded manually
  */
 function throwIfStudentNotInUg({ fileId, studentPersNr }) {
-  if (studentPersNr.replace(/-/g, "") === "121212121212") {
+  if (studentPersNr && studentPersNr.replace(/-/g, "") === "121212121212") {
     throw new ImportError({
       type: "not_in_ug",
-      message: `The student does not have a Canvas account. Please contact IT-support (windream fileId: ${fileId})`,
+      message: `The student does not have a Canvas account. Please contact IT-support (windream fileId: ${fileId}) - Unhandled error`,
+    });
+  }
+}
+
+/**
+ * Students has missing entry for KTH ID, probably external
+ * and needs to be manually graded
+ */
+function throwIfStudentMissingKTHID({ fileId, studentKthId }) {
+  if (!studentKthId) {
+    throw new ImportError({
+      type: "missing_kthid",
+      message: `The scanned exam is missing KTH ID. Please contact IT-support (windream fileId: ${fileId}) - Unhandled error`,
     });
   }
 }
@@ -30,6 +43,7 @@ async function uploadOneExam({ fileId, courseId }) {
     await tentaApi.downloadExam(fileId);
 
   // Some business rules
+  throwIfStudentMissingKTHID({ fileId, studentKthId });
   throwIfStudentNotInUg({ fileId, studentPersNr });
 
   log.debug(
@@ -76,7 +90,7 @@ function handleUploadErrors(err, exam) {
     // import queue
     throw new ImportError({
       type: "other_error",
-      message: `We encountered an unhandled error when importing exam (windream fileId: ${exam.fileId})`,
+      message: `We encountered an unhandled error when importing exam (windream fileId: ${exam.fileId}) - Unhandled error`,
       details: {
         err,
         exam,

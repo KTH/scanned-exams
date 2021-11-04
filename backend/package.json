@@ -1,6 +1,9 @@
 {
   "name": "scanned-exams-backend",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=14"
+  },
   "description": "Backend of the Scanned Exams service. Application integrated into the Canvas LMS that download paper exams from the 'Tenta API' and uploads them into Canvas",
   "main": "index.js",
   "scripts": {

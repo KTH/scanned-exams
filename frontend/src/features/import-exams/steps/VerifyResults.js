@@ -1,49 +1,40 @@
 import React from "react";
-import { useCourseImportStatus, useCourseExams } from "../../../common/api";
+import { useCourseImportStatus } from "../../../common/api";
 import {
   H2,
   LoadingPage,
-  PrimaryButton,
   SecondaryButton,
   P,
   cssInfoBox,
   cssSuccessBox,
 } from "../../widgets";
 
-export default function VerifyResults({ onGoTo, courseId }) {
+export default function VerifyResults({ onForceShowStep, courseId }) {
   // Get exams available to import
-  const queryExams = useCourseExams(courseId);
-  const {
-    data: dataExams,
-    isLoading: examsLoading,
-    isError: examsError,
-  } = queryExams;
-
-  const examsWithErrors =
-    dataExams?.result.filter((exam) => exam.status === "error") || [];
-  const importedExams =
-    dataExams?.result.filter((exam) => exam.status === "imported") || [];
+  const { data = {}, isLoading: examsLoading } = useCourseImportStatus(
+    courseId,
+    { repeatAtInterval: true }
+  );
+  const { stats = {} } = data;
+  const { error, imported } = stats;
 
   if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
   }
 
-  const errors = examsWithErrors?.length || 0;
-  const imported = importedExams?.length || 0;
-
   return (
     <div className="max-w-2xl">
       <H2>Verify Results</H2>
       <P>This is a summary of the status of all the processed exams.</P>
-      {errors === 0 ? renderDone() : renderHelp()}
+      {error ? renderHelp() : renderDone()}
       <div className="mt-8">
-        <SummaryTable summary={{ errors, imported }} />
+        <SummaryTable summary={{ error, imported }} />
       </div>
       <div className="mt-8">
-        {errors > 0 && (
+        {error > 0 && (
           <SecondaryButton
             className="sm:w-auto"
-            onClick={() => onGoTo("issues")}
+            onClick={() => onForceShowStep("issues")}
           >
             Show Errors
           </SecondaryButton>
@@ -80,17 +71,17 @@ function renderDone() {
 }
 
 function SummaryTable({ summary }) {
-  const { errors, imported } = summary;
+  const { error, imported } = summary;
   return (
     <table className="table-auto">
       <tbody>
         <tr>
           <td className="p-1 pl-0">Exams succesfully imported to Canvas:</td>
-          <td className="p-1 pl-2">{imported}</td>
+          <td className="p-1 pl-2">{imported !== undefined ? imported : ""}</td>
         </tr>
         <tr>
           <td className="p-1 pl-0">Exams with unresolved errors:</td>
-          <td className="p-1 pl-2">{errors}</td>
+          <td className="p-1 pl-2">{error !== undefined ? error : ""}</td>
         </tr>
       </tbody>
     </table>
