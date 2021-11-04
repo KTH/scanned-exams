@@ -4,6 +4,12 @@ const got = require("got");
 const log = require("skog");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
 const { EndpointError, ImportError } = require("../error");
+const {
+  propertiesToCreateLockedAssignment,
+  propertiesToUnlockAssignment,
+  propertiesToLockAssignment,
+  propertiesToCreateSubmission,
+} = require("../assignmentLock");
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,
@@ -130,19 +136,15 @@ async function createAssignment(courseId, ladokId, language = "en") {
   return canvas
     .requestUrl(`courses/${courseId}/assignments`, "POST", {
       assignment: {
+        ...propertiesToCreateLockedAssignment(examination.examDate),
         name: template.name,
         description: template.description,
-        // "on_paper" allows us to create an assignment where students cannot
-        // submit anything. This will be converted to "online_upload" when
-        // we actually submit something (when calling `unlockAssignment`)
-        submission_types: ["on_paper"],
         integration_data: {
           ladokId,
         },
         published: false,
         grading_type: "letter_grade",
         notify_of_update: false,
-        due_at: `${examination.examDate}T00:00:00`,
         // TODO: take the grading standard from TentaAPI
         //       grading_standard_id: 1,
       },
@@ -164,27 +166,15 @@ async function publishAssignment(courseId, assignmentId) {
 }
 
 /**
- * Unlocks an assignment for one day.
- *
- * During the unlock period, everybody can upload PDF files to this assignment
- * - When students upload things, they will be marked as "LATE"
- * - When "we" upload things, they will not be marked as "LATE"
- *
- * The "LATE" mark allows us to detect if someone that is not us has uploaded
- * something.
+ * Allows the app to upload exams.
  */
 async function unlockAssignment(courseId, assignmentId) {
-  const ONE_MINUTE_LATER = new Date();
-  ONE_MINUTE_LATER.setMinutes(ONE_MINUTE_LATER.getMinutes() + 1);
-
   return canvas.requestUrl(
     `courses/${courseId}/assignments/${assignmentId}`,
     "PUT",
     {
       assignment: {
-        submission_types: ["online_upload"],
-        allowed_extensions: ["pdf"],
-        lock_at: ONE_MINUTE_LATER.toISOString(),
+        ...propertiesToUnlockAssignment(),
         published: true,
       },
     }
@@ -192,10 +182,7 @@ async function unlockAssignment(courseId, assignmentId) {
 }
 
 /**
- * Locks the assignment
- *
- * After locking the assignment, no one (students or us) can upload more things
- * This prevents students to upload things by accident.
+ * Prevents students to upload things by accident.
  */
 async function lockAssignment(courseId, assignmentId) {
   return canvas.requestUrl(
@@ -203,7 +190,7 @@ async function lockAssignment(courseId, assignmentId) {
     "PUT",
     {
       assignment: {
-        submission_types: ["on_paper"],
+        ...propertiesToLockAssignment(),
       },
     }
   );
@@ -311,11 +298,10 @@ async function uploadExam(
       "POST",
       {
         submission: {
+          ...propertiesToCreateSubmission(examDate),
           submission_type: "online_upload",
           user_id: user.id,
           file_ids: [uploadedFile.id],
-          // IMPORTANT: do not pass the timezone in the "submitted_at" field
-          submitted_at: `${examDate}T08:00:00`,
         },
       }
     );
