@@ -5,8 +5,20 @@ module.exports = {
     port: 4443,
     https: true,
     proxy: {
-      "/scanned-exams/api": "http://localhost:4444",
-      "/scanned-exams/auth": "http://localhost:4444",
+      "/scanned-exams": {
+        target: "https://localdev.kth.se:4444",
+        secure: false,
+        bypass: function (req, res, proxyOptions) {
+          if (
+            req.method === "GET" &&
+            !req.path.startsWith("/scanned-exams/api") &&
+            !req.path.startsWith("/scanned-exams/auth")
+          ) {
+            // Only proxy requests for app resources
+            return "/index.html";
+          }
+        },
+      },
     },
   },
   style: {
