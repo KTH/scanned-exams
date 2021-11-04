@@ -78,7 +78,11 @@ async function getErrorsInQueue(req, res, next) {
     const courseId = req.params.id;
     const exams = await getEntriesFromQueue(courseId);
 
-    res.send(exams.filter((exam) => exam.status === "error"));
+    res.send(
+      exams.filter(
+        (exam) => exam.status === "error" || exam.status === "ignored"
+      )
+    );
   } catch (err) {
     next(err);
   }
