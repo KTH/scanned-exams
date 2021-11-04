@@ -12,11 +12,12 @@ export default function CreateAssignment({ courseId }) {
   }
 
   return (
-    <div>
+    <div className="max-w-2xl">
       <H2>Create Assignment</H2>
       <P>
-        We need to create an assignment. This is where the scanned exams will be imported as submissions. You can
-        leave the setup and edit the assignment once it has been created.
+        We need to create an assignment. This is where the scanned exams will be
+        imported as submissions. You can leave the setup and edit the assignment
+        once it has been created.
       </P>
       <P>
         <PrimaryButton

@@ -12,7 +12,7 @@ export default function PublishCourse({ courseId }) {
   }
 
   return (
-    <div>
+    <div className="max-w-2xl">
       <H2>Publish the exam room</H2>
       <P>Now the exam room is ready to be published.</P>
       <P>

@@ -4,7 +4,7 @@ export default function ImportInProgress({ progress, total }) {
   const perc = Math.round((progress / total) * 100);
 
   return (
-    <div>
+    <div className="max-w-2xl">
       <H2>Import in progress</H2>
       <div className="mt-8 mb-8">
         <div className="relative pt-1 mb-1">

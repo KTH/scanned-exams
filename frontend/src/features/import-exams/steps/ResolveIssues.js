@@ -60,7 +60,7 @@ function MissingStudents({ courseId, exams }) {
   } = useMutateIgnoreImportQueueErrors(courseId, exams);
 
   return (
-    <div>
+    <div className="max-w-2xl">
       <h3 className="font-semibold text-lg">Missing students</h3>
       <P>
         There are {exams.length} exams where the student hasn&apos;t yet been
@@ -105,7 +105,7 @@ function OtherErrors({ courseId, exams }) {
   } = useMutateIgnoreImportQueueErrors(courseId, exams);
 
   return (
-    <div>
+    <div className="max-w-2xl">
       <h3 className="font-semibold text-lg">Other errors</h3>
       <P>
         <b>
