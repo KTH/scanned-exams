@@ -1,92 +1,39 @@
 import React from "react";
-import { useQueryClient } from "react-query";
-import {
-  useCourseImportStatus,
-  useMutateImportStart,
-} from "../../../common/api";
-import {
-  H2,
-  LoadingPage,
-  PrimaryButton,
-  P,
-  ImportQueueProgressBar,
-} from "../../widgets";
+import { useCourseExams, useMutateImportStart } from "../../../common/api";
+import { H2, LoadingPage, PrimaryButton, P } from "../../widgets";
 
-export default function PrepareImport({
-  onForceShowStep,
-  courseId,
-  queryExams,
-}) {
-  const [queueStatus, setQueueStatus] = React.useState(undefined);
-
-  const client = useQueryClient();
-
-  // Make sure queueStatus is set properly on first render
-  const { isLoading: statusLoading } = useCourseImportStatus(courseId, {
-    onSuccess({ status }) {
-      setQueueStatus(status);
-    },
-  });
-
+export default function PrepareImport({ courseId }) {
   // Get exams available to import
-  const { data = {}, isFetching: examsLoading } = queryExams;
+  const { data = {}, isFetching: examsLoading } = useCourseExams(courseId);
   const { result: exams = [] } = data;
 
   const examsToImport = exams.filter((exam) => exam.status === "new") || [];
-  const examsWithError = exams.filter((exam) => exam.status === "error") || [];
-
-  const allExamsToImportOnNextTry = [...examsToImport, ...examsWithError];
+  const numberOfExamsToImport = examsToImport.length;
 
   // Hoook to start import
-  const { mutate: doStartImport, isLoading: startImportLoading } =
-    useMutateImportStart(courseId, allExamsToImportOnNextTry, {
-      onSuccess({ status }) {
-        // status lets us know if the queue is working or still idle
-        setQueueStatus(status);
-      },
-    });
+  // Side effect: this causes `ImportFlow` to show a progress bar
+  const {
+    mutate: doStartImport,
+    isLoading: startImportLoading,
+    isSuccess: startImportSuccess,
+  } = useMutateImportStart(courseId, examsToImport);
 
-  if (queueStatus === undefined || examsLoading || statusLoading) {
+  if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
-  }
-
-  const nrofExamsWithErrors = examsWithError.length;
-  const nrofExamsToImport = (examsToImport.length || 0) + nrofExamsWithErrors;
-
-  if (queueStatus === "working") {
-    return (
-      <div className="max-w-2xl">
-        <H2>Import in progress...</H2>
-        <div className="mt-8">
-          <ImportQueueProgressBar
-            courseId={courseId}
-            defaultTotal={nrofExamsToImport}
-            onDone={() => {
-              // Clear the query cache to avoid synching issues
-              client.removeQueries(["course", courseId]);
-              setQueueStatus("idle");
-              // Return flow control to ImportFlow.js
-              onForceShowStep(undefined);
-            }}
-          />
-        </div>
-      </div>
-    );
   }
 
   return (
     <div className="max-w-2xl">
       <H2>Prepare Import</H2>
       <P>
-        There are <b>{nrofExamsToImport} exams</b> available to import.{" "}
-        {nrofExamsWithErrors > 0 &&
-          `Note: ${nrofExamsWithErrors} of these are exams that previously failed to be imported. They are listed in "Resolve Issues", click button "Next" to see them.`}
+        There are <b>{numberOfExamsToImport} exams</b> available to import.{" "}
       </P>
       <div className="mt-8">
-        {nrofExamsToImport > 0 && (
+        {numberOfExamsToImport > 0 && (
           <PrimaryButton
             className="sm:w-96"
             waiting={startImportLoading}
+            success={startImportSuccess}
             onClick={doStartImport}
           >
             Start import!

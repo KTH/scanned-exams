@@ -64,6 +64,11 @@ async function examListByLadokId(ladokId) {
     });
   }
 
+  if (!body.documentSearchResults) {
+    log.debug(`No exams found with the "new format" e_ladokid=${ladokId}`);
+    return [];
+  }
+
   return list;
 }
 
@@ -79,18 +84,23 @@ async function downloadExam(fileId) {
 
   const examDateTime = getValue("e_date");
   const examDate = examDateTime.split("T")[0];
-  const studentKthId = getValue("s_uid");
-  const studentPersNr = getValue("s_pnr");
+  const student = {
+    kthId: getValue("s_uid"),
+    personNumber: getValue("s_pnr"),
+    firstName: getValue("s_firstname"),
+    lastName: getValue("s_lastname"),
+  };
 
-  // Accepting all exams we get from Windreams to allow errors to
-  // be presented to the end user.
+  if (!student.kthId)
+    throw new Error(
+      `Could not get KTH ID (s_uid) from TentaAPI (windream) for file id "${fileId}".`
+    );
 
   return {
     content: Readable.from(
       Buffer.from(body.wdFile.fileAsBase64.toString("utf-8"), "base64")
     ),
-    studentKthId,
-    studentPersNr,
+    student,
     examDate,
   };
 }

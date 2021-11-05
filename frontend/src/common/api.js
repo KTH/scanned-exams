@@ -1,7 +1,6 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { assert } from "./utils";
-
-const PROGRESS_REFRESH_INTERVAL = 1000;
 
 export class ApiError extends Error {
   constructor({ type, statusCode, message, details }) {
@@ -54,41 +53,85 @@ export function useCourseSetup(courseId) {
   );
 }
 
-/** Fetches the API to get information about the setup of a given course */
+/** Fetches the current status of the import queue */
 export function useCourseImportStatus(courseId, options = {}) {
-  const { repeatAtInterval = false } = options;
+  const [repeat, setRepeat] = useState(false);
+
   return useQuery(
     ["course", courseId, "import", "status"],
     () => apiClient(`courses/${courseId}/import-queue`),
     {
       onSuccess({ status } = {}) {
+        setRepeat(status === "working");
         options.onSuccess?.({ status });
       },
-      // We are refetching this periodically so UX changes state if
-      // import queue is triggered somewhere else
-      refetchInterval: repeatAtInterval ? PROGRESS_REFRESH_INTERVAL * 10 : null,
+
+      refetchInterval: repeat ? 1000 : null,
     }
   );
 }
 
-/** Ping API on import progress */
-export function useCourseImportProgress(courseId, options = {}) {
-  return useQuery(
-    ["course", courseId, "import", "status"],
-    () => apiClient(`courses/${courseId}/import-queue`),
+/** Fetches errors in import queue */
+export function useImportQueueErrors(courseId) {
+  return useQuery(["course", courseId, "import", "errors"], () =>
+    apiClient(`courses/${courseId}/import-queue/errors`)
+  );
+}
+
+/** Tells the API to try to fix errors in given exams */
+export function useMutateFixImportQueueErrors(courseId, examsToFix) {
+  const client = useQueryClient();
+
+  return useMutation(
+    () =>
+      apiClient(`courses/${courseId}/import-queue/errors/fix`, {
+        method: "POST",
+        body: examsToFix.map((exam) => exam.fileId),
+      }),
     {
-      onSuccess({ stats } = {}) {
-        const { total, imported, error } = stats;
-        if (imported + error >= total) {
-          options.onDone?.();
-        }
+      onSuccess() {
+        client.invalidateQueries(["course", courseId, "import"]);
       },
-      refetchInterval: options.cancel ? false : PROGRESS_REFRESH_INTERVAL,
     }
   );
 }
 
-/** Fetches the API to get information about the exams of a given course */
+/** Tells the API to ignore errors in given exams */
+export function useMutateIgnoreImportQueueErrors(courseId, examsToIgnore) {
+  const client = useQueryClient();
+
+  return useMutation(
+    () =>
+      apiClient(`courses/${courseId}/import-queue/errors/ignore`, {
+        method: "POST",
+        body: examsToIgnore.map((exam) => exam.fileId),
+      }),
+    {
+      onSuccess() {
+        client.invalidateQueries(["course", courseId, "import"]);
+      },
+    }
+  );
+}
+
+/** Tells the API to reset the import queue */
+export function useMutateResetImportQueue(courseId) {
+  const client = useQueryClient();
+
+  return useMutation(
+    () =>
+      apiClient(`courses/${courseId}/import-queue/`, {
+        method: "DELETE",
+      }),
+    {
+      onSuccess() {
+        client.invalidateQueries(["course", courseId, "import"]);
+      },
+    }
+  );
+}
+
+/** Fetches exams that are already imported, available for import, etc. */
 export function useCourseExams(courseId) {
   return useQuery(["course", courseId, "exams"], () =>
     apiClient(`courses/${courseId}/exams`)
@@ -120,13 +163,13 @@ export function useMutateCourseSetup(courseId, action, options = {}) {
   );
 }
 
-/** Start an import */
+/** Add exams to the import queue starting an import process */
 export function useMutateImportStart(courseId, examsToImport, options = {}) {
   const client = useQueryClient();
 
   return useMutation(
     () =>
-      apiClient(`courses/${courseId}/import/start`, {
+      apiClient(`courses/${courseId}/import-queue`, {
         method: "POST",
         body: examsToImport.map((exam) => exam.id),
       }),
@@ -134,28 +177,7 @@ export function useMutateImportStart(courseId, examsToImport, options = {}) {
       ...options,
       // Passes status object from API as data to callback
       onSuccess(data) {
-        client.invalidateQueries(["course", courseId]);
-        options.onSuccess?.(data);
-      },
-    }
-  );
-}
-
-/** Add Students to Course */
-export function useMutateAddStudents(courseId, studentIds, options = {}) {
-  const client = useQueryClient();
-
-  return useMutation(
-    () =>
-      apiClient(`courses/${courseId}/students`, {
-        method: "POST",
-        body: studentIds,
-      }),
-    {
-      ...options,
-      // Passes status object from API as data to callback
-      onSuccess(data) {
-        client.invalidateQueries(["course", courseId]);
+        client.invalidateQueries(["course", courseId, "import", "status"]);
         options.onSuccess?.(data);
       },
     }

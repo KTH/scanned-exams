@@ -1,10 +1,10 @@
 /** Functions that handle the "import exams" part of the app */
 const log = require("skog");
-const canvas = require("../../externalApis/canvasApiClient");
-const tentaApi = require("../../externalApis/tentaApiClient");
-const { getEntriesFromQueue } = require("../../importQueue");
+const canvas = require("../externalApis/canvasApiClient");
+const tentaApi = require("../externalApis/tentaApiClient");
+const { getEntriesFromQueue } = require("../importQueue");
 
-const { CanvasApiError } = require("../../error");
+const { CanvasApiError } = require("../error");
 
 /**
  * Get the "ladokId" that is associated with a given course. It throws in case
@@ -96,7 +96,7 @@ function calcNewSummary({ ...summaryProps }, status, error) {
   // eslint-disable-next-line no-param-reassign
   summary[status]++;
 
-  if (error !== undefined) {
+  if (error) {
     const errorType = error.type;
     if (summary.errorsByType[errorType] === undefined) {
       // eslint-disable-next-line no-param-reassign
@@ -109,78 +109,83 @@ function calcNewSummary({ ...summaryProps }, status, error) {
   return summary;
 }
 
-async function listAllExams(courseId) {
-  // - Canvas is source of truth regarding if a submitted exam is truly imported
-  // - the internal import queue keeps state of pending and last performed import
-  const ladokId = await getLadokId(courseId);
-  let [allScannedExams, studentsWithExamsInCanvas, examsInImportQueue] =
-    await Promise.all([
-      listScannedExams(courseId, ladokId),
-      listStudentsWithExamsInCanvas(courseId, ladokId),
-      getEntriesFromQueue(courseId),
-    ]);
+async function listAllExams(req, res, next) {
+  try {
+    const courseId = req.params.id;
+    // - Canvas is source of truth regarding if a submitted exam is truly imported
+    // - the internal import queue keeps state of pending and last performed import
+    const ladokId = await getLadokId(courseId);
+    let [allScannedExams, studentsWithExamsInCanvas, examsInImportQueue] =
+      await Promise.all([
+        listScannedExams(courseId, ladokId),
+        listStudentsWithExamsInCanvas(courseId, ladokId),
+        getEntriesFromQueue(courseId),
+      ]);
 
-  // Make sure these are arrays
-  allScannedExams = allScannedExams || [];
-  studentsWithExamsInCanvas = studentsWithExamsInCanvas || [];
-  examsInImportQueue = examsInImportQueue || [];
+    // Make sure these are arrays
+    allScannedExams = allScannedExams || [];
+    studentsWithExamsInCanvas = studentsWithExamsInCanvas || [];
+    examsInImportQueue = examsInImportQueue || [];
 
-  let summary = {
-    total: 0,
-    new: 0,
-    pending: 0,
-    imported: 0,
-    error: 0,
-    errorsByType: {},
-  };
-
-  const listOfExamsToHandle = allScannedExams.map((exam) => {
-    const foundInCanvas = studentsWithExamsInCanvas.find(
-      (s) => s === exam.student?.id
-    );
-
-    const foundInQueue = examsInImportQueue.find(
-      (examInQueue) => examInQueue.fileId === exam.fileId
-    );
-
-    let status = "new";
-    let errorDetails;
-    if (foundInCanvas) {
-      status = "imported";
-    } else if (foundInQueue) {
-      switch (foundInQueue.status) {
-        case "pending":
-          status = "pending";
-          break;
-        case "error":
-          status = "error";
-          errorDetails = foundInQueue.error;
-          break;
-        case "imported":
-          // It was marked imported but not found in Canvas
-          // Allow user to retry import
-          status = "new";
-          break;
-        default:
-          status = foundInQueue.status;
-          errorDetails = foundInQueue.error;
-      }
-    }
-
-    summary = calcNewSummary(summary, status, errorDetails);
-
-    return {
-      id: exam.fileId,
-      student: exam.student,
-      status,
-      error: errorDetails,
+    let summary = {
+      total: 0,
+      new: 0,
+      pending: 0,
+      imported: 0,
+      error: 0,
+      errorsByType: {},
     };
-  });
 
-  return {
-    result: listOfExamsToHandle,
-    summary,
-  };
+    const listOfExamsToHandle = allScannedExams.map((exam) => {
+      const foundInCanvas = studentsWithExamsInCanvas.find(
+        (s) => s === exam.student?.id
+      );
+
+      const foundInQueue = examsInImportQueue.find(
+        (examInQueue) => examInQueue.fileId === exam.fileId
+      );
+
+      let status = "new";
+      let errorDetails;
+      if (foundInCanvas) {
+        status = "imported";
+      } else if (foundInQueue) {
+        switch (foundInQueue.status) {
+          case "pending":
+            status = "pending";
+            break;
+          case "error":
+            status = "error";
+            errorDetails = foundInQueue.error;
+            break;
+          case "imported":
+            // It was marked imported but not found in Canvas
+            // Allow user to retry import
+            status = "new";
+            break;
+          default:
+            status = foundInQueue.status;
+            errorDetails = foundInQueue.error;
+        }
+      }
+
+      summary = calcNewSummary(summary, status, errorDetails);
+
+      return {
+        id: exam.fileId,
+        student: exam.student,
+        status,
+        error: errorDetails,
+      };
+    });
+
+    res.send({
+      result: listOfExamsToHandle,
+      summary,
+    });
+  } catch (err) {
+    next(err);
+  }
 }
 
 module.exports = {

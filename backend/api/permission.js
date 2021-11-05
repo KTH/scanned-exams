@@ -3,6 +3,22 @@ const canvas = require("./externalApis/canvasApiClient");
 const { AuthError } = require("./error");
 
 async function checkPermissions(courseId, userId) {
+  if (!courseId || courseId === "undefined") {
+    throw new AuthError({
+      type: "permission_denied",
+      message:
+        "Missing course ID is required to determine permissions (not found in params)",
+    });
+  }
+
+  if (!userId) {
+    throw new AuthError({
+      type: "permission_denied",
+      message:
+        "Missing user ID is required to determine permissions (not found in session)",
+    });
+  }
+
   const roles = await canvas.getRoles(courseId, userId).catch((err) => {
     throw new AuthError({
       type: "permission_denied",
@@ -22,35 +38,16 @@ async function checkPermissions(courseId, userId) {
       },
     });
   }
-}
-
-async function checkPermissionsMiddleware(req, res, next) {
-  const { id: courseId } = req.params;
-  const { userId } = req.session;
-
-  if (!courseId || courseId === "undefined") {
-    const err = new AuthError({
-      type: "permission_denied",
-      message:
-        "Missing course ID is required to determine permissions (not found in params)",
-    });
-    return next(err);
-  }
-
-  if (!userId) {
-    const err = new AuthError({
-      type: "permission_denied",
-      message:
-        "Missing user ID is required to determine permissions (not found in session)",
-    });
-    return next(err);
-  }
-
-  await checkPermissions(courseId, userId).catch(next);
 
   log.debug(`Authorized. User ${userId} in course ${courseId}`);
+}
 
-  return next();
+function checkPermissionsMiddleware(req, res, next) {
+  checkPermissions(req.params.id, req.session.userId)
+    .then(() => {
+      next();
+    })
+    .catch(next);
 }
 
 module.exports = {

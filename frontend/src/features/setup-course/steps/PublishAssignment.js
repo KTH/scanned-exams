@@ -12,7 +12,7 @@ export default function CreateAssignment({ courseId }) {
   }
 
   return (
-    <div>
+    <div className="max-w-2xl">
       <H2>Publish Assignment</H2>
       <P>
         You have created the assignment. You can edit the assignment and return
