@@ -205,7 +205,7 @@ function _formatErrorMsg(name, type, message) {
 function errorHandler(err, req, res, next) {
   if (err instanceof AuthError) {
     // Simple auth errors
-    log.warn(err);
+    log.warn({ err }, err.message);
     // Add error details if provided for debugging
     if (err.details) log.debug(err.details);
   } else if (err instanceof EndpointError) {
