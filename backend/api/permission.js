@@ -1,6 +1,6 @@
 const log = require("skog");
 const canvas = require("./externalApis/canvasApiClient");
-const { AuthError } = require("./error");
+const { AuthError, CanvasApiError } = require("./error");
 
 async function checkPermissions(courseId, userId) {
   if (!courseId || courseId === "undefined") {
@@ -20,9 +20,11 @@ async function checkPermissions(courseId, userId) {
   }
 
   const roles = await canvas.getRoles(courseId, userId).catch((err) => {
-    throw new AuthError({
-      type: "permission_denied",
-      message: err.message,
+    throw new CanvasApiError({
+      type: "unhandled_error",
+      statusCode: 503,
+      message: "Could not get roles from Canvas API",
+      err,
     });
   });
 
