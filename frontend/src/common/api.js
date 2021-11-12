@@ -168,13 +168,16 @@ export function useMutateAddStudents(courseId, studentIds, options = {}) {
  * If the user is logged out, field "data" will be null
  */
 export function useUser() {
-  return useQuery("user", () =>
-    apiClient(`me`).catch((err) => {
-      if (err instanceof ApiError && err.statusCode === 404) {
-        return null;
-      }
+  return useQuery(
+    "user",
+    () =>
+      apiClient(`me`).catch((err) => {
+        if (err instanceof ApiError && err.statusCode === 404) {
+          return null;
+        }
 
-      throw err;
-    })
+        throw err;
+      }),
+    { retry: 0 } // Only call once to avoid long wait
   );
 }
