@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/KTH/scannade-tentor#readme",
   "dependencies": {
-    "@kth/canvas-api": "^3.2.0",
+    "@kth/canvas-api": "^4.0.0-1",
     "@kth/reqvars": "^2.0.1",
     "connect-mongodb-session": "^3.1.0",
     "cookie-parser": "^1.4.5",
