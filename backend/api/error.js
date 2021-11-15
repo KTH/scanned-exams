@@ -269,8 +269,17 @@ function errorHandler(err, req, res, next) {
   });
 }
 
+function tentaApiGenericErrorHandler(err) {
+  Error.captureStackTrace(err, tentaApiGenericErrorHandler);
+  const error = new TentaApiError({
+    err, // Pass the original error
+  });
+  throw error;
+}
+
 module.exports = {
   errorHandler,
+  tentaApiGenericErrorHandler,
   getMostSignificantError,
   getOrigProgrammerError,
   isOperationalOrRecoverableError,
