@@ -6,7 +6,7 @@ const {
   resetQueueForImport,
   updateStatusOfEntryInQueue,
 } = require("../importQueue");
-const { listAllExams } = require("./utils/listAllExams");
+const { listAllExams } = require("./listAllExams");
 const { enrollStudent } = require("../externalApis/canvasApiClient");
 
 async function getExamsEndpoint(req, res, next) {
