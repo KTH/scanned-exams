@@ -4,6 +4,12 @@ const got = require("got");
 const log = require("skog");
 const { getAktivitetstillfalle } = require("./ladokApiClient");
 const { EndpointError, ImportError } = require("../error");
+const {
+  propertiesToCreateLockedAssignment,
+  propertiesToUnlockAssignment,
+  propertiesToLockAssignment,
+  propertiesToCreateSubmission,
+} = require("../assignmentLock");
 
 const canvas = new Canvas(
   process.env.CANVAS_API_URL,
@@ -127,35 +133,18 @@ async function createAssignment(courseId, ladokId, language = "en") {
   const examination = await getAktivitetstillfalle(ladokId);
   const { body: template } = await canvas.get(TEMPLATES.assignment[language]);
 
-  const examinationDate = new Date(`${examination.examDate}T00:00:00`);
-
-  if (examinationDate > new Date()) {
-    throw new EndpointError({
-      type: "future_exam",
-      statusCode: 400,
-      message: `You can not create the assignment now. Please run the app again after the exam date, i.e. on ${examination.examDate} or later`,
-    });
-  }
-
   return canvas
     .requestUrl(`courses/${courseId}/assignments`, "POST", {
       assignment: {
+        ...propertiesToCreateLockedAssignment(examination.examDate),
         name: template.name,
         description: template.description,
-        submission_types: ["online_upload"],
-        allowed_extensions: ["pdf"],
-        // TODO: save only the "Ladok UID" because `examination.courseCode` and
-        //       `examination.examCode` can be more than one
-        // TODO: add more data to be able to filter out better?
         integration_data: {
           ladokId,
         },
         published: false,
         grading_type: "letter_grade",
         notify_of_update: false,
-        lock_at: new Date().toISOString(),
-        // IMPORTANT: do NOT pass a time zone in the "due_at" field
-        due_at: `${examination.examDate}T00:00:00`,
         // TODO: take the grading standard from TentaAPI
         //       grading_standard_id: 1,
       },
@@ -176,31 +165,32 @@ async function publishAssignment(courseId, assignmentId) {
   );
 }
 
+/**
+ * Allows the app to upload exams.
+ */
 async function unlockAssignment(courseId, assignmentId) {
-  const TOMORROW = new Date();
-  TOMORROW.setDate(TOMORROW.getDate() + 1);
-
   return canvas.requestUrl(
     `courses/${courseId}/assignments/${assignmentId}`,
     "PUT",
     {
       assignment: {
-        lock_at: TOMORROW.toISOString(),
+        ...propertiesToUnlockAssignment(),
         published: true,
       },
     }
   );
 }
 
+/**
+ * Prevents students to upload things by accident.
+ */
 async function lockAssignment(courseId, assignmentId) {
-  const NOW = new Date();
-
   return canvas.requestUrl(
     `courses/${courseId}/assignments/${assignmentId}`,
     "PUT",
     {
       assignment: {
-        lock_at: NOW.toISOString(),
+        ...propertiesToLockAssignment(),
       },
     }
   );
@@ -259,7 +249,6 @@ async function uploadExam(
     log.debug(
       `Upload Exam: unlocking assignment ${assignment.id} in course ${courseId}`
     );
-    await unlockAssignment(courseId, assignment.id);
 
     const reqTokenStart = Date.now();
     // TODO: will return a 400 if the course is unpublished
@@ -303,16 +292,16 @@ async function uploadExam(
 
     log.debug("Time to upload file: " + (Date.now() - uploadFileStart) + "ms");
 
+    await unlockAssignment(courseId, assignment.id);
     await canvas.requestUrl(
       `courses/${courseId}/assignments/${assignment.id}/submissions/`,
       "POST",
       {
         submission: {
+          ...propertiesToCreateSubmission(examDate),
           submission_type: "online_upload",
           user_id: user.id,
           file_ids: [uploadedFile.id],
-          // IMPORTANT: do not pass the timezone in the "submitted_at" field
-          submitted_at: `${examDate}T08:00:00`,
         },
       }
     );
