@@ -40,12 +40,17 @@ function throwIfStudentMissingKTHID({ fileId, fileName, studentKthId }) {
 
 async function uploadOneExam({ fileId, courseId }) {
   log.debug(`Course ${courseId} / File ${fileId}. Downloading`);
-  const { content, fileName, student, studentPersNr, examDate } =
-    await tentaApi.downloadExam(fileId);
+  const { content, fileName, student, examDate } = await tentaApi.downloadExam(
+    fileId
+  );
 
   // Some business rules
   throwIfStudentMissingKTHID({ fileId, fileName, studentKthId: student.kthId });
-  throwIfStudentNotInUg({ fileId, fileName, studentPersNr });
+  throwIfStudentNotInUg({
+    fileId,
+    fileName,
+    studentPersNr: student.personNumber,
+  });
 
   updateStudentOfEntryInQueue({ fileId }, student);
 
