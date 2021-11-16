@@ -22,60 +22,34 @@ These are common words and phrases that should be used in the app for UX consist
 
 Pre-requirements
 
-1. Install [mkcert](https://github.com/FiloSottile/mkcert) (a tool to generate self-signed SSH certificates easily)
-2. Make sure you have a line like this in `/etc/hosts`:
+1. Install OpenSSL:
+- [macOS X](https://formulae.brew.sh/formula/openssl@3#default)
+
+2. Add a DNS override in `/etc/hosts`:
 
     ```
     127.0.0.1   localdev.kth.se
     ```
 
-Frontend:
-
-1. Go to the `frontend` directory
+3. Install npm packages
 
    ```sh
-   cd frontend
+   (cd backend; npm i) && (cd frontend; npm i)
    ```
 
-2. Install the dependencies and build the HTML/CSS/JS code
-
-    ```sh
-    npm install
-    npm run build
-    ```
-
-In the "backend" terminal:
-
-1. Go to the `backend` directory.
+4. Setup env vars in backen `.env.in` to `.env`
 
    ```sh
-   cd backend
+   (cd backend; cp .env.in .env) && code backend/.env
    ```
 
-2. Copy the `.env.in` to `.env`
+5. Start backend and then frontend
 
    ```sh
-   cp .env.in .env
+   (cd backend; npm run start)
    ```
-
-3. Open the newly created `.env` and add the relevant environmental variables (everything that starts with `CANVAS_`)
-4. Create a directory called `certs`.
-
    ```sh
-   mkdir certs
-   ```
-
-5. Run
-
-   ```sh
-   mkcert -key-file ./certs/key.pem -cert-file ./certs/cert.pem localdev.kth.se localhost
-   ```
-
-6. Install the dependencies and run the app in development mode
-
-   ```sh
-   npm install
-   npm start
+   (cd frontend; npm run dev)
    ```
 
 ---
