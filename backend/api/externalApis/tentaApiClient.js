@@ -2,7 +2,7 @@ const got = require("got");
 const log = require("skog");
 const { Readable } = require("stream");
 
-const { TentaApiError } = require("../error");
+const { tentaApiGenericErrorHandler } = require("../error");
 
 const client = got.extend({
   prefixUrl: process.env.TENTA_API_URL,
@@ -35,11 +35,7 @@ async function examListByLadokId(ladokId) {
     //   useDatesInSearch: false,
     // },
     responseType: "json",
-  }).catch((err) => {
-    throw new TentaApiError({
-      err,
-    });
-  });
+  }).catch(tentaApiGenericErrorHandler);
 
   if (!body.documentSearchResults) {
     log.debug(`No exams found with the "new format" e_ladokid=${ladokId}`);
