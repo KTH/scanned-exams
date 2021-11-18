@@ -3,8 +3,7 @@ const log = require("skog");
 const canvas = require("../externalApis/canvasApiClient");
 const tentaApi = require("../externalApis/tentaApiClient");
 const { getEntriesFromQueue } = require("../importQueue");
-
-const { CanvasApiError, tentaApiGenericErrorHandler } = require("../error");
+const { CanvasApiError } = require("../error");
 
 /**
  * Get the "ladokId" that is associated with a given course. It throws in case
@@ -44,9 +43,7 @@ async function getLadokId(courseId) {
 
 /** Returns a list of scanned exams (i.e. in Windream) given its ladokId */
 async function listScannedExams(courseId, ladokId) {
-  const allScannedExams = await tentaApi
-    .examListByLadokId(ladokId)
-    .catch(tentaApiGenericErrorHandler);
+  const allScannedExams = await tentaApi.examListByLadokId(ladokId);
 
   log.info(
     `Obtained exams for course [${courseId}] ladokId [${ladokId}]: ${allScannedExams.length}`
