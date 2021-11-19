@@ -24,10 +24,6 @@ async function tentaApi() {
       statusCode: err.response?.statusCode,
     };
 
-    error.response = {
-      url: err.response.url,
-    };
-
     log.error(error, error.message);
 
     return {
