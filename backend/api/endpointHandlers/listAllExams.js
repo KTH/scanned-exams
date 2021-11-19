@@ -3,7 +3,6 @@ const log = require("skog");
 const canvas = require("../externalApis/canvasApiClient");
 const tentaApi = require("../externalApis/tentaApiClient");
 const { getEntriesFromQueue } = require("../importQueue");
-
 const { CanvasApiError } = require("../error");
 
 /**
