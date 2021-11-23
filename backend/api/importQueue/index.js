@@ -48,7 +48,7 @@ class QueueEntry {
   constructor({
     fileId,
     courseId,
-    userKthId,
+    student,
     status = "new",
     createdAt,
     importStartedAt,
@@ -58,7 +58,11 @@ class QueueEntry {
   }) {
     this.fileId = fileId;
     this.courseId = courseId;
-    this.userKthId = userKthId;
+    this.student = {
+      kthId: student?.kthId,
+      firstName: student?.firstName,
+      lastName: student?.lastName,
+    };
     this.status = status;
     this.createdAt = createdAt || new Date();
     this.importStartedAt = importStartedAt;
@@ -71,7 +75,11 @@ class QueueEntry {
     return {
       fileId: this.fileId,
       courseId: this.courseId,
-      userKthId: this.userKthId,
+      student: {
+        kthId: this.student?.kthId,
+        firstName: this.student?.firstName,
+        lastName: this.student?.lastName,
+      },
       status: this.status,
       createdAt: this.createdAt,
       importStartedAt: this.importStartedAt || null,
@@ -86,17 +94,27 @@ class QueueStatus {
   /**
    * Status of import queue
    * @param {String} param0.status idle|working
-   * @param {int} param0.total total number being processed
-   * @param {int} param0.progress total number pending import
-   * @param {int} param0.error total number of errors
+   * @param {int} param0.total
+   * @param {int} param0.progress
+   * @param {int} param0.error
+   * @param {int} param0.ignored
    */
-  constructor({ status, total, progress = 0, error = 0 }) {
+  constructor({
+    status,
+    total,
+    progress = 0,
+    error = 0,
+    ignored = 0,
+    imported = 0,
+  }) {
     this.status = status;
     if (total !== undefined) {
       this.working = {
         error,
         progress,
         total,
+        imported,
+        ignored,
       };
     }
   }
@@ -109,6 +127,8 @@ class QueueStatus {
           progress: this.working.progress,
           total: this.working.total,
           error: this.working.error,
+          ignored: this.working.ignored,
+          imported: this.working.imported,
         },
       };
     }
@@ -120,7 +140,7 @@ class QueueStatus {
 /**
  * Get list of exams in import queue for given course
  * @param {String} courseId
- * @returns Mongodb cursor with results
+ * @returns an array of QueueEntry objects
  */
 async function getEntriesFromQueue(courseId) {
   try {
@@ -128,7 +148,9 @@ async function getEntriesFromQueue(courseId) {
     const collImportQueue = await getImportQueueCollection();
     const cursor = collImportQueue.find({ courseId });
 
-    return await cursor.toArray();
+    const entries = await cursor.toArray();
+
+    return entries.map((entry) => new QueueEntry(entry));
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
@@ -163,7 +185,7 @@ async function resetQueueForImport(courseId) {
     await collImportQueue.deleteMany({
       courseId,
       status: {
-        $in: ["imported", "error"],
+        $in: ["imported", "error", "ignored"],
       },
     });
   } catch (err) {
@@ -221,40 +243,89 @@ async function addEntryToQueue(entry) {
 
 async function getStatusFromQueue(courseId) {
   try {
-    // Open collection
     const collImportQueue = await getImportQueueCollection();
     const cursor = collImportQueue.find({ courseId });
 
-    // Calculate status
-    // TODO: This should be done by aggregation and setting indexes
     let pending = 0;
     let error = 0;
-    let total = 0;
-    let status = "idle";
+    let imported = 0;
+    let ignored = 0;
+
     await cursor.forEach((doc) => {
       switch (doc.status) {
         case "pending":
-          total++;
           pending++;
-          status = "working";
           break;
         case "error":
-          total++;
           error++;
           break;
         case "imported":
-          total++;
+          imported++;
+          break;
+        case "ignored":
+          ignored++;
           break;
         default: // noop
       }
     });
-    const progress = total - pending;
-    const statusObj = new QueueStatus({ status, total, progress, error });
 
-    // Return a typed status object
-    return statusObj;
+    const status = pending === 0 ? "idle" : "working";
+    const total = pending + error + imported + ignored;
+    const progress = error + imported + ignored;
+
+    return new QueueStatus({
+      status,
+      total,
+      progress,
+      error,
+      imported,
+      ignored,
+    });
   } catch (err) {
     // TODO: Handle errors
+    log.error({ err });
+    throw err;
+  }
+}
+
+async function updateStudentOfEntryInQueue(
+  entry,
+  { kthId, firstName, lastName }
+) {
+  try {
+    const collImportQueue = await getImportQueueCollection();
+    const tmpOld = await collImportQueue.findOne({ fileId: entry.fileId });
+
+    if (!tmpOld) {
+      throw new ImportError({
+        type: "entry_not_found",
+        message: `Entry for fileId [${entry.fileId}] not found.`,
+      });
+    }
+
+    const typedEntry = new QueueEntry(tmpOld);
+
+    typedEntry.student = {
+      kthId,
+      firstName,
+      lastName,
+    };
+
+    const res = await collImportQueue.replaceOne(
+      { fileId: typedEntry.fileId },
+      typedEntry
+    );
+
+    if (!res.acknowledged) {
+      throw new ImportError({
+        type: "update_error",
+        statusCode: 420,
+        message: `Update import queue didn't get acknowledge from Mongodb.`,
+      });
+    }
+
+    return typedEntry;
+  } catch (err) {
     log.error({ err });
     throw err;
   }
@@ -276,6 +347,10 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
           break;
         case "imported":
           typedEntry.importSuccessAt = new Date();
+          typedEntry.error = null;
+          break;
+        case "ignored":
+          // User has explicitly chosen to ignore this error
           typedEntry.error = null;
           break;
         case "error":
@@ -337,6 +412,22 @@ async function getFirstPendingFromQueue() {
   }
 }
 
+async function removeEntryFromQueue(entry) {
+  try {
+    const collImportQueue = await getImportQueueCollection();
+    await collImportQueue.deleteOne({
+      fileId: entry.fileId,
+    });
+  } catch (err) {
+    log.error({ err });
+    throw new ImportError({
+      type: "delete_error",
+      statusCode: 420,
+      message: "Error removing finished entries",
+    });
+  }
+}
+
 module.exports = {
   QueueEntry,
   QueueStatus,
@@ -344,9 +435,11 @@ module.exports = {
   getEntriesFromQueue,
   addEntryToQueue,
   updateStatusOfEntryInQueue,
+  updateStudentOfEntryInQueue,
   getStatusFromQueue,
   getFirstPendingFromQueue,
   resetQueueForImport,
   getImportQueueCollection,
+  removeEntryFromQueue,
   databaseClient,
 };

@@ -2,7 +2,7 @@ const got = require("got");
 const log = require("skog");
 const { Readable } = require("stream");
 
-const { TentaApiError } = require("../error");
+const { tentaApiGenericErrorHandler } = require("../error");
 
 const client = got.extend({
   prefixUrl: process.env.TENTA_API_URL,
@@ -35,11 +35,7 @@ async function examListByLadokId(ladokId) {
       useDatesInSearch: false,
     },
     responseType: "json",
-  }).catch((err) => {
-    throw new TentaApiError({
-      err,
-    });
-  });
+  }).catch(tentaApiGenericErrorHandler);
 
   if (!body.documentSearchResults) {
     log.debug(`No exams found with the "new format" e_ladokid=${ladokId}`);
@@ -64,6 +60,11 @@ async function examListByLadokId(ladokId) {
     });
   }
 
+  if (!body.documentSearchResults) {
+    log.debug(`No exams found with the "new format" e_ladokid=${ladokId}`);
+    return [];
+  }
+
   return list;
 }
 
@@ -80,19 +81,24 @@ async function downloadExam(fileId) {
   const { fileName } = body.wdFile;
   const examDateTime = getValue("e_date");
   const examDate = examDateTime.split("T")[0];
-  const studentKthId = getValue("s_uid");
-  const studentPersNr = getValue("s_pnr");
+  const student = {
+    kthId: getValue("s_uid"),
+    personNumber: getValue("s_pnr"),
+    firstName: getValue("s_firstname"),
+    lastName: getValue("s_lastname"),
+  };
 
-  // Accepting all exams we get from Windreams to allow errors to
-  // be presented to the end user.
+  if (!student.kthId)
+    throw new Error(
+      `Could not get KTH ID (s_uid) from TentaAPI (windream) for file id "${fileId}".`
+    );
 
   return {
     content: Readable.from(
       Buffer.from(body.wdFile.fileAsBase64.toString("utf-8"), "base64")
     ),
     fileName,
-    studentKthId,
-    studentPersNr,
+    student,
     examDate,
   };
 }

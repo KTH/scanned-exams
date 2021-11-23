@@ -4,6 +4,7 @@ const tentaApi = require("../externalApis/tentaApiClient");
 const {
   getFirstPendingFromQueue,
   updateStatusOfEntryInQueue,
+  updateStudentOfEntryInQueue,
 } = require("./index");
 const { ImportError } = require("../error");
 
@@ -16,7 +17,7 @@ const IS_DEV = NODE_ENV !== "production";
  * in windream and they need to be graded manually
  */
 function throwIfStudentNotInUg({ fileId, fileName, studentPersNr }) {
-  if (studentPersNr && studentPersNr.replace(/-/g, "") === "121212121212") {
+  if (studentPersNr.replace(/-/g, "") === "121212121212") {
     throw new ImportError({
       type: "not_in_ug",
       message: `The student does not have a Canvas account. Please contact IT-support (windream fileId: ${fileId}, ${fileName}) - Unhandled error`,
@@ -39,27 +40,34 @@ function throwIfStudentMissingKTHID({ fileId, fileName, studentKthId }) {
 
 async function uploadOneExam({ fileId, courseId }) {
   log.debug(`Course ${courseId} / File ${fileId}. Downloading`);
-  const { content, fileName, studentKthId, studentPersNr, examDate } =
-    await tentaApi.downloadExam(fileId);
+  const { content, fileName, student, examDate } = await tentaApi.downloadExam(
+    fileId
+  );
 
   // Some business rules
-  throwIfStudentMissingKTHID({ fileId, fileName, studentKthId });
-  throwIfStudentNotInUg({ fileId, fileName, studentPersNr });
+  throwIfStudentMissingKTHID({ fileId, fileName, studentKthId: student.kthId });
+  throwIfStudentNotInUg({
+    fileId,
+    fileName,
+    studentPersNr: student.personNumber,
+  });
+
+  updateStudentOfEntryInQueue({ fileId }, student);
 
   log.debug(
-    `Course ${courseId} / File ${fileId}, ${fileName} / User ${studentKthId}. Uploading`
+    `Course ${courseId} / File ${fileId}, ${fileName} / User ${student.kthId}. Uploading`
   );
   const uploadExamStart = Date.now();
   await canvas.uploadExam(content, {
     courseId,
-    studentKthId,
+    studentKthId: student.kthId,
     examDate,
     fileId,
   });
   log.debug("Time to upload exam: " + (Date.now() - uploadExamStart) + "ms");
 
   log.info(
-    `Course ${courseId} / File ${fileId}, ${fileName} / User ${studentKthId}. Uploaded!`
+    `Course ${courseId} / File ${fileId}, ${fileName} / User ${student.kthId}. Uploaded!`
   );
 }
 
@@ -116,7 +124,6 @@ module.exports = async function processQueueEntry() {
 
       // Upload to Canvas
       await uploadOneExam({
-        fileName: examToBeImported.fileName,
         fileId: examToBeImported.fileId,
         courseId: examToBeImported.courseId,
       }).catch((err) => {

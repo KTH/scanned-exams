@@ -1,9 +1,7 @@
 const express = require("express");
 const log = require("skog");
 const { errorHandler, EndpointError } = require("./error");
-
 const { checkPermissionsMiddleware } = require("./permission");
-
 const {
   getSetupStatus,
   createSpecialHomepage,
@@ -11,13 +9,15 @@ const {
   createSpecialAssignment,
   publishSpecialAssignment,
 } = require("./endpointHandlers/setupCourse");
-
 const {
-  getExamsEndpoint,
-  getStatusEndpoint,
-  startExportEndpoint,
-  addUserToCourseEndpoint,
-} = require("./endpointHandlers/legacy");
+  addEntriesToQueue,
+  getErrorsInQueue,
+  fixErrorsInQueue,
+  resetQueue,
+  ignoreErrorsInQueue,
+  getStatusFromQueueHandler,
+} = require("./endpointHandlers/importQueueHandlers");
+const { listAllExams } = require("./endpointHandlers/listAllExams");
 
 const router = express.Router();
 
@@ -45,83 +45,20 @@ router.get("/me", (req, res, next) => {
   return res.status(200).send({ userId });
 });
 
-router.get("/courses/:id/setup", async (req, res, next) => {
-  try {
-    const status = await getSetupStatus(req.params.id);
-    res.send(status);
-  } catch (err) {
-    next(err);
-  }
-});
+router.get("/courses/:id/setup", getSetupStatus);
+router.post("/courses/:id/setup/create-homepage", createSpecialHomepage);
+router.post("/courses/:id/setup/publish-course", publishCourse);
+router.post("/courses/:id/setup/create-assignment", createSpecialAssignment);
+router.post("/courses/:id/setup/publish-assignment", publishSpecialAssignment);
 
-router.post("/courses/:id/setup/create-homepage", async (req, res, next) => {
-  try {
-    await createSpecialHomepage(req.params.id);
+router.get("/courses/:id/exams", listAllExams);
 
-    res.send({
-      message: "done!",
-    });
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.post("/courses/:id/setup/publish-course", async (req, res, next) => {
-  try {
-    await publishCourse(req.params.id);
-
-    res.send({
-      message: "done!",
-    });
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.post("/courses/:id/setup/create-assignment", async (req, res, next) => {
-  try {
-    await createSpecialAssignment(req.params.id);
-
-    return res.send({
-      message: "done!",
-    });
-  } catch (err) {
-    return next(err);
-  }
-});
-
-router.post("/courses/:id/setup/publish-assignment", async (req, res, next) => {
-  try {
-    await publishSpecialAssignment(req.params.id);
-
-    return res.send({
-      message: "done!",
-    });
-  } catch (err) {
-    return next(err);
-  }
-});
-
-/**
- * Legacy endpoints
- */
-// Get list of exams for given course
-router.get("/courses/:id/exams", getExamsEndpoint);
-// Get the import process status
-router.get("/courses/:id/import/status", getStatusEndpoint);
-// Start the import process
-router.post("/courses/:id/import/start", startExportEndpoint);
-// Add student to Canvas course
-router.post("/courses/:id/students", addUserToCourseEndpoint);
-
-/**
- * New endpoints
- */
-// Get status of import queue
-router.get(
-  "/courses/:courseId/import-queue",
-  require("./endpointHandlers/getCourseImportStatus")
-);
+router.get("/courses/:id/import-queue", getStatusFromQueueHandler);
+router.post("/courses/:id/import-queue", addEntriesToQueue);
+router.get("/courses/:id/import-queue/errors", getErrorsInQueue);
+router.post("/courses/:id/import-queue/errors/fix", fixErrorsInQueue);
+router.post("/courses/:id/import-queue/errors/ignore", ignoreErrorsInQueue);
+router.delete("/courses/:id/import-queue", resetQueue);
 
 router.use(errorHandler);
 module.exports = router;

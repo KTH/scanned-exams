@@ -11,12 +11,11 @@ const hostname = serverUrl.host.split(":")[0];
 function startApiServer(sslCerts) {
   startBackgroundImport();
 
-  https.createServer(sslCerts, server)
-    .listen(process.env.PORT || 4443, () => {
-      log.info(
-        `Started HTTPS server in https://localhost:${process.env.PORT || 4443}`
-      );
-    });
+  https.createServer(sslCerts, server).listen(process.env.PORT || 4443, () => {
+    log.info(
+      `Started HTTPS server in https://localhost:${process.env.PORT || 4443}`
+    );
+  });
 }
 
 try {
@@ -29,6 +28,7 @@ try {
   if (process.env.NODE_ENV === "production") throw err;
 
   // DEVELOPMENT SERVER
+  /* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
   const devcert = require("devcert");
   devcert
     .certificateFor(hostname, {
