@@ -22,7 +22,7 @@ async function getLadokId(courseId) {
     });
   }
 
-  if (ladokIds.lengh > 1) {
+  if (ladokIds.length > 1) {
     throw new EndpointError({
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       type: "invalid_course",

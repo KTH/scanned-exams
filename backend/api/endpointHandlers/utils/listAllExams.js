@@ -27,7 +27,7 @@ async function getLadokId(courseId) {
     });
   }
 
-  if (ladokIds.lengh > 1) {
+  if (ladokIds.length > 1) {
     throw new CanvasApiError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
