@@ -1,5 +1,19 @@
 require("dotenv").config();
-const log = require("skog");
+require("@kth/reqvars").check();
+
+import express from "express";
+import cookieParser from "cookie-parser";
+import session from "express-session";
+import path from "path";
+import fs from "fs";
+import MongoDBStore from "connect-mongodb-session";
+
+import apiRouter from "./api/router";
+import authRouter from "./auth/router";
+import monitor from "./monitor";
+import log from "skog";
+
+MongoDBStore(session);
 
 log.init.pino({
   app: "scanned-exams",
@@ -15,18 +29,7 @@ process.on("unhandledRejection", (reason) => {
   process.exit(1);
 });
 
-require("@kth/reqvars").check();
 
-const express = require("express");
-const cookieParser = require("cookie-parser");
-const session = require("express-session");
-const path = require("path");
-const fs = require("fs");
-const MongoDBStore = require("connect-mongodb-session")(session);
-
-const apiRouter = require("./api/router");
-const authRouter = require("./auth/router");
-const monitor = require("./monitor");
 
 const server = express();
 
@@ -146,4 +149,5 @@ server.use(
 );
 
 server.get("/scanned-exams/_monitor", monitor);
-module.exports = server;
+
+export default server;

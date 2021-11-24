@@ -1,9 +1,9 @@
-const fs = require("fs");
-const https = require("https");
-const log = require("skog");
-const server = require("./server");
+import fs from "fs";
+import https from "https";
+import log from "skog";
+import server from "./server";
 
-const { startBackgroundImport } = require("./importWorker");
+import { startBackgroundImport } from "./importWorker.js";
 
 const serverUrl = new URL(process.env.SERVER_HOST_URL);
 const hostname = serverUrl.host.split(":")[0];
