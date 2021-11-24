@@ -1,5 +1,4 @@
 const got = require("got");
-const log = require("skog");
 const { Readable } = require("stream");
 
 module.exports = class TentaApi {
@@ -59,7 +58,6 @@ module.exports = class TentaApi {
 
   /** Download the exam with ID "fileId". Returns its content as a ReadableStream */
   async downloadExam(fileId) {
-    log.info(`Downloading file ${fileId}...`);
     const { body } = await this.client(`windream/file/${fileId}/true`, {
       responseType: "json",
     });

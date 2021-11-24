@@ -53,7 +53,10 @@ async function start() {
     type: "list",
     name: "assignmentId",
     message: "Choose an assignment",
-    choices: assignments,
+    choices: assignments.map((assignment) => ({
+      name: assignment.name,
+      value: assignment.id,
+    })),
   });
 
   const { ladokId } = await inquirer.prompt({
@@ -64,8 +67,24 @@ async function start() {
 
   const tentaApi = new TentaApi(tentaApiToken);
 
-  console.log("Fetching exams...");
   const exams = await tentaApi.examListByLadokId(ladokId);
+  console.log(`Found ${exams.length} exams`);
+  console.log("Fetching exams...");
+
+  for (const exam of exams) {
+    console.log(`${exam.fileId}. Student: ${exam.student.id}`);
+  }
+
+  const { confirm } = await inquirer.prompt({
+    type: "confirm",
+    name: "confirm",
+    message:
+      "The exams above will be uploaded. Are you sure you want to continue?",
+  });
+
+  if (!confirm) {
+    return;
+  }
 
   for (const exam of exams) {
     const { content, examDate, student } = await tentaApi.downloadExam(

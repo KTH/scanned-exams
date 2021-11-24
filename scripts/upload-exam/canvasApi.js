@@ -31,22 +31,30 @@ module.exports = class CanvasApi {
     content,
     { studentKthId, courseId, assignmentId, examDate }
   ) {
-    const { body: user } = await this.client.get(
-      `users/sis_user_id:${studentKthId}`
-    );
+    const { body: user } = await this.client
+      .get(`users/sis_user_id:${studentKthId}`)
+      .catch((err) => {
+        console.error("Error when fetching student");
+        throw err;
+      });
 
-    const { body: slot } = await this.client.requestUrl(
-      `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}/files`,
-      "POST",
-      {
-        name: `${studentKthId}.pdf`,
-      }
-    );
+    const { body: slot } = await this.client
+      .requestUrl(
+        `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}/files`,
+        "POST",
+        {
+          name: `${studentKthId}.pdf`,
+        }
+      )
+      .catch((err) => {
+        console.error("Error when fetching slot");
+        throw err;
+      });
 
     const { body: uploadedFile } = await this.sendFile(slot, content);
 
     await this.client.requestUrl(
-      `courses/${courseId}/assignments/${assignment.id}/submissions/`,
+      `courses/${courseId}/assignments/${assignmentId}/submissions/`,
       "POST",
       {
         submission: {
