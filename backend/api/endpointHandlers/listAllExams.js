@@ -190,4 +190,5 @@ async function listAllExams(req, res, next) {
 module.exports = {
   listScannedExams,
   listAllExams,
+  _getLadokId: getLadokId,
 };
