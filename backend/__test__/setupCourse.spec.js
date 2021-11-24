@@ -18,6 +18,9 @@ describe("setupCourse", () => {
     });
 
     it("should throw CanvasApiError when list of ladokIds is longer than 1", async () => {
+      /**
+       * We currently don't support multiple aktivitetstillfällen for a given course
+       */
       canvas.getAktivitetstillfalleUIDs.mockResolvedValue([1, 2]);
       let err;
       await _getLadokId(12345).catch((e) => {
