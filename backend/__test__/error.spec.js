@@ -1,4 +1,5 @@
-const { expect } = require("@jest/globals");
+/* eslint-disable no-console */
+const { expect, beforeAll } = require("@jest/globals");
 const {
   errorHandler,
   getMostSignificantError,
@@ -14,7 +15,40 @@ const {
   TentaApiError,
 } = require("../api/error");
 
+const tmpConsole = {
+  error: console.error,
+  info: console.error,
+  log: console.error,
+  warn: console.error,
+};
+
+const silentConsole = {
+  error: () => {},
+  info: () => {},
+  log: () => {},
+  warn: () => {},
+};
+
+function muteConsole() {
+  const { error, info, log, warn } = silentConsole;
+  console.error = error;
+  console.info = info;
+  console.log = log;
+  console.warn = warn;
+}
+
+function unmuteConsole() {
+  const { error, info, log, warn } = tmpConsole;
+  console.error = error;
+  console.info = info;
+  console.log = log;
+  console.warn = warn;
+}
+
 describe("utils", () => {
+  beforeAll(muteConsole);
+  afterAll(unmuteConsole);
+
   it("getOrigProgrammerError, one level", () => {
     const progErr = new Error("test");
     const err = getOrigProgrammerError(
@@ -81,6 +115,9 @@ describe("utils", () => {
 });
 
 describe("Errors", () => {
+  beforeAll(muteConsole);
+  afterAll(unmuteConsole);
+
   it("RecoverableError", () => {
     try {
       throw new RecoverableError({
@@ -197,6 +234,9 @@ class DummyResponse {
 }
 
 describe("errorHandler can handle", () => {
+  beforeAll(muteConsole);
+  afterAll(unmuteConsole);
+
   const res = new DummyResponse();
   it("Error", () => {
     errorHandler(new Error("error message"), undefined, res, dummyNext);
