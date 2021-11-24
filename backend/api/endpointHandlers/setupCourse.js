@@ -1,7 +1,7 @@
 /** Endpoints to setup a Canvas course */
 
 const canvas = require("../externalApis/canvasApiClient");
-const { EndpointError } = require("../error");
+const { CanvasApiError } = require("../error");
 
 /**
  * Get the "ladokId" of a given course. It throws in case the course
@@ -11,7 +11,7 @@ async function getLadokId(courseId) {
   const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
 
   if (ladokIds.length === 0) {
-    throw new EndpointError({
+    throw new CanvasApiError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       message:
@@ -23,7 +23,7 @@ async function getLadokId(courseId) {
   }
 
   if (ladokIds.length > 1) {
-    throw new EndpointError({
+    throw new CanvasApiError({
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       type: "invalid_course",
       message: "Examrooms with more than one examination are not supported",
@@ -96,7 +96,7 @@ async function createSpecialAssignment(req, res, next) {
     );
 
     if (existingAssignment) {
-      throw new EndpointError({
+      throw new CanvasApiError({
         type: "assignment_exists",
         statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
         message: "The assignment already exists",
@@ -120,7 +120,7 @@ async function publishSpecialAssignment(req, res, next) {
     const assignment = await canvas.getValidAssignment(courseId, ladokId);
 
     if (!assignment) {
-      throw new EndpointError({
+      throw new CanvasApiError({
         type: "assignment_not_found",
         statusCode: 404,
         message: "There is no valid assignment that can be published",
@@ -138,6 +138,7 @@ async function publishSpecialAssignment(req, res, next) {
 }
 
 module.exports = {
+  _getLadokId: getLadokId,
   getSetupStatus,
   createSpecialHomepage,
   publishCourse,
