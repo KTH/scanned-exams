@@ -3,7 +3,7 @@ const log = require("skog");
 const canvas = require("../externalApis/canvasApiClient");
 const tentaApi = require("../externalApis/tentaApiClient");
 const { getEntriesFromQueue } = require("../importQueue");
-const { CanvasApiError } = require("../error");
+const { CanvasApiError, EndpointError } = require("../error");
 
 /**
  * Get the "ladokId" that is associated with a given course. It throws in case
@@ -15,7 +15,7 @@ async function getLadokId(courseId) {
   const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
 
   if (ladokIds.length === 0) {
-    throw new CanvasApiError({
+    throw new EndpointError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       message:
@@ -27,7 +27,7 @@ async function getLadokId(courseId) {
   }
 
   if (ladokIds.length > 1) {
-    throw new CanvasApiError({
+    throw new EndpointError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       message: "Examrooms with more than one examination are not supported",

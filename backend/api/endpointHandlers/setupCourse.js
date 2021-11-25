@@ -1,7 +1,7 @@
 /** Endpoints to setup a Canvas course */
 
 const canvas = require("../externalApis/canvasApiClient");
-const { CanvasApiError } = require("../error");
+const { CanvasApiError, EndpointError } = require("../error");
 
 /**
  * Get the "ladokId" of a given course. It throws in case the course
@@ -11,7 +11,7 @@ async function getLadokId(courseId) {
   const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
 
   if (ladokIds.length === 0) {
-    throw new CanvasApiError({
+    throw new EndpointError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       message:
@@ -23,7 +23,7 @@ async function getLadokId(courseId) {
   }
 
   if (ladokIds.length > 1) {
-    throw new CanvasApiError({
+    throw new EndpointError({
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       type: "invalid_course",
       message: "Examrooms with more than one examination are not supported",
