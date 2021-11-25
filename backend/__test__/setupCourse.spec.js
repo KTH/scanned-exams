@@ -7,6 +7,10 @@ jest.mock("../api/externalApis/canvasApiClient");
 
 describe("setupCourse", () => {
   describe("getLadokId", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it("should throw EndpointError when list of ladokIds is empty", async () => {
       canvas.getAktivitetstillfalleUIDs.mockResolvedValue([]);
       let err;

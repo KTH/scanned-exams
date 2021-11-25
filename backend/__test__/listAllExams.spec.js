@@ -1,4 +1,4 @@
-const { expect } = require("@jest/globals");
+const { expect, beforeEach } = require("@jest/globals");
 const canvas = require("../api/externalApis/canvasApiClient");
 const { _getLadokId } = require("../api/endpointHandlers/listAllExams");
 const { EndpointError } = require("../api/error");
@@ -7,6 +7,10 @@ jest.mock("../api/externalApis/canvasApiClient");
 
 describe("listAllExams", () => {
   describe("getLadokId", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it("should throw EndpointError when list of ladokIds is empty", async () => {
       canvas.getAktivitetstillfalleUIDs.mockResolvedValue([]);
       let err;
