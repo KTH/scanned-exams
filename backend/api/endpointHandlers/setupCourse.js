@@ -7,41 +7,28 @@ const { CanvasApiError, EndpointError } = require("../error");
  * Get the "ladokId" of a given course. It throws in case the course
  * has no valid ladok IDs
  */
-async function getLadokId(courseId) {
-  const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
-
-  if (ladokIds.length === 0) {
+function throwIfNotExactlyOneLadokId(ladokIds, courseId) {
+  if (!Array.isArray(ladokIds) || ladokIds.length !== 1) {
     throw new EndpointError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
-      message:
-        "This course can't be used for importing exams. It must be an examroom",
-      details: {
-        courseId,
-      },
-    });
-  }
-
-  if (ladokIds.length > 1) {
-    throw new EndpointError({
-      statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
-      type: "invalid_course",
-      message: "Examrooms with more than one examination are not supported",
+      message: "Only examrooms with exactly one (1) examination is supported",
       details: {
         courseId,
         ladokIds,
       },
     });
   }
-
-  return ladokIds[0];
 }
 
 /** Get setup status of a Canvas course given its ID */
 async function getSetupStatus(req, res, next) {
   try {
     const courseId = req.params.id;
-    const ladokId = await getLadokId(courseId);
+
+    const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
+    throwIfNotExactlyOneLadokId(ladokIds, courseId);
+    const ladokId = ladokIds[0];
 
     const [course, assignment] = await Promise.all([
       canvas.getCourse(courseId),
@@ -89,7 +76,11 @@ async function publishCourse(req, res, next) {
 async function createSpecialAssignment(req, res, next) {
   try {
     const courseId = req.params.id;
-    const ladokId = await getLadokId(courseId);
+
+    const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
+    throwIfNotExactlyOneLadokId(ladokIds, courseId);
+    const ladokId = ladokIds[0];
+
     const existingAssignment = await canvas.getValidAssignment(
       courseId,
       ladokId
@@ -116,7 +107,11 @@ async function createSpecialAssignment(req, res, next) {
 async function publishSpecialAssignment(req, res, next) {
   try {
     const courseId = req.params.id;
-    const ladokId = await getLadokId(courseId);
+
+    const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
+    throwIfNotExactlyOneLadokId(ladokIds, courseId);
+    const ladokId = ladokIds[0];
+
     const assignment = await canvas.getValidAssignment(courseId, ladokId);
 
     if (!assignment) {
@@ -138,7 +133,7 @@ async function publishSpecialAssignment(req, res, next) {
 }
 
 module.exports = {
-  _getLadokId: getLadokId,
+  _throwIfNotExactlyOneLadokId: throwIfNotExactlyOneLadokId,
   getSetupStatus,
   createSpecialHomepage,
   publishCourse,

@@ -1,45 +1,45 @@
-const { expect, beforeEach } = require("@jest/globals");
-const canvas = require("../api/externalApis/canvasApiClient");
-const { _getLadokId } = require("../api/endpointHandlers/listAllExams");
+const { expect } = require("@jest/globals");
+const {
+  _throwIfNotExactlyOneLadokId,
+} = require("../api/endpointHandlers/listAllExams");
 const { EndpointError } = require("../api/error");
 
-jest.mock("../api/externalApis/canvasApiClient");
-
 describe("listAllExams", () => {
-  describe("getLadokId", () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it("should throw EndpointError when list of ladokIds is empty", async () => {
-      canvas.getAktivitetstillfalleUIDs.mockResolvedValue([]);
+  describe("throwIfNotExactlyOneLadokId", () => {
+    it("should throw EndpointError when list of ladokIds is empty", () => {
       let err;
-      await _getLadokId(12345).catch((e) => {
+      try {
+        _throwIfNotExactlyOneLadokId([]);
+      } catch (e) {
         err = e;
-      });
+      }
 
       expect(err instanceof EndpointError).toBe(true);
     });
 
-    it("should throw EndpointError when list of ladokIds is longer than 1", async () => {
+    it("should throw EndpointError when list of ladokIds is longer than 1", () => {
       /**
        * We currently don't support multiple aktivitetstillfällen for a given course
        */
-      canvas.getAktivitetstillfalleUIDs.mockResolvedValue([1, 2]);
       let err;
-      await _getLadokId(12345).catch((e) => {
+      try {
+        _throwIfNotExactlyOneLadokId([1, 2]);
+      } catch (e) {
         err = e;
-      });
+      }
 
       expect(err instanceof EndpointError).toBe(true);
     });
 
-    it("should return a single  value", async () => {
-      canvas.getAktivitetstillfalleUIDs.mockResolvedValue([1]);
+    it("should pass if only one item", () => {
+      let err;
+      try {
+        _throwIfNotExactlyOneLadokId([1]);
+      } catch (e) {
+        err = e;
+      }
 
-      const outp = await _getLadokId(12345);
-
-      expect(outp).toBe(1);
+      expect(err).toBeUndefined();
     });
   });
 });

@@ -11,34 +11,18 @@ const { CanvasApiError, EndpointError } = require("../error");
  *
  * Note: this function does not check if the returned ladok ID exists in Ladok.
  */
-async function getLadokId(courseId) {
-  const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
-
-  if (ladokIds.length === 0) {
+function throwIfNotExactlyOneLadokId(ladokIds, courseId) {
+  if (!Array.isArray(ladokIds) || ladokIds.length !== 1) {
     throw new EndpointError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
-      message:
-        "This course can't be used for importing exams. It must be an examroom",
-      details: {
-        courseId,
-      },
-    });
-  }
-
-  if (ladokIds.length > 1) {
-    throw new EndpointError({
-      type: "invalid_course",
-      statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
-      message: "Examrooms with more than one examination are not supported",
+      message: "Only examrooms with exactly one (1) examination is supported",
       details: {
         courseId,
         ladokIds,
       },
     });
   }
-
-  return ladokIds[0];
 }
 
 /** Returns a list of scanned exams (i.e. in Windream) given its ladokId */
@@ -113,7 +97,10 @@ async function listAllExams(req, res, next) {
     const courseId = req.params.id;
     // - Canvas is source of truth regarding if a submitted exam is truly imported
     // - the internal import queue keeps state of pending and last performed import
-    const ladokId = await getLadokId(courseId);
+    const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
+    throwIfNotExactlyOneLadokId(ladokIds, courseId);
+    const ladokId = ladokIds[0];
+
     let [allScannedExams, studentsWithExamsInCanvas, examsInImportQueue] =
       await Promise.all([
         listScannedExams(courseId, ladokId),
@@ -190,5 +177,5 @@ async function listAllExams(req, res, next) {
 module.exports = {
   listScannedExams,
   listAllExams,
-  _getLadokId: getLadokId,
+  _throwIfNotExactlyOneLadokId: throwIfNotExactlyOneLadokId,
 };
