@@ -39,7 +39,9 @@ function throwIfStudentMissingKTHID({ fileId, fileName, studentKthId }) {
 }
 
 async function uploadOneExam({ fileId, courseId }) {
-  log.debug(`Course ${courseId} / File ${fileId}. Downloading`);
+  log
+    .child({ courseId })
+    .debug(`Course ${courseId} / File ${fileId}. Downloading`);
   const { content, fileName, student, examDate } = await tentaApi.downloadExam(
     fileId
   );
@@ -54,9 +56,11 @@ async function uploadOneExam({ fileId, courseId }) {
 
   updateStudentOfEntryInQueue({ fileId }, student);
 
-  log.debug(
-    `Course ${courseId} / File ${fileId}, ${fileName} / User ${student.kthId}. Uploading`
-  );
+  log
+    .child({ courseId })
+    .debug(
+      `Course ${courseId} / File ${fileId}, ${fileName} / User ${student.kthId}. Uploading`
+    );
   const uploadExamStart = Date.now();
   await canvas.uploadExam(content, {
     courseId,
@@ -64,11 +68,15 @@ async function uploadOneExam({ fileId, courseId }) {
     examDate,
     fileId,
   });
-  log.debug("Time to upload exam: " + (Date.now() - uploadExamStart) + "ms");
+  log
+    .child({ courseId })
+    .debug("Time to upload exam: " + (Date.now() - uploadExamStart) + "ms");
 
-  log.info(
-    `Course ${courseId} / File ${fileId}, ${fileName} / User ${student.kthId}. Uploaded!`
-  );
+  log
+    .child({ courseId })
+    .info(
+      `Course ${courseId} / File ${fileId}, ${fileName} / User ${student.kthId}. Uploaded!`
+    );
 }
 
 function handleUploadErrors(err, exam) {
@@ -76,23 +84,27 @@ function handleUploadErrors(err, exam) {
     if (err.type === "import_error") {
       // This is a general error which means we don't know
       // how to fix it from code.
-      log.error(
-        "Unhandled Canvas Error - we failed uploading exam " +
-          exam.fileId +
-          ` (${err.type || err.name} | ${err.message})`
-      );
+      log
+        .child({ courseId: exam?.courseId })
+        .error(
+          "Unhandled Canvas Error - we failed uploading exam " +
+            exam.fileId +
+            ` (${err.type || err.name} | ${err.message})`
+        );
     }
     // ImportErrors already have a good error message
     // so we just throw them as is
     throw err;
   } else {
     // This error was probably caused by our code
-    log.error(
-      { err },
-      "Unhandled Import Error - we failed uploading exam " +
-        exam.fileId +
-        ` (${err.message})`
-    );
+    log
+      .child({ courseId: exam?.courseId })
+      .error(
+        { err },
+        "Unhandled Import Error - we failed uploading exam " +
+          exam.fileId +
+          ` (${err.message})`
+      );
 
     // We need to create a user friendly error message that is stored in the
     // import queue
@@ -133,7 +145,10 @@ module.exports = async function processQueueEntry() {
       // Update status in import queue
       await updateStatusOfEntryInQueue(examToBeImported, "imported");
 
-      if (IS_DEV) log.debug("Imported file " + examToBeImported.fileId);
+      if (IS_DEV)
+        log
+          .child({ courseId: examToBeImported?.courseId })
+          .debug("Imported file " + examToBeImported.fileId);
     } catch (err) {
       // TODO: Improve handling of errors, at least adding a more user
       // friendly message
