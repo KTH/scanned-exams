@@ -1,5 +1,5 @@
-const { expect, afterAll } = require("@jest/globals");
-const {
+import { expect, afterAll } from "@jest/globals";
+import {
   QueueEntry,
   QueueStatus,
   getEntryFromQueue,
@@ -11,9 +11,10 @@ const {
   resetQueueForImport,
   getImportQueueCollection,
   databaseClient,
+  TQueueEntryError,
   // updateStatusOfEntryInQueue,
   // getStatusFromQueue,
-} = require("../api/importQueue");
+} from "../api/importQueue";
 
 /**
  *
@@ -27,7 +28,7 @@ afterAll(async () => {
 });
 
 describe("Import queue", () => {
-  afterEach(async () => {
+  beforeEach(async () => {
     // Prevent tests from relying on previous state
     await getImportQueueCollection().then((coll) => coll.deleteMany({}));
   });
@@ -169,8 +170,8 @@ describe("Import queue", () => {
 
     await updateStatusOfEntryInQueue(typedEntry, "error", {
       type: "import_error",
-      meassage: "There was an import error",
-    });
+      message: "There was an import error",
+    } as TQueueEntryError);
     const updatedEntry = await getEntryFromQueue(entry.fileId);
 
     expect(updatedEntry).toBeInstanceOf(QueueEntry);
@@ -299,8 +300,9 @@ describe("Resetting a queue", () => {
         new QueueEntry({
           fileId: i,
           courseId,
+          student: undefined,
           status: i < 8 ? "imported" : "error",
-        })
+        } as any)
       );
     }
 

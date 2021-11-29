@@ -1,5 +1,5 @@
-const { expect } = require("@jest/globals");
-const {
+import { expect } from "@jest/globals";
+import {
   errorHandler,
   getMostSignificantError,
   getOrigProgrammerError,
@@ -12,13 +12,16 @@ const {
   CanvasApiError,
   LadokApiError,
   TentaApiError,
-} = require("../api/error");
+} from "../api/error";
 
 describe("utils", () => {
   it("getOrigProgrammerError, one level", () => {
     const progErr = new Error("test");
     const err = getOrigProgrammerError(
       new EndpointError({
+        type: "type",
+        statusCode: 0,
+        message: "error",
         err: progErr,
       })
     );
@@ -28,6 +31,9 @@ describe("utils", () => {
     const progErr = new Error("test");
     const err = getOrigProgrammerError(
       new EndpointError({
+        type: "type",
+        statusCode: 0,
+        message: "error",
         err: new OperationalError(
           undefined,
           undefined,
@@ -41,7 +47,11 @@ describe("utils", () => {
     expect(err === progErr).toBe(true);
   });
   it("getMostSignificantError, one level", () => {
-    const err = new EndpointError({});
+    const err = new EndpointError({
+      type: "type",
+      statusCode: 0,
+      message: "error",
+    });
     const errToLog = getMostSignificantError(err);
     expect(errToLog === err).toBe(true);
   });
@@ -57,6 +67,9 @@ describe("utils", () => {
     );
     const errToLog = getMostSignificantError(
       new EndpointError({
+        type: "type",
+        statusCode: 0,
+        message: "error",
         err,
       })
     );
@@ -67,15 +80,26 @@ describe("utils", () => {
     expect(isOperationalOrRecoverableError(err)).toBe(false);
   });
   it("isOperationalOrRecoverableError, check OperationalError", () => {
-    const err = new OperationalError();
+    const err = new OperationalError(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined
+    );
     expect(isOperationalOrRecoverableError(err)).toBe(true);
   });
   it("isOperationalOrRecoverableError, check RecoverableError", () => {
-    const err = new RecoverableError({});
+    const err = new RecoverableError({ err: undefined });
     expect(isOperationalOrRecoverableError(err)).toBe(true);
   });
   it("isOperationalOrRecoverableError, check EndpointError", () => {
-    const err = new EndpointError({});
+    const err = new EndpointError({
+      type: "type",
+      statusCode: 0,
+      message: "error",
+    });
     expect(isOperationalOrRecoverableError(err)).toBe(true);
   });
 });
@@ -185,6 +209,8 @@ function dummyNext() {
 
 class DummyResponse {
   headerSent = false;
+  statusCode: number;
+  body: any;
 
   status(code) {
     this.statusCode = code;
@@ -259,7 +285,9 @@ describe("errorHandler can handle", () => {
           "DummyError",
           500,
           "inner_error",
-          "original error should be shown in logs"
+          "original error should be shown in logs",
+          undefined,
+          undefined
         ),
       }),
       undefined,
@@ -309,7 +337,9 @@ describe("errorHandler can handle", () => {
         "DummyError",
         503,
         "test_error",
-        "test operational error"
+        "test operational error",
+        undefined,
+        undefined
       ),
       undefined,
       res,
