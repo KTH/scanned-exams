@@ -1,9 +1,9 @@
 import log from "skog";
-import tentaApiClient from "./api/externalApis/tentaApiClient";
+import * as tentaApi from "./api/externalApis/tentaApiClient";
 
-async function tentaApi() {
+async function checkTentaApi() {
   try {
-    const body = await tentaApiClient.getVersion();
+    const body = await tentaApi.getVersion();
     return {
       status: "OK",
       data: body,
@@ -17,7 +17,7 @@ async function tentaApi() {
     }
 
     // TODO: enhance this error
-    const error = new Error(err.message);
+    const error = new Error(err.message) as any;
     error.name = "MonitorError";
     error.response = {
       url: err.response?.url,
@@ -34,7 +34,7 @@ async function tentaApi() {
 }
 
 export default async function monitor(req, res) {
-  const tentaApiCheck = await tentaApi();
+  const tentaApiCheck = await checkTentaApi();
   res.setHeader("Content-Type", "text/plain");
   res.send(`APPLICATION_STATUS: OK - Note: this "OK" value is hardcoded
 

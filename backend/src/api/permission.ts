@@ -1,6 +1,6 @@
-const log = require("skog");
-const canvas = require("./externalApis/canvasApiClient");
-const { AuthError, CanvasApiError } = require("./error");
+import log from "skog";
+import * as canvasApi from "./externalApis/canvasApiClient";
+import { AuthError, CanvasApiError } from "./error";
 
 async function checkPermissions(courseId, userId) {
   if (!courseId || courseId === "undefined") {
@@ -19,7 +19,7 @@ async function checkPermissions(courseId, userId) {
     });
   }
 
-  const roles = await canvas.getRoles(courseId, userId).catch((err) => {
+  const roles = await canvasApi.getRoles(courseId, userId).catch((err) => {
     throw new CanvasApiError({
       type: "unhandled_error",
       statusCode: 503,
@@ -52,7 +52,7 @@ function checkPermissionsMiddleware(req, res, next) {
     .catch(next);
 }
 
-module.exports = {
+export {
   checkPermissions,
   checkPermissionsMiddleware,
 };

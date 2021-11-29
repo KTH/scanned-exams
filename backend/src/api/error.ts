@@ -1,8 +1,29 @@
-const log = require("skog");
+import log from "skog";
 
 /* eslint max-classes-per-file: */
 
-class OperationalError extends Error {
+interface IOperationalError {
+  name: string;
+  statusCode: number;
+  type: string;
+  details?: object;
+  err?: object;
+}
+
+interface IRecoverableError {
+  name: string;
+  err: object;
+}
+
+
+
+class OperationalError extends Error implements IOperationalError {
+  name: string;
+  statusCode: number;
+  type: string;
+  details: object;
+  err: object;
+
   /**
    * Common ancestor of all operational errors allowing
    * for more catch all checks.
@@ -24,7 +45,10 @@ class OperationalError extends Error {
   }
 }
 
-class RecoverableError extends Error {
+class RecoverableError extends Error implements IRecoverableError {
+  name: string;
+  err: object;
+
   /**
    * Error for recoverable programmer errors. These are errors that don't require us to crash the app,
    * but unexpected. It can be thrown at any layer of the application. If it is caught in an
@@ -51,7 +75,7 @@ class AuthError extends OperationalError {
    * @param {object=} param0.details Additional error details for used by programmer
    * @param {Error=} param0.err The original error that caused this error
    */
-  constructor({ type, message, details, err }) {
+  constructor({ type, message, details = undefined, err = undefined }) {
     super("AuthError", 401, type, message, details, err);
   }
 }
@@ -68,7 +92,7 @@ class EndpointError extends OperationalError {
    * @param {object=} param0.details Additional error details for used by programmer
    * @param {Error=} param0.err The original error that caused this error
    */
-  constructor({ type, statusCode, message, details, err }) {
+  constructor({ type, statusCode, message, details = undefined, err = undefined }) {
     super("EndpointError", statusCode, type, message, details, err);
   }
 }
@@ -84,7 +108,7 @@ class CanvasApiError extends OperationalError {
    * @param {object=} param0.details Additional error details for used by programmer
    * @param {Error=} param0.err The original error that caused this error
    */
-  constructor({ type, statusCode = 503, message, details, err }) {
+  constructor({ type, statusCode = 503, message, details = undefined, err = undefined }) {
     super("CanvasApiError", statusCode, type, message, details, err);
   }
 }
@@ -100,7 +124,7 @@ class LadokApiError extends OperationalError {
    * @param {object=} param0.details Additional error details for used by programmer
    * @param {Error=} param0.err The original error that caused this error
    */
-  constructor({ type, statusCode = 503, message, details, err }) {
+  constructor({ type, statusCode = 503, message, details = undefined, err = undefined }) {
     super("LadokApiError", statusCode, type, message, details, err);
   }
 }
@@ -120,8 +144,8 @@ class TentaApiError extends OperationalError {
     type = "unhandled_error",
     statusCode = 503,
     message = "There was an error when accessing Windream",
-    details,
-    err,
+    details = undefined,
+    err = undefined,
   }) {
     super("TentaApiError", statusCode, type, message, details, err);
   }
@@ -142,8 +166,8 @@ class ImportError extends OperationalError {
     type = "unhandled_error",
     statusCode = 503,
     message = "There was an error when accessing the import queue",
-    details,
-    err,
+    details = undefined,
+    err = undefined,
   }) {
     super("ImportError", statusCode, type, message, details, err);
   }
@@ -278,7 +302,7 @@ function tentaApiGenericErrorHandler(err) {
   throw error;
 }
 
-module.exports = {
+export {
   errorHandler,
   tentaApiGenericErrorHandler,
   getMostSignificantError,

@@ -10,6 +10,7 @@ const OAUTH_REDIRECT_URI = new URL(
 );
 
 const issuer = new Issuer({
+  issuer: "se.kth",
   authorization_endpoint: new URL(
     "/login/oauth2/auth",
     process.env.CANVAS_API_URL
@@ -22,7 +23,7 @@ const issuer = new Issuer({
 const client = new issuer.Client({
   client_id: process.env.CANVAS_DEVELOPER_KEY_ID,
   client_secret: process.env.CANVAS_DEVELOPER_KEY_SECRET,
-  redirect_uris: [OAUTH_REDIRECT_URI],
+  redirect_uris: [OAUTH_REDIRECT_URI.toString()],
 });
 
 router.post("/", (req, res) => {
@@ -39,9 +40,9 @@ router.post("/", (req, res) => {
 
 router.get("/callback", async (req, res) => {
   try {
-    const tokenSet = await client.oauthCallback(OAUTH_REDIRECT_URI, req.query, {
+    const tokenSet = await client.oauthCallback(OAUTH_REDIRECT_URI.toString(), req.query, {
       state: req.session.temporalState,
-    });
+    }) as any;
 
     // TODO: What happens if there is no "tokenSet"?
     // TODO: What happens if the user clicks "not authorize"?

@@ -33,40 +33,38 @@
  * lock it, and send submissions correctly
  */
 
-module.exports = {
-  propertiesToCreateLockedAssignment(examDate) {
-    return {
-      submission_types: ["on_paper"],
+export function propertiesToCreateLockedAssignment(examDate) {
+  return {
+    submission_types: ["on_paper"],
 
-      // When passing "00:00" to Canvas API, it is converted to "23:59"
-      // In order to avoid this, we pass "00:01" instead
-      due_at: `${examDate}T00:01:00`,
-    };
-  },
+    // When passing "00:00" to Canvas API, it is converted to "23:59"
+    // In order to avoid this, we pass "00:01" instead
+    due_at: `${examDate}T00:01:00`,
+  };
+}
 
-  propertiesToCreateSubmission(examDate) {
-    return {
-      // This ensures us that the things we upload are not considered "LATE"
-      submitted_at: `${examDate}T00:00:00`,
-    };
-  },
+export function propertiesToCreateSubmission(examDate) {
+  return {
+    // This ensures us that the things we upload are not considered "LATE"
+    submitted_at: `${examDate}T00:00:00`,
+  };
+}
 
-  propertiesToUnlockAssignment() {
-    // Ideally we unlock the assignment for few seconds. However, Canvas API
-    // ignores seconds, so the minimum is 1 minute
-    const ONE_MINUTE_LATER = new Date();
-    ONE_MINUTE_LATER.setMinutes(ONE_MINUTE_LATER.getMinutes() + 1);
+export function propertiesToUnlockAssignment() {
+  // Ideally we unlock the assignment for few seconds. However, Canvas API
+  // ignores seconds, so the minimum is 1 minute
+  const ONE_MINUTE_LATER = new Date();
+  ONE_MINUTE_LATER.setMinutes(ONE_MINUTE_LATER.getMinutes() + 1);
 
-    return {
-      submission_types: ["online_upload"],
-      allowed_extensions: ["pdf"],
-      lock_at: ONE_MINUTE_LATER.toISOString(),
-    };
-  },
+  return {
+    submission_types: ["online_upload"],
+    allowed_extensions: ["pdf"],
+    lock_at: ONE_MINUTE_LATER.toISOString(),
+  };
+}
 
-  propertiesToLockAssignment() {
-    return {
-      submission_types: ["on_paper"],
-    };
-  },
-};
+export function propertiesToLockAssignment() {
+  return {
+    submission_types: ["on_paper"],
+  };
+}

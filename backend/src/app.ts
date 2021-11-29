@@ -1,6 +1,6 @@
-const log = require("skog");
-const server = require("./server");
-const { startBackgroundImport } = require("./importWorker");
+import log from "skog";
+import server from "./server";
+import { startBackgroundImport } from "./importWorker";
 
 const PORT = process.env.PORT || 4000;
 

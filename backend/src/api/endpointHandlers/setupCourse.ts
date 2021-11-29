@@ -1,14 +1,14 @@
 /** Endpoints to setup a Canvas course */
 
-const canvas = require("../externalApis/canvasApiClient");
-const { EndpointError } = require("../error");
+import * as canvasApi from "../externalApis/canvasApiClient";
+import { EndpointError } from "../error";
 
 /**
  * Get the "ladokId" of a given course. It throws in case the course
  * has no valid ladok IDs
  */
 async function getLadokId(courseId) {
-  const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
+  const ladokIds = await canvasApi.getAktivitetstillfalleUIDs(courseId);
 
   if (ladokIds.length === 0) {
     throw new EndpointError({
@@ -22,7 +22,7 @@ async function getLadokId(courseId) {
     });
   }
 
-  if (ladokIds.lengh > 1) {
+  if (ladokIds.length > 1) {
     throw new EndpointError({
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
       type: "invalid_course",
@@ -44,9 +44,9 @@ async function getSetupStatus(req, res, next) {
     const ladokId = await getLadokId(courseId);
 
     const [course, assignment] = await Promise.all([
-      canvas.getCourse(courseId),
-      canvas.getValidAssignment(courseId, ladokId),
-    ]);
+      canvasApi.getCourse(courseId),
+      canvasApi.getValidAssignment(courseId, ladokId),
+    ]) as any;
 
     res.send({
       coursePublished: course.workflow_state === "available",
@@ -61,7 +61,7 @@ async function getSetupStatus(req, res, next) {
 /** Create a homepage in Canvas */
 async function createSpecialHomepage(req, res, next) {
   try {
-    await canvas.createHomepage(req.params.id);
+    await canvasApi.createHomepage(req.params.id);
 
     res.send({
       message: "done",
@@ -75,7 +75,7 @@ async function createSpecialHomepage(req, res, next) {
 async function publishCourse(req, res, next) {
   try {
     const courseId = req.params.id;
-    await canvas.publishCourse(courseId);
+    await canvasApi.publishCourse(courseId);
 
     res.send({
       message: "done",
@@ -90,7 +90,7 @@ async function createSpecialAssignment(req, res, next) {
   try {
     const courseId = req.params.id;
     const ladokId = await getLadokId(courseId);
-    const existingAssignment = await canvas.getValidAssignment(
+    const existingAssignment = await canvasApi.getValidAssignment(
       courseId,
       ladokId
     );
@@ -103,7 +103,7 @@ async function createSpecialAssignment(req, res, next) {
       });
     }
 
-    await canvas.createAssignment(courseId, ladokId);
+    await canvasApi.createAssignment(courseId, ladokId);
     res.send({
       message: "done",
     });
@@ -117,7 +117,7 @@ async function publishSpecialAssignment(req, res, next) {
   try {
     const courseId = req.params.id;
     const ladokId = await getLadokId(courseId);
-    const assignment = await canvas.getValidAssignment(courseId, ladokId);
+    const assignment = await canvasApi.getValidAssignment(courseId, ladokId);
 
     if (!assignment) {
       throw new EndpointError({
@@ -127,7 +127,7 @@ async function publishSpecialAssignment(req, res, next) {
       });
     }
 
-    await canvas.publishAssignment(courseId, assignment.id);
+    await canvasApi.publishAssignment(courseId, assignment.id);
 
     res.send({
       message: "done",
@@ -137,7 +137,7 @@ async function publishSpecialAssignment(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   getSetupStatus,
   createSpecialHomepage,
   publishCourse,
