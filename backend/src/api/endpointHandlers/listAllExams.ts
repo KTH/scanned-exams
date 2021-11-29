@@ -1,6 +1,6 @@
 /** Functions that handle the "import exams" part of the app */
 import log from "skog";
-import canvas from "../externalApis/canvasApiClient";
+import * as canvasApi from "../externalApis/canvasApiClient";
 import tentaApi from "../externalApis/tentaApiClient";
 import { getEntriesFromQueue } from "../importQueue";
 import { CanvasApiError } from "../error";
@@ -12,7 +12,7 @@ import { CanvasApiError } from "../error";
  * Note: this function does not check if the returned ladok ID exists in Ladok.
  */
 async function getLadokId(courseId) {
-  const ladokIds = await canvas.getAktivitetstillfalleUIDs(courseId);
+  const ladokIds = await canvasApi.getAktivitetstillfalleUIDs(courseId);
 
   if (ladokIds.length === 0) {
     throw new CanvasApiError({
@@ -56,7 +56,7 @@ async function listScannedExams(courseId, ladokId) {
  * Returns a list of students (KTH IDs) that has an exam in Canvas
  */
 async function listStudentsWithExamsInCanvas(courseId, ladokId) {
-  const assignment = await canvas
+  const assignment = await canvasApi
     .getValidAssignment(courseId, ladokId)
     .then((result) => {
       if (!result) {
@@ -74,10 +74,10 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
       }
     });
 
-  const submissions = await canvas.getAssignmentSubmissions(
+  const submissions = await canvasApi.getAssignmentSubmissions(
     courseId,
     assignment.id
-  );
+  ) as any;
 
   // Filter-out submissions without exams or without KTH ID
   return submissions

@@ -1,5 +1,5 @@
 import log from "skog";
-import canvas from "../externalApis/canvasApiClient";
+import * as canvasApi from "../externalApis/canvasApiClient";
 import tentaApi from "../externalApis/tentaApiClient";
 import {
   getFirstPendingFromQueue,
@@ -58,7 +58,7 @@ async function uploadOneExam({ fileId, courseId }) {
     `Course ${courseId} / File ${fileId}, ${fileName} / User ${student.kthId}. Uploading`
   );
   const uploadExamStart = Date.now();
-  await canvas.uploadExam(content, {
+  await canvasApi.uploadExam(content, {
     courseId,
     studentKthId: student.kthId,
     examDate,
