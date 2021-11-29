@@ -1,8 +1,8 @@
-const got = require("got");
-const log = require("skog");
-const { Readable } = require("stream");
+import got from "got";
+import log from "skog";
+import { Readable } from "stream";
 
-const { tentaApiGenericErrorHandler } = require("../error");
+import { tentaApiGenericErrorHandler } from "../error";
 
 const client = got.extend({
   prefixUrl: process.env.TENTA_API_URL,
@@ -35,7 +35,7 @@ async function examListByLadokId(ladokId) {
       useDatesInSearch: false,
     },
     responseType: "json",
-  }).catch(tentaApiGenericErrorHandler);
+  }).catch(tentaApiGenericErrorHandler) as any;
 
   if (!body.documentSearchResults) {
     log.debug(`No exams found with the "new format" e_ladokid=${ladokId}`);
@@ -73,7 +73,7 @@ async function downloadExam(fileId) {
   log.info(`Downloading file ${fileId}...`);
   const { body } = await client(`windream/file/${fileId}/true`, {
     responseType: "json",
-  });
+  }) as any;
 
   const getValue = (index) =>
     body.wdFile.objectIndiceses.find((di) => di.index === index)?.value;
@@ -103,7 +103,7 @@ async function downloadExam(fileId) {
   };
 }
 
-module.exports = {
+export {
   examListByLadokId,
   downloadExam,
   getVersion,

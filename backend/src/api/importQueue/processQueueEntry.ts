@@ -1,6 +1,6 @@
 import log from "skog";
 import * as canvasApi from "../externalApis/canvasApiClient";
-import tentaApi from "../externalApis/tentaApiClient";
+import * as tentaApi from "../externalApis/tentaApiClient";
 import {
   getFirstPendingFromQueue,
   updateStatusOfEntryInQueue,

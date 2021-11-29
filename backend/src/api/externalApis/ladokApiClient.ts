@@ -1,6 +1,6 @@
-const log = require("skog");
-const got = require("got");
-const { LadokApiError } = require("../error");
+import log from "skog";
+import got from "got";
+import { LadokApiError } from "../error";
 
 let ladokGot;
 function getLadokGot() {
@@ -34,7 +34,7 @@ function ladokErrorHandler(err) {
   throw error;
 }
 
-async function getAktivitetstillfalle(ladokId) {
+export async function getAktivitetstillfalle(ladokId) {
   log.debug(`Getting information for aktivitetstillfälle ${ladokId}`);
   const res = await getLadokGot()
     .get(`resultat/aktivitetstillfalle/${ladokId}`)
@@ -50,7 +50,3 @@ async function getAktivitetstillfalle(ladokId) {
     examDate: body.Datumperiod.Startdatum,
   };
 }
-
-module.exports = {
-  getAktivitetstillfalle,
-};
