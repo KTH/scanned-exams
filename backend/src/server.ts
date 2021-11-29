@@ -6,14 +6,14 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import path from "path";
 import fs from "fs";
-import MongoDBStore from "connect-mongodb-session";
+import connectMongodbSession from "connect-mongodb-session";
 
 import apiRouter from "./api/router";
 import authRouter from "./auth/router";
 import monitor from "./monitor";
 import log from "skog";
 
-MongoDBStore(session);
+const MongoDBStore = connectMongodbSession(session);
 
 log.init.pino({
   app: "scanned-exams",
@@ -28,8 +28,6 @@ process.on("unhandledRejection", (reason) => {
   log.fatal(reason, `Reject: ${reason}`);
   process.exit(1);
 });
-
-
 
 const server = express();
 
