@@ -1,12 +1,12 @@
-const log = require("skog");
-const canvas = require("../externalApis/canvasApiClient");
-const tentaApi = require("../externalApis/tentaApiClient");
-const {
+import log from "skog";
+import canvas from "../externalApis/canvasApiClient";
+import tentaApi from "../externalApis/tentaApiClient";
+import {
   getFirstPendingFromQueue,
   updateStatusOfEntryInQueue,
   updateStudentOfEntryInQueue,
-} = require("./index");
-const { ImportError } = require("../error");
+} from "./index";
+import { ImportError } from "../error";
 
 const { DEV_FORCE_RANDOM_ERRORS, NODE_ENV } = process.env;
 const FORCE_RANDOM_ERRORS = DEV_FORCE_RANDOM_ERRORS === "TRUE";
@@ -111,7 +111,7 @@ function handleUploadErrors(err, exam) {
  * Find and process an entry from the global import queue and exit
  * @returns {bool} return true is entry was processed and false if queue was empty
  */
-module.exports = async function processQueueEntry() {
+export async function processQueueEntry() {
   const examToBeImported = await getFirstPendingFromQueue();
 
   if (examToBeImported) {

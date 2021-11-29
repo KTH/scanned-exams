@@ -1,13 +1,13 @@
-const {
+import {
   addEntryToQueue,
   getStatusFromQueue,
   updateStatusOfEntryInQueue,
   getEntriesFromQueue,
   getEntryFromQueue,
   resetQueueForImport,
-} = require("../importQueue");
-const { EndpointError } = require("../error");
-const { enrollStudent } = require("../externalApis/canvasApiClient");
+} from "../importQueue";
+import { EndpointError } from "../error";
+import { enrollStudent } from "../externalApis/canvasApiClient";
 
 async function getStatusFromQueueHandler(req, res, next) {
   try {
@@ -183,7 +183,7 @@ async function resetQueue(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   addEntriesToQueue,
   getErrorsInQueue,
   fixErrorsInQueue,

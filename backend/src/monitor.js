@@ -1,5 +1,5 @@
-const log = require("skog");
-const tentaApiClient = require("./api/externalApis/tentaApiClient");
+import log from "skog";
+import tentaApiClient from "./api/externalApis/tentaApiClient";
 
 async function tentaApi() {
   try {
@@ -33,7 +33,7 @@ async function tentaApi() {
   }
 }
 
-module.exports = async function monitor(req, res) {
+export default async function monitor(req, res) {
   const tentaApiCheck = await tentaApi();
   res.setHeader("Content-Type", "text/plain");
   res.send(`APPLICATION_STATUS: OK - Note: this "OK" value is hardcoded
@@ -41,4 +41,4 @@ module.exports = async function monitor(req, res) {
 TentaAPI: ${tentaApiCheck.status}
 - ${tentaApiCheck.data}
 `);
-};
+}

@@ -3,7 +3,7 @@ import https from "https";
 import log from "skog";
 import server from "./server";
 
-import { startBackgroundImport } from "./importWorker.js";
+import { startBackgroundImport } from "./importWorker";
 
 const serverUrl = new URL(process.env.SERVER_HOST_URL);
 const hostname = serverUrl.host.split(":")[0];

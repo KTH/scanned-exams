@@ -48,8 +48,8 @@ class AuthError extends OperationalError {
    * @param {object} param0 Error params
    * @param {String} param0.type Subtype of error
    * @param {String} param0.message Human readable error message for display in frontend
-   * @param {object} param0.details Additional error details for used by programmer
-   * @param {Error} param0.err The original error that caused this error
+   * @param {object=} param0.details Additional error details for used by programmer
+   * @param {Error=} param0.err The original error that caused this error
    */
   constructor({ type, message, details, err }) {
     super("AuthError", 401, type, message, details, err);
@@ -65,8 +65,8 @@ class EndpointError extends OperationalError {
    * @param {String} param0.type Subtype of error
    * @param {Number} param0.statusCode HTTP status code of response
    * @param {String} param0.message Human readable error message for display in frontend
-   * @param {object} param0.details Additional error details for used by programmer
-   * @param {Error} param0.err The original error that caused this error
+   * @param {object=} param0.details Additional error details for used by programmer
+   * @param {Error=} param0.err The original error that caused this error
    */
   constructor({ type, statusCode, message, details, err }) {
     super("EndpointError", statusCode, type, message, details, err);
@@ -79,10 +79,10 @@ class CanvasApiError extends OperationalError {
    * thrown at the integration layer.
    * @param {object} param0 Error params
    * @param {String} param0.type Subtype of error
-   * @param {Number} param0.statusCode HTTP status code of response
+   * @param {Number=} param0.statusCode HTTP status code of response
    * @param {String} param0.message Error message for programmer
-   * @param {object} param0.details Additional error details for used by programmer
-   * @param {Error} param0.err The original error that caused this error
+   * @param {object=} param0.details Additional error details for used by programmer
+   * @param {Error=} param0.err The original error that caused this error
    */
   constructor({ type, statusCode = 503, message, details, err }) {
     super("CanvasApiError", statusCode, type, message, details, err);
@@ -95,10 +95,10 @@ class LadokApiError extends OperationalError {
    * thrown at the integration layer.
    * @param {object} param0 Error params
    * @param {String} param0.type Subtype of error
-   * @param {Number} param0.statusCode HTTP status code of response
+   * @param {Number=} param0.statusCode HTTP status code of response
    * @param {String} param0.message Error message for programmer
-   * @param {object} param0.details Additional error details for used by programmer
-   * @param {Error} param0.err The original error that caused this error
+   * @param {object=} param0.details Additional error details for used by programmer
+   * @param {Error=} param0.err The original error that caused this error
    */
   constructor({ type, statusCode = 503, message, details, err }) {
     super("LadokApiError", statusCode, type, message, details, err);
@@ -111,10 +111,10 @@ class TentaApiError extends OperationalError {
    * thrown at the integration layer.
    * @param {object} param0 Error params
    * @param {String} param0.type Subtype of error
-   * @param {Number} param0.statusCode HTTP status code of response
+   * @param {Number=} param0.statusCode HTTP status code of response
    * @param {String} param0.message Error message for programmer
-   * @param {object} param0.details Additional error details for used by programmer
-   * @param {Error} param0.err The original error that caused this error
+   * @param {object=} param0.details Additional error details for used by programmer
+   * @param {Error=} param0.err The original error that caused this error
    */
   constructor({
     type = "unhandled_error",
@@ -132,10 +132,11 @@ class ImportError extends OperationalError {
    * ImportError – all errors that can occur when performing operations on the import queue.
    * This should be thrown at the integration layer.
    * @param {object} param0 Error params
-   * @param {String} param0.type Subtype of error
-   * @param {String} param0.message Error message for programmer
-   * @param {object} param0.details Additional error details for used by programmer
-   * @param {Error} param0.err The original error that caused this error
+   * @param {String=} param0.type Subtype of error
+   * @param {Number=} param0.statusCode HTTP status code of response
+   * @param {String=} param0.message Error message for programmer
+   * @param {object=} param0.details Additional error details for used by programmer
+   * @param {Error=} param0.err The original error that caused this error
    */
   constructor({
     type = "unhandled_error",

@@ -1,13 +1,11 @@
-const { MongoClient } = require("mongodb");
-const log = require("skog");
-const { ImportError } = require("../error");
+import { MongoClient, ObjectId } from "mongodb";
+import log from "skog";
+import { ImportError } from "../error";
 
 const { MONGODB_CONNECTION_STRING } = process.env;
 const DB_QUEUE_NAME = "import_queue";
 
 const databaseClient = new MongoClient(MONGODB_CONNECTION_STRING, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
   maxPoolSize: 5,
   minPoolSize: 1,
 });
@@ -36,7 +34,7 @@ async function getImportQueueCollection() {
  * @param {bool|function} test Test case that should return true
  * @param {string} msg Error message
  */
-function assert(test, msg) {
+function assert(test: boolean | Function, msg: string): void {
   if ((typeof test === "function" && !test()) || !test) {
     throw Error(msg);
   }
@@ -44,7 +42,29 @@ function assert(test, msg) {
 
 /* eslint max-classes-per-file: off */
 
+type TStudent = {
+  kthId: string;
+  firstName: string;
+  lastName: string;
+}
+
+type TQueueEntryError = {
+  type: string;
+  message: string;
+  details?: object; // Additional error details
+}
+
 class QueueEntry {
+  fileId: number;
+  courseId: number;
+  student: TStudent;
+  status: string;
+  createdAt: Date;
+  importStartedAt: Date;
+  importSuccessAt: Date;
+  lastErrorAt: Date;
+  error: TQueueEntryError;
+
   constructor({
     fileId,
     courseId,
@@ -90,15 +110,26 @@ class QueueEntry {
   }
 }
 
+enum EQueueStatus {
+  IDLE = "idle",
+  WORKING = "working",
+}
+
+type TQueueSummary = {
+  total: number;
+  progress: number;
+  error: number;
+  ignored: number;
+  imported: number;
+}
+
 class QueueStatus {
   /**
    * Status of import queue
-   * @param {String} param0.status idle|working
-   * @param {int} param0.total
-   * @param {int} param0.progress
-   * @param {int} param0.error
-   * @param {int} param0.ignored
    */
+  status: EQueueStatus;
+  working: TQueueSummary;
+  
   constructor({
     status,
     total,
@@ -150,23 +181,23 @@ async function getEntriesFromQueue(courseId) {
 
     const entries = await cursor.toArray();
 
-    return entries.map((entry) => new QueueEntry(entry));
+    return entries.map((entry) => new QueueEntry(entry as any));
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
-    throw ImportError({
+    throw new ImportError({
       err,
     });
   }
 }
 
-async function getEntryFromQueue(fileId) {
+async function getEntryFromQueue(fileId): Promise<QueueEntry> {
   try {
     // Open collection
     const collImportQueue = await getImportQueueCollection();
     const doc = await collImportQueue.findOne({ fileId });
 
-    return new QueueEntry(doc);
+    return new QueueEntry(doc as any);
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
@@ -217,7 +248,7 @@ async function addEntryToQueue(entry) {
 
     // Add entry
     const res = await collImportQueue.insertOne({
-      _id: typedEntry.fileId,
+      _id: new ObjectId(typedEntry.fileId),
       ...typedEntry.toJSON(),
     });
 
@@ -226,7 +257,7 @@ async function addEntryToQueue(entry) {
       return typedEntry;
     }
     // TODO: Should we check reason?
-    throw ImportError({
+    throw new ImportError({
       type: "insert_error",
       statusCode: 420,
       message: "Could not insert entry into queue",
@@ -303,7 +334,7 @@ async function updateStudentOfEntryInQueue(
       });
     }
 
-    const typedEntry = new QueueEntry(tmpOld);
+    const typedEntry = new QueueEntry(tmpOld as any);
 
     typedEntry.student = {
       kthId,
@@ -331,14 +362,14 @@ async function updateStudentOfEntryInQueue(
   }
 }
 
-async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
+async function updateStatusOfEntryInQueue(entry, status, errorDetails?: TQueueEntryError) {
   try {
     const collImportQueue = await getImportQueueCollection();
 
     // Perform update
     const tmpOld = await collImportQueue.findOne({ fileId: entry.fileId });
     if (tmpOld) {
-      const typedEntry = new QueueEntry(tmpOld);
+      const typedEntry = new QueueEntry(tmpOld as any);
       typedEntry.status = status;
       switch (status) {
         case "pending":
@@ -379,7 +410,7 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
         throw new ImportError({
           type: "not_found",
           statusCode: 404,
-          message: `Entry ${entry.fileId} in import queue not found.`,
+          message: `Entry ${entry.fileId} in import queue not found.`,
         });
       }
 
@@ -404,7 +435,7 @@ async function getFirstPendingFromQueue() {
       return null;
     }
 
-    return new QueueEntry(doc);
+    return new QueueEntry(doc as any);
   } catch (err) {
     // TODO: Handle errors
     log.error({ err });
@@ -428,7 +459,7 @@ async function removeEntryFromQueue(entry) {
   }
 }
 
-module.exports = {
+export {
   QueueEntry,
   QueueStatus,
   getEntryFromQueue,

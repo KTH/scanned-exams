@@ -1,9 +1,9 @@
 /** Functions that handle the "import exams" part of the app */
-const log = require("skog");
-const canvas = require("../externalApis/canvasApiClient");
-const tentaApi = require("../externalApis/tentaApiClient");
-const { getEntriesFromQueue } = require("../importQueue");
-const { CanvasApiError } = require("../error");
+import log from "skog";
+import canvas from "../externalApis/canvasApiClient";
+import tentaApi from "../externalApis/tentaApiClient";
+import { getEntriesFromQueue } from "../importQueue";
+import { CanvasApiError } from "../error";
 
 /**
  * Get the "ladokId" that is associated with a given course. It throws in case
@@ -26,7 +26,7 @@ async function getLadokId(courseId) {
     });
   }
 
-  if (ladokIds.lengh > 1) {
+  if (ladokIds.length > 1) {
     throw new CanvasApiError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
@@ -85,7 +85,16 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
     .map((submission) => submission.user?.sis_user_id);
 }
 
-function calcNewSummary({ ...summaryProps }, status, error) {
+type TSummary = {
+  total: number;
+  new: number;
+  pending: number;
+  imported: number;
+  error: number;
+  errorsByType: object;
+};
+
+function calcNewSummary({ ...summaryProps }, status, error) : TSummary {
   const summary = { ...summaryProps };
   // eslint-disable-next-line no-param-reassign
   summary.total++;
@@ -105,7 +114,7 @@ function calcNewSummary({ ...summaryProps }, status, error) {
       summary.errorsByType[errorType]++;
     }
   }
-  return summary;
+  return summary as TSummary;
 }
 
 async function listAllExams(req, res, next) {
@@ -126,7 +135,7 @@ async function listAllExams(req, res, next) {
     studentsWithExamsInCanvas = studentsWithExamsInCanvas || [];
     examsInImportQueue = examsInImportQueue || [];
 
-    let summary = {
+    let summary: TSummary = {
       total: 0,
       new: 0,
       pending: 0,
@@ -187,7 +196,7 @@ async function listAllExams(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   listScannedExams,
   listAllExams,
 };

@@ -1,10 +1,9 @@
-const express = require("express");
-const { Issuer, generators } = require("openid-client");
+import express from "express";
+import { Issuer, generators } from "openid-client";
+import { URL } from "url";
+import log from "skog";
 
 const router = express.Router();
-const { URL } = require("url");
-const log = require("skog");
-
 const OAUTH_REDIRECT_URI = new URL(
   "/scanned-exams/auth/callback",
   process.env.SERVER_HOST_URL
@@ -65,4 +64,4 @@ router.get("/callback", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
