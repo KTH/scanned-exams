@@ -48,7 +48,7 @@ type TStudent = {
   lastName: string;
 }
 
-type TQueueEntryError = {
+export type TQueueEntryError = {
   type: string;
   message: string;
   details?: object; // Additional error details
@@ -59,18 +59,18 @@ class QueueEntry {
   courseId: number;
   student: TStudent;
   status: string;
-  createdAt: Date;
-  importStartedAt: Date;
-  importSuccessAt: Date;
-  lastErrorAt: Date;
-  error: TQueueEntryError;
+  createdAt?: Date;
+  importStartedAt?: Date;
+  importSuccessAt?: Date;
+  lastErrorAt?: Date;
+  error?: TQueueEntryError;
 
   constructor({
     fileId,
     courseId,
     student,
     status = "new",
-    createdAt,
+    createdAt = new Date(),
     importStartedAt,
     importSuccessAt,
     lastErrorAt,
@@ -84,7 +84,7 @@ class QueueEntry {
       lastName: student?.lastName,
     };
     this.status = status;
-    this.createdAt = createdAt || new Date();
+    this.createdAt = createdAt;
     this.importStartedAt = importStartedAt;
     this.importSuccessAt = importSuccessAt;
     this.lastErrorAt = lastErrorAt;
@@ -415,7 +415,7 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails?: TQueueEn
       }
 
       // Return updated object
-      return new QueueEntry(typedEntry);
+      return new QueueEntry(typedEntry as any);
     }
 
     return null;
