@@ -153,7 +153,7 @@ async function getEntriesFromQueue(courseId) {
     return entries.map((entry) => new QueueEntry(entry));
   } catch (err) {
     // TODO: Handle errors
-    log.child({ courseId }).error({ err });
+    log.error({ err });
     throw ImportError({
       err,
     });
@@ -189,7 +189,7 @@ async function resetQueueForImport(courseId) {
       },
     });
   } catch (err) {
-    log.child({ courseId }).error({ err });
+    log.error({ err });
     throw new ImportError({
       type: "delete_error",
       statusCode: 420,
@@ -283,7 +283,7 @@ async function getStatusFromQueue(courseId) {
     });
   } catch (err) {
     // TODO: Handle errors
-    log.child({ courseId }).error({ err });
+    log.error({ err });
     throw err;
   }
 }
@@ -326,7 +326,7 @@ async function updateStudentOfEntryInQueue(
 
     return typedEntry;
   } catch (err) {
-    log.child({ courseId: entry?.courseId }).error({ err });
+    log.error({ err });
     throw err;
   }
 }
@@ -390,7 +390,7 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
     return null;
   } catch (err) {
     // TODO: Handle errors
-    log.child({ courseId: entry?.courseId }).error({ err });
+    log.error({ err });
     throw err;
   }
 }
@@ -419,7 +419,7 @@ async function removeEntryFromQueue(entry) {
       fileId: entry.fileId,
     });
   } catch (err) {
-    log.child({ courseId: entry?.courseId }).error({ err });
+    log.error({ err });
     throw new ImportError({
       type: "delete_error",
       statusCode: 420,
