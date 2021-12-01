@@ -379,7 +379,7 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails) {
         throw new ImportError({
           type: "not_found",
           statusCode: 404,
-          message: `Entry ${entry.fileId} in import queue not found.`,
+          message: `Entry ${entry.fileId} in import queue not found.`,
         });
       }
 
