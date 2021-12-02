@@ -41,7 +41,7 @@
     "openid-client": "^4.6.0",
     "pino": "^6.11.2",
     "skog": "^2.1.0",
-
+    "@swc/core": "^1.2.117",
     "ts-node": "^10.4.0"
   },
   "devDependencies": {
