@@ -183,6 +183,8 @@ async function getEntriesFromQueue(courseId) {
 
     return entries.map((entry) => new QueueEntry(entry as any));
   } catch (err) {
+    if (err.name === "TypeError") throw err;
+    
     // TODO: Handle errors
     log.error({ err });
     throw new ImportError({
@@ -199,6 +201,8 @@ async function getEntryFromQueue(fileId): Promise<QueueEntry> {
 
     return new QueueEntry(doc as any);
   } catch (err) {
+    if (err.name === "TypeError") throw err;
+
     // TODO: Handle errors
     log.error({ err });
     throw err;
@@ -220,6 +224,8 @@ async function resetQueueForImport(courseId) {
       },
     });
   } catch (err) {
+    if (err.name === "TypeError") throw err;
+
     log.error({ err });
     throw new ImportError({
       type: "delete_error",
@@ -263,6 +269,8 @@ async function addEntryToQueue(entry) {
       message: "Could not insert entry into queue",
     });
   } catch (err) {
+    if (err.name === "TypeError") throw err;
+
     throw new ImportError({
       type: "entry_exists",
       statusCode: 409,
@@ -313,6 +321,8 @@ async function getStatusFromQueue(courseId) {
       ignored,
     });
   } catch (err) {
+    if (err.name === "TypeError") throw err;
+
     // TODO: Handle errors
     log.error({ err });
     throw err;
@@ -357,6 +367,8 @@ async function updateStudentOfEntryInQueue(
 
     return typedEntry;
   } catch (err) {
+    if (err.name === "TypeError") throw err;
+
     log.error({ err });
     throw err;
   }
@@ -420,6 +432,8 @@ async function updateStatusOfEntryInQueue(entry, status, errorDetails?: TQueueEn
 
     return null;
   } catch (err) {
+    if (err.name === "TypeError") throw err;
+
     // TODO: Handle errors
     log.error({ err });
     throw err;
@@ -437,6 +451,8 @@ async function getFirstPendingFromQueue() {
 
     return new QueueEntry(doc as any);
   } catch (err) {
+    if (err.name === "TypeError") throw err;
+
     // TODO: Handle errors
     log.error({ err });
     throw err;
@@ -450,6 +466,8 @@ async function removeEntryFromQueue(entry) {
       fileId: entry.fileId,
     });
   } catch (err) {
+    if (err.name === "TypeError") throw err;
+
     log.error({ err });
     throw new ImportError({
       type: "delete_error",
