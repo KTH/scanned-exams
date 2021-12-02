@@ -30,7 +30,7 @@
       "runtimeVersion": "14.17.0",
       "cwd": "${workspaceFolder}/backend",
       "program": "${workspaceRoot}/backend/node_modules/jest/bin/jest.js",
-      "args": ["--verbose", "-i", "--no-cache", "--testPathPattern", "${fileBasename}"],
+      "args": ["--verbose", "-i", "--no-cache", "--runInBand",  "--testPathPattern", "${fileBasename}"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     }
