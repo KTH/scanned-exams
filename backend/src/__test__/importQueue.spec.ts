@@ -223,7 +223,7 @@ describe("Import queue", () => {
 });
 
 describe("Get first element from queue", () => {
-  afterEach(async () => {
+  beforeEach(async () => {
     // Perform tear down here
     await getImportQueueCollection().then((coll) => coll.deleteMany({}));
   });
@@ -287,7 +287,7 @@ describe("Get first element from queue", () => {
 });
 
 describe("Resetting a queue", () => {
-  afterEach(async () => {
+  beforeEach(async () => {
     // Perform tear down here
     await getImportQueueCollection().then((coll) => coll.deleteMany({}));
   });
