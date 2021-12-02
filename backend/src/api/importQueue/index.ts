@@ -1,6 +1,7 @@
 import { MongoClient, ObjectId } from "mongodb";
 import log from "skog";
 import { ImportError } from "../error";
+require("dotenv").config();
 
 const { MONGODB_CONNECTION_STRING } = process.env;
 const DB_QUEUE_NAME = "import_queue";
