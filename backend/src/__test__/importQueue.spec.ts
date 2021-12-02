@@ -23,6 +23,14 @@ import {
  *
  */
 
+function stringToInt(inp) {
+  let outp = 0;
+  for (let i = 0; i < inp.length; i++) {
+    outp += inp.charCodeAt(i) * 128 * i; // add charpoint value of each char in string to create unique number
+  }
+  return outp;
+}
+
 afterAll(async () => {
   await databaseClient.close();
 });
@@ -35,7 +43,20 @@ describe("Import queue", () => {
 
   it("should add one entry to queue", async () => {
     const entry = {
-      fileId: "file1",
+      fileId: stringToInt("file1"),
+      courseId: "mainTestCourse",
+      userKthId: "u23z456",
+    };
+
+    const typedEntry = await addEntryToQueue(entry);
+
+    expect(typedEntry).toBeInstanceOf(QueueEntry);
+    expect(typedEntry.status).toBe("new");
+  });
+
+  it("should add one entry to queue with numeric fileId", async () => {
+    const entry = {
+      fileId: 1234,
       courseId: "mainTestCourse",
       userKthId: "u23z456",
     };
@@ -48,12 +69,12 @@ describe("Import queue", () => {
 
   it("should not add entry with same fileId twice", async () => {
     const entry1 = {
-      fileId: "twice1",
+      fileId: stringToInt("twice1"),
       courseId: "mainTestCourse",
       userKthId: "u23z456",
     };
     const entry2 = {
-      fileId: "twice1",
+      fileId: stringToInt("twice1"),
       courseId: "mainTestCourse",
       userKthId: "u23z456",
     };
@@ -72,21 +93,21 @@ describe("Import queue", () => {
 
   it("should list only entries with correct courseId", async () => {
     const entry1 = {
-      fileId: "filter1",
+      fileId: stringToInt("filter1"),
       courseId: "mainTestCourse",
       userKthId: "u23z456",
     };
     await addEntryToQueue(entry1);
 
     const entry2 = {
-      fileId: "filter2",
+      fileId: stringToInt("filter2"),
       courseId: "mainTestCourse",
       userKthId: "u23z456",
     };
     await addEntryToQueue(entry2);
 
     const entry = {
-      fileId: "filter3",
+      fileId: stringToInt("filter3"),
       courseId: "listTest123",
       userKthId: "u23z456",
     };
@@ -105,7 +126,7 @@ describe("Import queue", () => {
 
   it("should allow updating status of entry in queue to 'pending'", async () => {
     const entry = {
-      fileId: "pendingFile1",
+      fileId: stringToInt("pendingFile1"),
       courseId: "mainTestCourse",
       userKthId: "u233z456",
     };
@@ -124,7 +145,7 @@ describe("Import queue", () => {
 
   it("should allow updating status of entry in queue to 'imported'", async () => {
     const entry = {
-      fileId: "importedFile1",
+      fileId: stringToInt("importedFile1"),
       courseId: "mainTestCourse",
       userKthId: "u133z456",
     };
@@ -142,7 +163,7 @@ describe("Import queue", () => {
 
   it("should allow updating status of entry in queue to 'error' w/o details", async () => {
     const entry = {
-      fileId: "errorFile1",
+      fileId: stringToInt("errorFile1"),
       courseId: "mainTestCourse",
       userKthId: "u333z456",
     };
@@ -161,7 +182,7 @@ describe("Import queue", () => {
 
   it("should allow updating status of entry in queue to 'error' with details", async () => {
     const entry = {
-      fileId: "errorFile2",
+      fileId: stringToInt("errorFile2"),
       courseId: "mainTestCourse",
       userKthId: "u3433z456",
     };
@@ -183,7 +204,7 @@ describe("Import queue", () => {
 
   it("should provide status summary of queue ('working')", async () => {
     const entry = {
-      fileId: "errorFile2",
+      fileId: stringToInt("errorFile2"),
       courseId: "mainTestCourse",
       userKthId: "u3433z456",
       status: "pending",
@@ -200,7 +221,7 @@ describe("Import queue", () => {
   it("should allow return 'idle' when all 'pending' imports change state to 'imported'", async () => {
     let statusSummary;
     const entry = {
-      fileId: "statusFile1",
+      fileId: stringToInt("statusFile1"),
       courseId: "statusTestCourse",
       userKthId: "u3433z456",
     };
@@ -235,7 +256,7 @@ describe("Get first element from queue", () => {
 
   it("should return null if there is no `pending` element", async () => {
     const entry1 = {
-      fileId: "statusFile1",
+      fileId: stringToInt("statusFile1"),
       courseId: "statusTestCourse",
       userKthId: "u3433z456",
       status: "success",
@@ -248,7 +269,7 @@ describe("Get first element from queue", () => {
 
   it("should return the first element if something is enqueued", async () => {
     const entry1 = {
-      fileId: "statusFile1",
+      fileId: stringToInt("statusFile1"),
       courseId: "statusTestCourse",
       userKthId: "u3433z456",
       status: "pending",
@@ -263,14 +284,14 @@ describe("Get first element from queue", () => {
 
   it("should return the first `pending` element", async () => {
     const entry1 = {
-      fileId: "statusFile1",
+      fileId: stringToInt("statusFile1"),
       courseId: "statusTestCourse",
       userKthId: "u3433z456",
       status: "pending",
     };
 
     const entry2 = {
-      fileId: "statusFile2",
+      fileId: stringToInt("statusFile2"),
       courseId: "statusTestCourse",
       userKthId: "u3433z456",
       status: "pending",

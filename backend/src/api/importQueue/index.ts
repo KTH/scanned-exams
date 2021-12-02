@@ -241,6 +241,8 @@ async function resetQueueForImport(courseId) {
  * @param {Object} entry This is a QueueEntry like object
  * @returns QueueEntry
  */
+
+
 async function addEntryToQueue(entry) {
   assert(entry.fileId !== undefined, "Param entry is missing fileId");
   assert(entry.courseId !== undefined, "Param entry is missing courseId");
@@ -253,8 +255,13 @@ async function addEntryToQueue(entry) {
     const collImportQueue = await getImportQueueCollection();
 
     // Add entry
+
+    // In Typescript, _id requires an ObjectID, which in turn requires a hexa decimal string
+    // of a fixed length. Here I am creating this string in a repeatable way.
+    const tmpIdIn = typedEntry.fileId.toString(16);
+    const newId = "000000000000000000000000".substr(tmpIdIn.length) + tmpIdIn;
     const res = await collImportQueue.insertOne({
-      _id: new ObjectId(typedEntry.fileId),
+      _id: new ObjectId(newId),
       ...typedEntry.toJSON(),
     });
 
