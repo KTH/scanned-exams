@@ -131,7 +131,7 @@ server.use("/scanned-exams/api", apiRouter);
 server.get("/scanned-exams/app", async (req, res) => {
   try {
     const html = await fs.promises.readFile(
-      path.join(__dirname, "..", "frontend", "build", "index.html"),
+      path.join(__dirname, "..", "..", "frontend", "build", "index.html"),
       { encoding: "utf-8" }
     );
 
@@ -143,7 +143,7 @@ server.get("/scanned-exams/app", async (req, res) => {
 });
 server.use(
   "/scanned-exams/app/static",
-  express.static(path.join(__dirname, "..", "frontend", "build", "static"))
+  express.static(path.join(__dirname, "..", "..", "frontend", "build", "static"))
 );
 
 server.get("/scanned-exams/_monitor", monitor);
