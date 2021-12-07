@@ -204,8 +204,15 @@ function _formatErrorMsg(name, type, message) {
  */
 function errorHandler(err, req, res, next) {
   if (err instanceof AuthError) {
-    // Simple auth errors
-    log.error(err);
+    switch (err.type) {
+      case "permission_denied":
+        // This is common and only used for debugging
+        log.debug(err);
+        break;
+      default:
+        // All other auth errors
+        log.error(err);
+    }
     // Add error details if provided for debugging
     if (err.details) log.debug(err.details);
   } else if (err instanceof EndpointError) {
