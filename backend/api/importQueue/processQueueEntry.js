@@ -116,8 +116,7 @@ module.exports = async function processQueueEntry() {
 
   if (examToBeImported) {
     // Log the courseId for this operation
-    // WARNING! log.child mutates the logger so we can't run operations in parallel
-    log.child({ courseId: examToBeImported?.courseId });
+
     try {
       // Force errors during development
       if (IS_DEV && FORCE_RANDOM_ERRORS) {
@@ -125,13 +124,16 @@ module.exports = async function processQueueEntry() {
           throw Error("Forced error for testing during development");
       }
 
-      // Upload to Canvas
-      await uploadOneExam({
-        fileId: examToBeImported.fileId,
-        courseId: examToBeImported.courseId,
-      }).catch((err) => {
-        handleUploadErrors(err, examToBeImported);
-      });
+      await log
+        .child({ courseId: examToBeImported?.courseId }, () =>
+          uploadOneExam({
+            fileId: examToBeImported.fileId,
+            courseId: examToBeImported.courseId,
+          })
+        )
+        .catch((err) => {
+          handleUploadErrors(err, examToBeImported);
+        });
 
       // Update status in import queue
       await updateStatusOfEntryInQueue(examToBeImported, "imported");
