@@ -30,6 +30,7 @@
   "dependencies": {
     "@kth/canvas-api": "^4.0.0",
     "@kth/reqvars": "^2.0.1",
+    "@swc/core": ">=1.2.0",
     "connect-mongodb-session": "^3.1.0",
     "cookie-parser": "^1.4.5",
     "dotenv": "^8.2.0",
@@ -41,7 +42,6 @@
     "openid-client": "^4.6.0",
     "pino": "^6.11.2",
     "skog": "^2.1.0",
-    "@swc/core": ">=1.2.0",
     "ts-node": "^10.4.0"
   },
   "devDependencies": {
