@@ -36,8 +36,6 @@
 module.exports = {
   propertiesToCreateLockedAssignment(examDate) {
     return {
-      submission_types: ["on_paper"],
-
       // When passing "00:00" to Canvas API, it is converted to "23:59"
       // In order to avoid this, we pass "00:01" instead
       due_at: `${examDate}T00:01:00`,
@@ -64,9 +62,8 @@ module.exports = {
     };
   },
 
+  // This function is kept just for consistency reasons
   propertiesToLockAssignment() {
-    return {
-      submission_types: ["on_paper"],
-    };
+    return {};
   },
 };

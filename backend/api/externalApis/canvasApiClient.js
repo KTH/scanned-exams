@@ -166,7 +166,8 @@ async function publishAssignment(courseId, assignmentId) {
 }
 
 /**
- * Allows the app to upload exams.
+ * Allows the app to upload exams temporary. The "unlock" is done in a safe way
+ * to minimize the risk of students uploading things to the assignment.
  */
 async function unlockAssignment(courseId, assignmentId) {
   return canvas.requestUrl(
@@ -292,6 +293,8 @@ async function uploadExam(
 
     log.debug("Time to upload file: " + (Date.now() - uploadFileStart) + "ms");
 
+    // TODO: move the following statement outside of this function
+    // Reason: this module (canvasApiClient) should not contain "business rules"
     await unlockAssignment(courseId, assignment.id);
     await canvas.requestUrl(
       `courses/${courseId}/assignments/${assignment.id}/submissions/`,
@@ -305,8 +308,6 @@ async function uploadExam(
         },
       }
     );
-
-    await lockAssignment(courseId, assignment.id);
   } catch (err) {
     if (err.type === "missing_student") {
       log.warn(`User ${studentKthId} is missing in Canvas course ${courseId}`);
