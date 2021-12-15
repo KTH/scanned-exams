@@ -345,7 +345,7 @@ async function getRoles(courseId, userId) {
 
   // TODO: error handling for non-existent courseId or userId
   const enrollments = await canvas
-    .list(`courses/${courseId}/enrollments`)
+    .list(`courses/${courseId}/enrollments`, { per_page: 100 })
     .toArray();
 
   return enrollments
