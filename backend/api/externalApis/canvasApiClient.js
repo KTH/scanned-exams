@@ -325,6 +325,7 @@ async function uploadExam(
   }
 }
 
+// TOOD: This function can take very long to run. Consider changing it somehow®
 async function getRoles(courseId, userId) {
   if (!courseId) {
     throw new EndpointError({
@@ -344,10 +345,12 @@ async function getRoles(courseId, userId) {
 
   // TODO: error handling for non-existent courseId or userId
   const enrollments = await canvas
-    .list(`courses/${courseId}/enrollments`, { user_id: userId })
+    .list(`courses/${courseId}/enrollments`)
     .toArray();
 
-  return enrollments.map((enr) => enr.role_id);
+  return enrollments
+    .filter((enr) => enr.user_id === userId)
+    .map((enr) => enr.role_id);
 }
 
 async function enrollStudent(courseId, userId) {
