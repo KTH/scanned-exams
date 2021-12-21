@@ -1,4 +1,4 @@
-const Canvas = require("@kth/canvas-api");
+const Canvas = require("@kth/canvas-api").default;
 const FormData = require("formdata-node").default;
 const got = require("got");
 const log = require("skog");
