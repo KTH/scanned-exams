@@ -115,6 +115,7 @@ export async function processQueueEntry() {
   const examToBeImported = await getFirstPendingFromQueue();
 
   if (examToBeImported) {
+    // Log the courseId for this operation
     try {
       // Force errors during development
       if (IS_DEV && FORCE_RANDOM_ERRORS) {
@@ -123,12 +124,16 @@ export async function processQueueEntry() {
       }
 
       // Upload to Canvas
-      await uploadOneExam({
-        fileId: examToBeImported.fileId,
-        courseId: examToBeImported.courseId,
-      }).catch((err) => {
-        handleUploadErrors(err, examToBeImported);
-      });
+      await log
+        .child({ courseId: examToBeImported?.courseId }, () =>
+          uploadOneExam({
+            fileId: examToBeImported.fileId,
+            courseId: examToBeImported.courseId,
+          })
+        )
+        .catch((err) => {
+          handleUploadErrors(err, examToBeImported);
+        });
 
       // Update status in import queue
       await updateStatusOfEntryInQueue(examToBeImported, "imported");

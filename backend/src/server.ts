@@ -70,9 +70,14 @@ server.use(
 
 server.use(log.middleware);
 server.use((req, res, next) => {
+  // Get courseId from path if available
+  const courseId = req.path.startsWith("/scanned-exams/api/courses")
+    ? req.path.split("/")[4]
+    : undefined;
   log.child(
     {
       session_id: req.session.id.slice(0, 6),
+      course_id: courseId,
     },
     next
   );
@@ -127,7 +132,7 @@ server.post("/scanned-exams", async (req, res) => {
   }
 });
 server.use("/scanned-exams/auth", authRouter);
-server.use("/scanned-exams/api", apiRouter);
+server.use("/scanned-exams/api", apiRouter); // NOTE: If you change this route mapping, please update the logging middleware
 server.get("/scanned-exams/app", async (req, res) => {
   try {
     const html = await fs.promises.readFile(

@@ -292,6 +292,8 @@ async function uploadExam(
 
     log.debug("Time to upload file: " + (Date.now() - uploadFileStart) + "ms");
 
+    // TODO: move the following statement outside of this function
+    // Reason: this module (canvasApiClient) should not contain "business rules"
     await unlockAssignment(courseId, assignment.id);
     await canvas.request(
       `courses/${courseId}/assignments/${assignment.id}/submissions/`,
@@ -302,11 +304,11 @@ async function uploadExam(
           submission_type: "online_upload",
           user_id: user.id,
           file_ids: [uploadedFile.id],
+          // IMPORTANT: do not pass the timezone in the "submitted_at" field
+          submitted_at: `${examDate}T08:00:00`,
         },
       }
     );
-
-    await lockAssignment(courseId, assignment.id);
   } catch (err) {
     if (err.type === "missing_student") {
       log.warn(`User ${studentKthId} is missing in Canvas course ${courseId}`);
@@ -324,6 +326,7 @@ async function uploadExam(
   }
 }
 
+// TOOD: This function can take very long to run. Consider changing it somehow
 async function getRoles(courseId, userId) {
   if (!courseId) {
     throw new EndpointError({
@@ -343,10 +346,13 @@ async function getRoles(courseId, userId) {
 
   // TODO: error handling for non-existent courseId or userId
   const enrollments = await canvas
-    .listItems(`courses/${courseId}/enrollments`, { user_id: userId })
+    .list(`courses/${courseId}/enrollments`, { per_page: 100 })
     .toArray() as any;
 
-  return enrollments.map((enr) => enr.role_id);
+  return enrollments
+    .filter((enr) => enr.user_id === userId)
+    .map((enr) => enr.role_id);
+
 }
 
 async function enrollStudent(courseId, userId) {

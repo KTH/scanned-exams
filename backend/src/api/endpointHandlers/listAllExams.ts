@@ -3,7 +3,8 @@ import log from "skog";
 import * as canvasApi from "../externalApis/canvasApiClient";
 import * as tentaApi from "../externalApis/tentaApiClient";
 import { getEntriesFromQueue } from "../importQueue";
-import { CanvasApiError } from "../error";
+import { CanvasApiError, EndpointError } from "../error";
+import { totalmem } from "os";
 
 /**
  * Get the "ladokId" that is associated with a given course. It throws in case
@@ -11,34 +12,18 @@ import { CanvasApiError } from "../error";
  *
  * Note: this function does not check if the returned ladok ID exists in Ladok.
  */
-async function getLadokId(courseId) {
-  const ladokIds = await canvasApi.getAktivitetstillfalleUIDs(courseId);
-
-  if (ladokIds.length === 0) {
-    throw new CanvasApiError({
+function throwIfNotExactlyOneLadokId(ladokIds, courseId) {
+  if (!Array.isArray(ladokIds) || ladokIds.length !== 1) {
+    throw new EndpointError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
-      message:
-        "This course can't be used for importing exams. It must be an examroom",
-      details: {
-        courseId,
-      },
-    });
-  }
-
-  if (ladokIds.length > 1) {
-    throw new CanvasApiError({
-      type: "invalid_course",
-      statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
-      message: "Examrooms with more than one examination are not supported",
+      message: "Only examrooms with exactly one (1) examination is supported",
       details: {
         courseId,
         ladokIds,
       },
     });
   }
-
-  return ladokIds[0];
 }
 
 /** Returns a list of scanned exams (i.e. in Windream) given its ladokId */
@@ -77,7 +62,7 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
   const submissions = await canvasApi.getAssignmentSubmissions(
     courseId,
     assignment.id
-  ) as any;
+  );
 
   // Filter-out submissions without exams or without KTH ID
   return submissions
@@ -85,16 +70,7 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
     .map((submission) => submission.user?.sis_user_id);
 }
 
-type TSummary = {
-  total: number;
-  new: number;
-  pending: number;
-  imported: number;
-  error: number;
-  errorsByType: object;
-};
-
-function calcNewSummary({ ...summaryProps }, status, error) : TSummary {
+function calcNewSummary({ ...summaryProps }: TErrorSummary, status: string, error: any) : TErrorSummary {
   const summary = { ...summaryProps };
   // eslint-disable-next-line no-param-reassign
   summary.total++;
@@ -105,7 +81,7 @@ function calcNewSummary({ ...summaryProps }, status, error) : TSummary {
   summary[status]++;
 
   if (error) {
-    const errorType = error.type;
+    const errorType = error.type as string;
     if (summary.errorsByType[errorType] === undefined) {
       // eslint-disable-next-line no-param-reassign
       summary.errorsByType[errorType] = 1;
@@ -114,7 +90,16 @@ function calcNewSummary({ ...summaryProps }, status, error) : TSummary {
       summary.errorsByType[errorType]++;
     }
   }
-  return summary as TSummary;
+  return summary;
+}
+
+type TErrorSummary = {
+  total: number;
+  new: number;
+  pending: number;
+  imported: number;
+  error: number;
+  errorsByType: { [key: string]: number }; // Typedef https://www.typescriptlang.org/docs/handbook/2/mapped-types.html
 }
 
 async function listAllExams(req, res, next) {
@@ -122,7 +107,10 @@ async function listAllExams(req, res, next) {
     const courseId = req.params.id;
     // - Canvas is source of truth regarding if a submitted exam is truly imported
     // - the internal import queue keeps state of pending and last performed import
-    const ladokId = await getLadokId(courseId);
+    const ladokIds = await canvasApi.getAktivitetstillfalleUIDs(courseId);
+    throwIfNotExactlyOneLadokId(ladokIds, courseId);
+    const ladokId = ladokIds[0];
+
     let [allScannedExams, studentsWithExamsInCanvas, examsInImportQueue] =
       await Promise.all([
         listScannedExams(courseId, ladokId),
@@ -135,7 +123,7 @@ async function listAllExams(req, res, next) {
     studentsWithExamsInCanvas = studentsWithExamsInCanvas || [];
     examsInImportQueue = examsInImportQueue || [];
 
-    let summary: TSummary = {
+    let summary: TErrorSummary = {
       total: 0,
       new: 0,
       pending: 0,
@@ -199,4 +187,5 @@ async function listAllExams(req, res, next) {
 export {
   listScannedExams,
   listAllExams,
+  throwIfNotExactlyOneLadokId as _throwIfNotExactlyOneLadokId,
 };

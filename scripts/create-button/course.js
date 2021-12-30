@@ -7,16 +7,11 @@ async function start() {
       "Here you will create or edit a button for the Scanned Exams app\n" +
       "as course-level button. It means that the button is visible\n" +
       "for only one course in Canvas\n\n" +
-      'Use "create-button/account.js" for creating or editing course-level buttons'
+      'You can pass the CANVAS_API_TOKEN env var to skip a prompt\n\n' +
+      'Press Ctrl-C to abort'
   );
 
-  const { answer } = await inquirer.prompt({
-    type: "confirm",
-    message: "Do you want to continue?",
-    name: "answer",
-  });
-
-  if (!answer) return;
+  // Removed question about proceeding, you can type Ctrl-C
 
   const { canvasRoot } = await inquirer.prompt({
     type: "list",
@@ -44,11 +39,16 @@ async function start() {
   console.log();
   console.log(`Go to ${canvasRoot}profile/settings to get a Canvas API token.`);
 
-  const { canvasApiToken } = await inquirer.prompt({
-    name: "canvasApiToken",
-    message: `Paste the API token here`,
-    type: "password",
-  });
+  let canvasApiToken = process.env.CANVAS_API_TOKEN;
+
+  if (!canvasApiToken) {
+    const { canvasApiToken: tmp } = await inquirer.prompt({
+      name: "canvasApiToken",
+      message: `Paste the API token here`,
+      type: "password",
+    });
+    canvasApiToken = tmp;
+  }
 
   const { courseId } = await inquirer.prompt({
     name: "courseId",

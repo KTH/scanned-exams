@@ -130,7 +130,7 @@ class QueueStatus {
    */
   status: EQueueStatus;
   working: TQueueSummary;
-  
+
   constructor({
     status,
     total,
