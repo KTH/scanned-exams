@@ -1,15 +1,15 @@
 import React from "react";
 
-const errorTitles = {
+const errorTitles: { [key: string]: string } = {
   permission_denied: "Apologies! Permission denied",
 };
 
-const errorMessage = {
+const errorMessage: { [key: string]: string } = {
   permission_denied:
     "If you believe you should have access, reloading the webpage could resolve this issue.",
 };
 
-export default function FullPageError({ error }) {
+export default function FullPageError({ error }: any) {
   const title = errorTitles[error.type] || "Oops! Trouble Encountered";
   const body = errorMessage[error.type] || error.message;
 
