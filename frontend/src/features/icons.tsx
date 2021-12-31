@@ -1,6 +1,6 @@
 import React from "react";
 
-export function Check(props) {
+export function Check(props: any) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -20,7 +20,7 @@ export function Check(props) {
   );
 }
 
-export function Spinner(props) {
+export function Spinner(props: any) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

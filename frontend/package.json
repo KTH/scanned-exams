@@ -43,11 +43,13 @@
   "homepage": "/scanned-exams/app",
   "devDependencies": {
     "@kth/eslint-config-kth": "^2.0.1",
+    "@testing-library/dom": "^8.11.1",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
     "autoprefixer": "^9.8.6",
     "eslint": "^7.29.0",
+    "eslint-plugin-testing-library": "^3.10.2",
     "postcss": "^7.0.36",
     "prettier": "^2.3.2",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.7"

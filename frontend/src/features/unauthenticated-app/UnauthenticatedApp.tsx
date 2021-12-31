@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function UnauthenticatedApp({ courseId }) {
+export default function UnauthenticatedApp({ courseId }: any) {
   return (
     <div className="max-w-screen-lg">
       <div className="text-4xl font-semibold mt-8 mb-4 tracking-tight">

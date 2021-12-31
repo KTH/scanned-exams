@@ -4,7 +4,7 @@ import SetupFlow from "../setup-course/SetupFlow";
 import ImportFlow from "../import-exams/ImportFlow";
 import { LoadingPage } from "../widgets";
 
-function isSetupRequired(courseSetup) {
+function isSetupRequired(courseSetup: any) {
   return !(
     courseSetup.coursePublished &&
     courseSetup.assignmentCreated &&
@@ -12,7 +12,7 @@ function isSetupRequired(courseSetup) {
   );
 }
 
-export default function AuthenticatedApp({ courseId }) {
+export default function AuthenticatedApp({ courseId }: any) {
   const query = useCourseSetup(courseId);
 
   const { isLoading, isError } = query;

@@ -3,7 +3,7 @@ import { Check } from "./icons";
 
 const ListContext = React.createContext(0);
 
-export function StepList({ children, currentStep }) {
+export function StepList({ children, currentStep }: any) {
   return (
     <ListContext.Provider value={currentStep}>
       <ul className="flex w-full">{children}</ul>
@@ -11,7 +11,7 @@ export function StepList({ children, currentStep }) {
   );
 }
 
-export function Step({ children, index, done }) {
+export function Step({ children, index, done }: any) {
   const currentStep = React.useContext(ListContext);
 
   return (

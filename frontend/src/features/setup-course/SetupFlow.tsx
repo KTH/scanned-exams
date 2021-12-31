@@ -5,7 +5,7 @@ import PublishCourse from "./steps/PublishCourse";
 import CreateAssignment from "./steps/CreateAssignment";
 import PublishAssignment from "./steps/PublishAssignment";
 
-function StepText({ long, short }) {
+function StepText({ long, short }: any) {
   return (
     <span>
       <span className="md:hidden">{short}</span>
@@ -19,8 +19,8 @@ function StepText({ long, short }) {
  * @param {Array} arr List of truthy expressions/variables
  * @returns
  */
-function getIndexOfFirstFalse(arr) {
-  return arr.findIndex((s) => !s);
+function getIndexOfFirstFalse(arr: any) {
+  return arr.findIndex((s: any) => !s);
 }
 
 export default function SetupScreen({
@@ -28,7 +28,7 @@ export default function SetupScreen({
   assignmentCreated,
   assignmentPublished,
   courseId,
-}) {
+}: any) {
   const [homepageCreated, setHomepageCreated] = React.useState(coursePublished);
 
   // The

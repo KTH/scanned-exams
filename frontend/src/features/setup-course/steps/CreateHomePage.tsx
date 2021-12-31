@@ -2,7 +2,7 @@ import React from "react";
 import { H2, PrimaryButton, SecondaryButton, P } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
-export default function CreateHomePage({ onDone, courseId }) {
+export default function CreateHomePage({ onDone, courseId }: any) {
   const mutation = useMutateCourseSetup(courseId, "create-homepage", {
     onSuccess() {
       setTimeout(onDone, 500);

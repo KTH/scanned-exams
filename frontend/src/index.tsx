@@ -11,7 +11,7 @@ import reportWebVitals from "./reportWebVitals";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry(failureCount, error) {
+      retry(failureCount: number, error: any) {
         if (failureCount > 3 || error?.statusCode === 401) {
           return false;
         }
@@ -30,7 +30,7 @@ const queryClient = new QueryClient({
 // Therefore we have implemented our own "onfocus" handler where we only listen
 // to "visibilitychange" events
 // Read more: https://react-query.tanstack.com/guides/window-focus-refetching
-focusManager.setEventListener((handleFocus) => {
+focusManager.setEventListener((handleFocus: any) => {
   if (typeof window !== "undefined" && window.addEventListener) {
     window.addEventListener("visibilitychange", handleFocus, false);
   }
