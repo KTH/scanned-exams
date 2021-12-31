@@ -35,7 +35,7 @@ const TEMPLATES = {
 async function getCourse(courseId) {
   const { body } = await canvas.get(`courses/${courseId}`);
 
-  return body;
+  return body as any;
 }
 
 /** Creates a "good-looking" homepage in Canvas */
@@ -79,7 +79,7 @@ async function getAktivitetstillfalleUIDs(courseId) {
   // the same Ladok ID)
   const uniqueIds = Array.from(new Set(sisIds));
 
-  return uniqueIds;
+  return uniqueIds as String[];
 }
 
 // TODO: this function is kept only for backwards-compatibility reasons
@@ -102,7 +102,7 @@ async function getExaminationLadokId(courseId) {
       `Course ${courseId} not supported: it is connected to ${uniqueIds.length} different Ladok Ids`
     );
   } else {
-    return uniqueIds[0];
+    return uniqueIds[0] as String;
   }
 }
 
@@ -126,7 +126,7 @@ async function getAssignmentSubmissions(courseId, assignmentId) {
       `courses/${courseId}/assignments/${assignmentId}/submissions`,
       { include: "user" } // include user obj with kth id
     )
-    .toArray();
+    .toArray() as any;
 }
 
 async function createAssignment(courseId, ladokId, language = "en") {
@@ -149,7 +149,7 @@ async function createAssignment(courseId, ladokId, language = "en") {
         //       grading_standard_id: 1,
       },
     })
-    .then((r) => r.body);
+    .then((r) => r.body as any);
 }
 
 /** Publish an assignment */

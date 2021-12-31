@@ -13,14 +13,14 @@ import {
   ExamErrorTable,
 } from "../../widgets";
 
-export default function ResolveIssues({ courseId }) {
+export default function ResolveIssues({ courseId }: any) {
   const { data: exams = [], isFetching } = useImportQueueErrors(courseId);
   const examsWithMissingStudentError = exams
-    .filter((exam) => exam.status === "error")
-    .filter((exam) => exam.error?.type === "missing_student");
+    .filter((exam: any) => exam.status === "error")
+    .filter((exam: any) => exam.error?.type === "missing_student");
   const examsWithOtherErrors = exams
-    .filter((exam) => exam.status === "error")
-    .filter((exam) => exam.error?.type !== "missing_student");
+    .filter((exam: any) => exam.status === "error")
+    .filter((exam: any) => exam.error?.type !== "missing_student");
 
   if (isFetching) {
     return <LoadingPage>Loading...</LoadingPage>;
@@ -47,7 +47,7 @@ export default function ResolveIssues({ courseId }) {
   return <div></div>;
 }
 
-function MissingStudents({ courseId, exams }) {
+function MissingStudents({ courseId, exams }: any) {
   const {
     mutate: doFixMissingStudents,
     isLoading: addingMissingStudents,
@@ -92,7 +92,7 @@ function MissingStudents({ courseId, exams }) {
   );
 }
 
-function OtherErrors({ courseId, exams }) {
+function OtherErrors({ courseId, exams }: any) {
   const {
     mutate: doFixOtherErrors,
     isLoading: fixingOtherErrors,

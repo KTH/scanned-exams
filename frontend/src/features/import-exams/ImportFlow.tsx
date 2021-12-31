@@ -7,7 +7,7 @@ import ResolveIssues from "./steps/ResolveIssues";
 import VerifyResults from "./steps/VerifyResults";
 import ImportInProgress from "./steps/ImportInProgress";
 
-function StepText({ long, short }) {
+function StepText({ long, short }: any) {
   return (
     <span>
       <span className="md:hidden">{short}</span>
@@ -23,7 +23,7 @@ const stepIndex = {
   result: 2,
 };
 
-function getImportQueueStep(data) {
+function getImportQueueStep(data: any) {
   if (!data) {
     return undefined;
   }
@@ -41,13 +41,13 @@ function getImportQueueStep(data) {
   }
 }
 
-export default function ImportScreen({ courseId }) {
+export default function ImportScreen({ courseId }: any) {
   const { data, isLoading: statusLoading } = useCourseImportStatus(courseId);
   const { working } = data || {};
 
   // Determine current active step
   const showStep = statusLoading ? undefined : getImportQueueStep(data);
-  const showStepIndex = stepIndex[showStep];
+  const showStepIndex = stepIndex[showStep!];
 
   // Determine if steps are done
   const importDone = showStepIndex > 0;
@@ -90,7 +90,7 @@ function _renderContent({
   imported,
   ignored,
   progress,
-}) {
+}: any) {
   switch (showStep) {
     case "import":
       return <PrepareImport courseId={courseId} />;

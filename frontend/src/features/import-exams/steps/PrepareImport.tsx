@@ -2,12 +2,12 @@ import React from "react";
 import { useCourseExams, useMutateImportStart } from "../../../common/api";
 import { H2, LoadingPage, PrimaryButton, P } from "../../widgets";
 
-export default function PrepareImport({ courseId }) {
+export default function PrepareImport({ courseId }: any) {
   // Get exams available to import
   const { data = {}, isFetching: examsLoading } = useCourseExams(courseId);
   const { result: exams = [] } = data;
 
-  const examsToImport = exams.filter((exam) => exam.status === "new") || [];
+  const examsToImport = exams.filter((exam: any) => exam.status === "new") || [];
   const numberOfExamsToImport = examsToImport.length;
 
   // Hoook to start import

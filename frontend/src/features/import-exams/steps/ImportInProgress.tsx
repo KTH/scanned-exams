@@ -1,6 +1,6 @@
 import { H2 } from "../../widgets";
 
-export default function ImportInProgress({ progress, total }) {
+export default function ImportInProgress({ progress, total }: any) {
   const perc = Math.round((progress / total) * 100);
 
   return (

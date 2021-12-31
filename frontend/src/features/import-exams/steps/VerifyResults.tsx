@@ -6,7 +6,7 @@ import {
 import { ExamErrorTable, H2, SecondaryButton } from "../../widgets";
 
 // TODO: do something with `ignored` (errors that are not fixed)
-export default function VerifyResults({ courseId, imported, ignored }) {
+export default function VerifyResults({ courseId, imported, ignored }: any) {
   const {
     mutate: doResetImportQueue,
     isLoading: resettingQueue,
@@ -14,7 +14,7 @@ export default function VerifyResults({ courseId, imported, ignored }) {
   } = useMutateResetImportQueue(courseId);
   const { data: exams = [] } = useImportQueueErrors(courseId);
 
-  const ignoredExams = exams.filter((exam) => exam.status === "ignored");
+  const ignoredExams = exams.filter((exam: any) => exam.status === "ignored");
 
   return (
     <div className="max-w-2xl">

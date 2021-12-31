@@ -8,16 +8,16 @@ export const cssInfoBox =
 export const cssSuccessBox =
   "bg-green-50 border-l-4 border-green-600 text-green-800 p-4 mt-6";
 
-export function P(props) {
+export function P(props: any) {
   return <p className="mt-6" {...props} />;
 }
 
-export function H2(props) {
+export function H2(props: any) {
   // eslint-disable-next-line jsx-a11y/heading-has-content
   return <h2 className="font-semibold mt-4 mb-8 text-2xl" {...props} />;
 }
 
-export function BaseButton({ className, ...props }) {
+export function BaseButton({ className, ...props }: any) {
   return (
     <button
       type="button"
@@ -34,7 +34,7 @@ export const BaseActionButton = ({
   success,
   children,
   onClick,
-}) => {
+}: any) => {
   // Don't allow clicks when any of these states are true
   const _blockClick = !!(disabled || waiting || success);
 
@@ -47,7 +47,7 @@ export const BaseActionButton = ({
         "border border-transparent text-white bg-blue-500  mr-8",
       ].join(" ")}
       disabled={disabled}
-      onClick={(e) => !_blockClick && onClick(e)}
+      onClick={(e: MouseEvent) => !_blockClick && onClick(e)}
     >
       {children}
       {waiting && <Spinner className="h-5 w-5 animate-spin ml-3" />}
@@ -56,7 +56,7 @@ export const BaseActionButton = ({
   );
 };
 
-export const PrimaryButton = ({ className, disabled, ...props }) => (
+export const PrimaryButton = ({ className, disabled, ...props }: any) => (
   <BaseActionButton
     className={[
       className,
@@ -68,14 +68,14 @@ export const PrimaryButton = ({ className, disabled, ...props }) => (
   />
 );
 
-export const SecondaryButton = ({ className, ...props }) => (
+export const SecondaryButton = ({ className, ...props }: any) => (
   <BaseButton
     className={`${className} mt-2 sm:mt-0 text-black border border-black hover:bg-gray-200  mr-8`}
     {...props}
   />
 );
 
-export const LoadingPage = ({ className, children, ...props }) => (
+export const LoadingPage = ({ className, children, ...props }: any) => (
   <div
     className={[
       className,
@@ -88,7 +88,7 @@ export const LoadingPage = ({ className, children, ...props }) => (
   </div>
 );
 
-export const ExamErrorTable = ({ exams }) => (
+export const ExamErrorTable = ({ exams }: any) => (
   <table className="w-full mt-6">
     <thead>
       <tr>
@@ -98,7 +98,7 @@ export const ExamErrorTable = ({ exams }) => (
       </tr>
     </thead>
     <tbody>
-      {exams.map((exam) => (
+      {exams.map((exam: any) => (
         <tr key={exam.fileId}>
           <td className="text-left p-2">{exam.fileId}</td>
           {/* TODO: file name */}
