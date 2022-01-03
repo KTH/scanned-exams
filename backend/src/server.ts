@@ -113,13 +113,13 @@ server.post("/scanned-exams", async (req, res) => {
 
     if (!process.env.CANVAS_API_URL.startsWith(`https://${domain}`)) {
       log.warn(
-        `This app is configured for ${process.env.CANVAS_API_URL} but you are running it from ${domain}`
+        `This app is configured for ${process.env.CANVAS_API_URL} but you are running it from ${domain}. Please update your bookmarks, ${process.env.CANVAS_API_URL} is the URL that should be used!`
       );
 
       return res
         .status(400)
         .send(
-          `This app is configured for ${process.env.CANVAS_API_URL} but you are running it from ${domain}`
+          `This app is configured for ${process.env.CANVAS_API_URL} but you are running it from ${domain}. Please update your bookmarks, ${process.env.CANVAS_API_URL} is the URL that should be used!`
         );
     }
 
