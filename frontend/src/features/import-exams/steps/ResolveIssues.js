@@ -117,7 +117,10 @@ function OtherErrors({ courseId, exams }) {
         to retry importing these exams.
       </P>
       <P>
-        Contact IT-support if you don&apos;t know how to resolve these issues.
+        <b>If you don&apos;t know how to resolvera these issues:</b> please contact your
+        local exam administrator with the information below. The local exam administrator
+        in turn needs to contact it-support@kth.se since they sit on information that is
+        important to the troubleshooting process.
       </P>
       <div className="mt-8">
         <ExamErrorTable exams={exams} />
