@@ -7,10 +7,10 @@ async function start() {
       "Here you will create or edit a button for the Scanned Exams app\n" +
       "as course-level button. It means that the button is visible\n" +
       "for only one course in Canvas\n\n" +
-      'Use "create-button/account.js" for creating or editing course-level buttons\n\n' +
       'You can pass the CANVAS_API_TOKEN env var to skip a prompt\n\n' +
       'Press Ctrl-C to abort'
   );
+
   // Removed question about proceeding, you can type Ctrl-C
 
   const { canvasRoot } = await inquirer.prompt({
@@ -49,7 +49,6 @@ async function start() {
     });
     canvasApiToken = tmp;
   }
-
 
   const { courseId } = await inquirer.prompt({
     name: "courseId",

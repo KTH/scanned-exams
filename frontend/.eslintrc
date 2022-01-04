@@ -4,6 +4,6 @@
     "prettier",
     "prettier/react",
     "react-app",
-    "react-app/jest"
+    "react-app/jest",
   ]
 }

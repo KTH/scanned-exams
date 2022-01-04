@@ -62,7 +62,7 @@ async function start() {
   const { ladokId } = await inquirer.prompt({
     name: "ladokId",
     type: "input",
-    message: "Enter the Ladok Aktivitetstillfälle ID",
+    message: "Enter the Ladok Aktivitetstillfîlle ID",
   });
 
   const tentaApi = new TentaApi(tentaApiToken);

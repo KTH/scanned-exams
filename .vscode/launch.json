@@ -7,7 +7,26 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run Backend (NPM)",
+      "name": "Dev Backend (NPM)",
+      "runtimeVersion": "14.17.0",
+      "cwd": "${workspaceFolder}/backend",
+      "outputCapture": "std",
+      "env": {
+        "PORT": "4444"
+      },
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run-script",
+        "dev"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Start Backend (NPM)",
       "runtimeVersion": "14.17.0",
       "cwd": "${workspaceFolder}/backend",
       "outputCapture": "std",
@@ -30,7 +49,7 @@
       "runtimeVersion": "14.17.0",
       "cwd": "${workspaceFolder}/backend",
       "program": "${workspaceRoot}/backend/node_modules/jest/bin/jest.js",
-      "args": ["--verbose", "-i", "--no-cache", "--testPathPattern", "${fileBasename}"],
+      "args": ["--verbose", "-i", "--no-cache", "--runInBand",  "--testPathPattern", "${fileBasename}"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     }

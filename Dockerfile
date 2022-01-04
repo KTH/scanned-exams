@@ -28,4 +28,4 @@ COPY . .
 
 EXPOSE 4000
 
-CMD cd backend && node app.js
+CMD cd backend && npm run start
