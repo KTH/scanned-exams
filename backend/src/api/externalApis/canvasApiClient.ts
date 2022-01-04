@@ -40,7 +40,9 @@ async function getCourse(courseId) {
 
 /** Creates a "good-looking" homepage in Canvas */
 async function createHomepage(courseId, language = "en") {
-  const { body: template } = await canvas.get(TEMPLATES.homepage[language]) as any;
+  const { body: template } = (await canvas.get(
+    TEMPLATES.homepage[language]
+  )) as any;
 
   await canvas.request(`courses/${courseId}/front_page`, "PUT", {
     wiki_page: {
@@ -67,7 +69,9 @@ async function publishCourse(courseId) {
 
 /** Get the Ladok UID of the examination linked with a canvas course */
 async function getAktivitetstillfalleUIDs(courseId) {
-  const sections = await canvas.listItems(`courses/${courseId}/sections`).toArray() as any;
+  const sections = (await canvas
+    .listItems(`courses/${courseId}/sections`)
+    .toArray()) as any;
 
   // For SIS IDs with format "AKT.<ladok id>.<suffix>", take the "<ladok id>"
   const REGEX = /^AKT\.([\w-]+)/;
@@ -84,7 +88,9 @@ async function getAktivitetstillfalleUIDs(courseId) {
 
 // TODO: this function is kept only for backwards-compatibility reasons
 async function getExaminationLadokId(courseId) {
-  const sections = await canvas.listItems(`courses/${courseId}/sections`).toArray() as any;
+  const sections = (await canvas
+    .listItems(`courses/${courseId}/sections`)
+    .toArray()) as any;
 
   // For SIS IDs with format "AKT.<ladok id>.<suffix>", take the "<ladok id>"
   const REGEX = /^AKT\.([\w-]+)/;
@@ -107,9 +113,9 @@ async function getExaminationLadokId(courseId) {
 }
 
 async function getValidAssignment(courseId, ladokId) {
-  const assignments = await canvas
+  const assignments = (await canvas
     .listItems(`courses/${courseId}/assignments`)
-    .toArray() as any;
+    .toArray()) as any;
 
   // TODO: Filter more strictly?
   return (
@@ -131,7 +137,9 @@ async function getAssignmentSubmissions(courseId, assignmentId) {
 
 async function createAssignment(courseId, ladokId, language = "en") {
   const examination = await getAktivitetstillfalle(ladokId);
-  const { body: template } = await canvas.get(TEMPLATES.assignment[language]) as any;
+  const { body: template } = (await canvas.get(
+    TEMPLATES.assignment[language]
+  )) as any;
 
   return canvas
     .request(`courses/${courseId}/assignments`, "POST", {
@@ -221,10 +229,12 @@ async function sendFile({ upload_url, upload_params }, content) {
 //       "GET users/sis_user_id:${userId}" twice
 async function hasSubmission({ courseId, assignmentId, userId }) {
   try {
-    const { body: user } = await canvas.get(`users/sis_user_id:${userId}`) as any;
-    const { body: submission } = await canvas.get(
+    const { body: user } = (await canvas.get(
+      `users/sis_user_id:${userId}`
+    )) as any;
+    const { body: submission } = (await canvas.get(
       `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}`
-    ) as any;
+    )) as any;
 
     return !submission.missing;
   } catch (err) {
@@ -240,9 +250,9 @@ async function uploadExam(
   { courseId, studentKthId, examDate, fileId }
 ) {
   try {
-    const { body: user } = await canvas.get(
+    const { body: user } = (await canvas.get(
       `users/sis_user_id:${studentKthId}`
-    ) as any;
+    )) as any;
 
     const ladokId = await getExaminationLadokId(courseId);
     const assignment = await getValidAssignment(courseId, ladokId);
@@ -252,7 +262,7 @@ async function uploadExam(
 
     const reqTokenStart = Date.now();
     // TODO: will return a 400 if the course is unpublished
-    const { body: slot } = await canvas
+    const { body: slot } = (await canvas
       .request(
         `courses/${courseId}/assignments/${assignment.id}/submissions/${user.id}/files`,
         "POST",
@@ -281,14 +291,14 @@ async function uploadExam(
             },
           });
         }
-      }) as any;
+      })) as any;
 
     log.debug(
       "Time to generate upload token: " + (Date.now() - reqTokenStart) + "ms"
     );
 
     const uploadFileStart = Date.now();
-    const { body: uploadedFile } = await sendFile(slot, content) as any;
+    const { body: uploadedFile } = (await sendFile(slot, content)) as any;
 
     log.debug("Time to upload file: " + (Date.now() - uploadFileStart) + "ms");
 
@@ -304,8 +314,6 @@ async function uploadExam(
           submission_type: "online_upload",
           user_id: user.id,
           file_ids: [uploadedFile.id],
-          // IMPORTANT: do not pass the timezone in the "submitted_at" field
-          submitted_at: `${examDate}T08:00:00`,
         },
       }
     );
@@ -345,14 +353,13 @@ async function getRoles(courseId, userId) {
   }
 
   // TODO: error handling for non-existent courseId or userId
-  const enrollments = await canvas
+  const enrollments = (await canvas
     .list(`courses/${courseId}/enrollments`, { per_page: 100 })
-    .toArray() as any;
+    .toArray()) as any;
 
   return enrollments
     .filter((enr) => enr.user_id === userId)
     .map((enr) => enr.role_id);
-
 }
 
 async function enrollStudent(courseId, userId) {
