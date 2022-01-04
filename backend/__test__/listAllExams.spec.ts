@@ -1,15 +1,15 @@
-const { expect } = require("@jest/globals");
-const {
+import { describe, expect, it } from "@jest/globals";
+import {
   _throwIfNotExactlyOneLadokId,
-} = require("../api/endpointHandlers/listAllExams");
-const { EndpointError } = require("../api/error");
+} from "../src/api/endpointHandlers/listAllExams";
+import { EndpointError } from "../src/api/error";
 
 describe("listAllExams", () => {
   describe("throwIfNotExactlyOneLadokId", () => {
     it("should throw EndpointError when list of ladokIds is empty", () => {
       let err;
       try {
-        _throwIfNotExactlyOneLadokId([]);
+        _throwIfNotExactlyOneLadokId([], null);
       } catch (e) {
         err = e;
       }
@@ -19,11 +19,11 @@ describe("listAllExams", () => {
 
     it("should throw EndpointError when list of ladokIds is longer than 1", () => {
       /**
-       * We currently don't support multiple aktivitetstillfällen for a given course
+       * We currently don't support multiple aktivitetstillfîllen for a given course
        */
       let err;
       try {
-        _throwIfNotExactlyOneLadokId([1, 2]);
+        _throwIfNotExactlyOneLadokId([1, 2], null);
       } catch (e) {
         err = e;
       }
@@ -34,7 +34,7 @@ describe("listAllExams", () => {
     it("should pass if only one item", () => {
       let err;
       try {
-        _throwIfNotExactlyOneLadokId([1]);
+        _throwIfNotExactlyOneLadokId([1], null);
       } catch (e) {
         err = e;
       }

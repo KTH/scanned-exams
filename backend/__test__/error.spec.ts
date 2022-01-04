@@ -13,7 +13,7 @@ import {
   CanvasApiError,
   LadokApiError,
   TentaApiError,
-} from "../api/error";
+} from "../src/api/error";
 
 const tmpConsole = {
   error: console.error,

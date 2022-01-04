@@ -1,10 +1,12 @@
-import { describe, expect, it } from "@jest/globals";
+import { describe, expect, it, jest } from "@jest/globals";
 import {
   _throwIfNotExactlyOneLadokId,
-} from "../api/endpointHandlers/listAllExams";
-import { EndpointError } from "../api/error";
+} from "../src/api/endpointHandlers/setupCourse";
+import { EndpointError } from "../src/api/error";
 
-describe("listAllExams", () => {
+jest.mock("../src/api/externalApis/canvasApiClient");
+
+describe("setupCourse", () => {
   describe("throwIfNotExactlyOneLadokId", () => {
     it("should throw EndpointError when list of ladokIds is empty", () => {
       let err;

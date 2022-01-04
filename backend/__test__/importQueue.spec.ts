@@ -14,7 +14,7 @@ import {
   TQueueEntryError,
   // updateStatusOfEntryInQueue,
   // getStatusFromQueue,
-} from "../api/importQueue";
+} from "../src/api/importQueue";
 
 /**
  *
