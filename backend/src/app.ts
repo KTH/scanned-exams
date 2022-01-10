@@ -1,3 +1,4 @@
+import "./config";
 import log from "skog";
 import server from "./server";
 import { startBackgroundImport } from "./importWorker";

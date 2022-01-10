@@ -1,6 +1,4 @@
-require("dotenv").config();
-require("@kth/reqvars").check();
-
+import log from "skog";
 import express from "express";
 import cookieParser from "cookie-parser";
 import session from "express-session";
@@ -11,24 +9,8 @@ import connectMongodbSession from "connect-mongodb-session";
 import apiRouter from "./api/router";
 import authRouter from "./auth/router";
 import monitor from "./monitor";
-import log from "skog";
 
 const MongoDBStore = connectMongodbSession(session);
-
-log.init.pino({
-  app: "scanned-exams",
-});
-
-process.on("uncaughtException", (err) => {
-  log.fatal(err, `Reject: ${err}`);
-  process.exit(1);
-});
-
-process.on("unhandledRejection", (reason) => {
-  log.fatal(reason, `Reject: ${reason}`);
-  process.exit(1);
-});
-
 const server = express();
 
 const COOKIE_MAX_AGE_SECONDS = 3600;
@@ -148,7 +130,9 @@ server.get("/scanned-exams/app", async (req, res) => {
 });
 server.use(
   "/scanned-exams/app/static",
-  express.static(path.join(__dirname, "..", "..", "frontend", "build", "static"))
+  express.static(
+    path.join(__dirname, "..", "..", "frontend", "build", "static")
+  )
 );
 
 server.get("/scanned-exams/_monitor", monitor);

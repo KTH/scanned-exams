@@ -1,7 +1,6 @@
 import { MongoClient, ObjectId } from "mongodb";
 import log from "skog";
 import { ImportError } from "../error";
-require("dotenv").config();
 
 const { MONGODB_CONNECTION_STRING } = process.env;
 const DB_QUEUE_NAME = "import_queue";
@@ -47,13 +46,13 @@ type TStudent = {
   kthId: string;
   firstName: string;
   lastName: string;
-}
+};
 
 export type TQueueEntryError = {
   type: string;
   message: string;
   details?: object; // Additional error details
-}
+};
 
 class QueueEntry {
   fileId: number;
@@ -122,7 +121,7 @@ type TQueueSummary = {
   error: number;
   ignored: number;
   imported: number;
-}
+};
 
 class QueueStatus {
   /**
@@ -185,7 +184,7 @@ async function getEntriesFromQueue(courseId) {
     return entries.map((entry) => new QueueEntry(entry as any));
   } catch (err) {
     if (err.name === "TypeError") throw err;
-    
+
     // TODO: Handle errors
     log.error({ err });
     throw new ImportError({
@@ -242,7 +241,6 @@ async function resetQueueForImport(courseId) {
  * @param {Object} entry This is a QueueEntry like object
  * @returns QueueEntry
  */
-
 
 async function addEntryToQueue(entry) {
   assert(entry.fileId !== undefined, "Param entry is missing fileId");
@@ -382,7 +380,11 @@ async function updateStudentOfEntryInQueue(
   }
 }
 
-async function updateStatusOfEntryInQueue(entry, status, errorDetails?: TQueueEntryError) {
+async function updateStatusOfEntryInQueue(
+  entry,
+  status,
+  errorDetails?: TQueueEntryError
+) {
   try {
     const collImportQueue = await getImportQueueCollection();
 
