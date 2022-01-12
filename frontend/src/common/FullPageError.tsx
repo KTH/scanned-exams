@@ -15,10 +15,12 @@ export default function FullPageError({ error }: any) {
 
   return (
     <div className="flex flex-row items-center justify-center">
-      <div role="alert" className="bg-red-100 p-12 m-12 max-w-3xl">
-        <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-        <p className="my-6 text-lg">{body}</p>
+      <div role="alert" className="bg-red-50 border-2 border-red-200 rounded p-12 m-12 max-w-3xl">
+        <h2 className="text-xl text-red-500 font-semibold tracking-tight">{title}</h2>
+        <p className="mt-6  text-lg text-black">{body}</p>
       </div>
     </div>
   );
 }
+
+"bg-red-50 border-l-4 border-red-600 text-red-800 p-4 mt-6"

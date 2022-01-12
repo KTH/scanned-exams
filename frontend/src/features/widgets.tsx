@@ -8,6 +8,9 @@ export const cssInfoBox =
 export const cssSuccessBox =
   "bg-green-50 border-l-4 border-green-600 text-green-800 p-4 mt-6";
 
+export const cssErrorBox =
+  "bg-red-50 border-l-4 border-red-600 text-red-800 p-4 mt-6";
+
 export function P(props: any) {
   return <p className="mt-6" {...props} />;
 }
