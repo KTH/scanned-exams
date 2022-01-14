@@ -1,4 +1,3 @@
-import "./config";
 import fs from "fs";
 import https from "https";
 import log from "skog";
