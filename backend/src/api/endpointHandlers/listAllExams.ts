@@ -64,9 +64,9 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
     assignment.id
   );
 
-  // Filter-out submissions without exams or without KTH ID
+  // Select only online_upload submissions
   return submissions
-    .filter((s) => s.workflow_state !== "unsubmitted" || !s.user?.sis_user_id)
+    .filter((s) => s.submission_type === "online_upload")
     .map((submission) => submission.user?.sis_user_id);
 }
 
