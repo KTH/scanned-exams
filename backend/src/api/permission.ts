@@ -1,8 +1,8 @@
 import log from "skog";
-import * as canvasApi from "./externalApis/canvasApiClient";
 import { AuthError, CanvasApiError } from "./error";
+import CanvasUserApiClient from "./externalApis/canvasUserApiClient";
 
-async function checkPermissions(courseId, userId) {
+async function checkPermissions(courseId, { accessToken, userId }) {
   if (!courseId || courseId === "undefined") {
     throw new AuthError({
       type: "permission_denied",
@@ -11,15 +11,15 @@ async function checkPermissions(courseId, userId) {
     });
   }
 
-  if (!userId) {
+  if (!accessToken) {
     throw new AuthError({
       type: "permission_denied",
       message:
-        "Missing user ID is required to determine permissions (not found in session)",
+        "Missing access token, it is required to determine permissions (not found in session)",
     });
   }
-
-  const roles = await canvasApi.getRoles(courseId, userId).catch((err) => {
+  const canvasApi = new CanvasUserApiClient(accessToken);
+  const roles = await canvasApi.getRoles(courseId).catch((err) => {
     throw new CanvasApiError({
       type: "unhandled_error",
       statusCode: 503,
@@ -45,14 +45,14 @@ async function checkPermissions(courseId, userId) {
 }
 
 function checkPermissionsMiddleware(req, res, next) {
-  checkPermissions(req.params.id, req.session.userId)
+  checkPermissions(req.params.id, {
+    accessToken: req.session.accessToken,
+    userId: req.session.userId,
+  })
     .then(() => {
       next();
     })
     .catch(next);
 }
 
-export {
-  checkPermissions,
-  checkPermissionsMiddleware,
-};
+export { checkPermissions, checkPermissionsMiddleware };
