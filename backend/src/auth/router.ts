@@ -1,7 +1,18 @@
 import express from "express";
-import { Issuer, generators } from "openid-client";
+import { Issuer, generators, TokenSet } from "openid-client";
 import { URL } from "url";
 import log from "skog";
+
+/**
+ * Fields that are not part of the oauth standard but are included in the
+ * response given by Canvas
+ */
+interface CanvasTokenSet extends TokenSet {
+  user: {
+    /** User ID */
+    id: number;
+  };
+}
 
 const router = express.Router();
 const OAUTH_REDIRECT_URI = new URL(
@@ -40,9 +51,13 @@ router.post("/", (req, res) => {
 
 router.get("/callback", async (req, res) => {
   try {
-    const tokenSet = await client.oauthCallback(OAUTH_REDIRECT_URI.toString(), req.query, {
-      state: req.session.temporalState,
-    }) as any;
+    const tokenSet = (await client.oauthCallback(
+      OAUTH_REDIRECT_URI.toString(),
+      req.query,
+      {
+        state: req.session.temporalState,
+      }
+    )) as CanvasTokenSet;
 
     // TODO: What happens if there is no "tokenSet"?
     // TODO: What happens if the user clicks "not authorize"?
@@ -50,6 +65,8 @@ router.get("/callback", async (req, res) => {
 
     req.session.temporalState = undefined;
     req.session.userId = tokenSet.user.id;
+    req.session.accessToken = tokenSet.access_token;
+    req.session.refreshToken = tokenSet.refresh_token;
 
     const courseId = req.session.temporalCourseId;
     req.session.temporalCourseId = undefined;
