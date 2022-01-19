@@ -10,8 +10,12 @@
  */
 import Canvas from "@kth/canvas-api";
 
-interface Enrollment {
+interface IRole {
   role_id: number;
+}
+
+interface ICourse {
+  enrollments: IRole[];
 }
 
 export default class CanvasUserApiClient {
@@ -23,10 +27,9 @@ export default class CanvasUserApiClient {
 
   /** Get which roles have the current user in a given course */
   async getRoles(courseId: string) {
-    const enrollments = await this.client
-      .listItems<Enrollment>(`courses/${courseId}/enrollments?user_id=self`)
-      .toArray();
+    const { body: course } = await this.client
+      .get<ICourse>(`courses/${courseId}`);
 
-    return enrollments.map((e) => e.role_id);
+    return course.enrollments?.map((r) => r.role_id);
   }
 }
