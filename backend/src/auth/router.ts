@@ -41,7 +41,7 @@ router.post("/", (req, res) => {
   const state = generators.state();
   const url = client.authorizationUrl({
     state,
-    scope: "url:GET|/api/v1/courses/:course_id/enrollments",
+    scope: "url:GET|/api/v1/courses/:course_id",
   });
 
   req.session.temporalCourseId = req.body.courseId;
