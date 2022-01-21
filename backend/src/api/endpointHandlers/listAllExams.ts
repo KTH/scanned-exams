@@ -77,7 +77,7 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
     .filter((s) => s.attachments.reduce((val, next) => next.filename !== "file_removed.pdf" ? val + 1 : val, 0))
     // Remove submissions witout KTH ID
     .filter((s) => s.user?.sis_user_id)
-    .map(s => s.user.user.sis_user_id);
+    .map(s => s.user.sis_user_id);
 }
 
 function calcNewSummary({ ...summaryProps }: TErrorSummary, status: string, error: any) : TErrorSummary {
