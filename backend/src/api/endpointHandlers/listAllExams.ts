@@ -64,10 +64,19 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
     assignment.id
   );
 
-  // Select only online_upload submissions
+  // Filter-out submissions without exams
   return submissions
-    .filter((s) => s.submission_type === "online_upload")
-    .map((submission) => submission.user?.sis_user_id);
+    .filter((s) => (
+        s.workflow_state !== "unsubmitted"
+        && Array.isArray(s.attachments)
+        && s.attachments.length > 0
+      )
+    )
+    // Remove submissions with only deleted files. They are marked with { filename: 'file_removed.pdf' } by SpeedGrader/Canvas
+    // 0 - remove from list, >= 1 - keep in list
+    .filter((s) => s.attachments.reduce((val, next) => next.filename !== "file_removed.pdf" ? val + 1 : val, 0))
+    // Remove submissions witout KTH ID
+    .filter((s) => s.user?.sis_user_id)
 }
 
 function calcNewSummary({ ...summaryProps }: TErrorSummary, status: string, error: any) : TErrorSummary {
