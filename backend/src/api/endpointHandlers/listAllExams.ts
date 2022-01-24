@@ -40,7 +40,7 @@ async function listScannedExams(courseId, ladokId) {
 /**
  * Returns a list of students (KTH IDs) that has an exam in Canvas
  */
-async function listStudentsWithExamsInCanvas(courseId, ladokId) {
+async function listStudentsWithExamsInCanvas(courseId, ladokId) : Promise<String[]> {
   const assignment = await canvasApi
     .getValidAssignment(courseId, ladokId)
     .then((result) => {
@@ -64,10 +64,35 @@ async function listStudentsWithExamsInCanvas(courseId, ladokId) {
     assignment.id
   );
 
-  // Select only online_upload submissions
+  // Filter-out submissions without exams
   return submissions
-    .filter((s) => s.submission_type === "online_upload")
-    .map((submission) => submission.user?.sis_user_id);
+    .filter(_isSubmittedAndHasAttachments)
+    // Remove submissions with only deleted files
+    .filter(_hasRealFilesAsAttachment)
+    // Remove submissions witout KTH ID
+    .filter(_hasSisUserId)
+    .map(s => s.user.sis_user_id);
+}
+
+function _isSubmittedAndHasAttachments(s) : boolean {
+  return (
+    s.workflow_state !== "unsubmitted"
+    && Array.isArray(s.attachments)
+    && s.attachments.length > 0
+  );
+}
+
+function _hasRealFilesAsAttachment(s) : boolean {
+  if (!Array.isArray(s.attachments)) {
+    return false;
+  }
+  // Deleted files are marked with { filename: 'file_removed.pdf' } by SpeedGrader/Canvas
+  const nrofActiveFiles = s.attachments.reduce((val, next) => next.filename !== "file_removed.pdf" ? val + 1 : val, 0);
+  return  nrofActiveFiles > 0;
+}
+
+function _hasSisUserId(s) : boolean {
+  return s.user?.sis_user_id ? true : false;
 }
 
 function calcNewSummary({ ...summaryProps }: TErrorSummary, status: string, error: any) : TErrorSummary {
