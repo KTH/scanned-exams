@@ -8,6 +8,7 @@ import {
 } from "../importQueue";
 import { EndpointError } from "../error";
 import { enrollStudent } from "../externalApis/canvasApiClient";
+import log from "skog";
 
 async function getStatusFromQueueHandler(req, res, next) {
   try {
@@ -118,7 +119,12 @@ async function fixErrorsInQueue(req, res, next) {
       if (entry.error?.type === "missing_student") {
         // Add student to Canvas
         // eslint-disable-next-line no-await-in-loop
-        await enrollStudent(courseId, entry.student.kthId);
+        await enrollStudent(courseId, entry.student.kthId).catch((err) => {
+          log.error(
+            { err },
+            `Error trying to add student [${entry.student.kthId}] in course [${courseId}]`
+          );
+        });
         // Add entry to the queue (since its already there, we update the status to "working")
       }
 
