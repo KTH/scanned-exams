@@ -4,7 +4,6 @@ import * as canvasApi from "../externalApis/canvasApiClient";
 import * as tentaApi from "../externalApis/tentaApiClient";
 import { getEntriesFromQueue } from "../importQueue";
 import { CanvasApiError, EndpointError } from "../error";
-import { totalmem } from "os";
 
 /**
  * Get the "ladokId" that is associated with a given course. It throws in case
