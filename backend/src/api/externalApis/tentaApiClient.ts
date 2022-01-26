@@ -5,7 +5,7 @@ import { Readable } from "stream";
 import { tentaApiGenericErrorHandler } from "../error";
 
 /** An exam that exists in "Tenta API" */
-interface ScannedExam {
+export interface ScannedExam {
   /** Unique ID for the exam */
   fileId: number;
 
