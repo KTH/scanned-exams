@@ -24,7 +24,7 @@ const store = new MongoDBStore({
   // These two lines are required when using CosmosDB
   // See https://github.com/mongodb-js/connect-mongodb-session#azure-cosmos-mongodb-support
   expiresKey: `_ts`,
-  expiresAfterSeconds: COOKIE_MAX_AGE_SECONDS
+  expiresAfterSeconds: COOKIE_MAX_AGE_SECONDS,
 });
 
 server.set("trust proxy", 1);
@@ -75,7 +75,7 @@ server.use(cookieParser());
 //               like CSS files)
 // - /auth       routes for the authorization process
 // - /_monitor   just the monitor page
-function _showOnlyHostname (inp: String): String {
+function _showOnlyHostname(inp: String): String {
   const tmpIn = inp.startsWith("http") ? inp : `https://${inp}`;
   const tmpOut = tmpIn.match(/https?:\/\/[^\/]*/m);
   if (tmpOut != null) {
@@ -103,13 +103,16 @@ server.post("/scanned-exams", async (req, res) => {
     );
 
     if (!process.env.CANVAS_API_URL.startsWith(`https://${domain}`)) {
-      const msg = 
-        `This app is configured for ${_showOnlyHostname(process.env.CANVAS_API_URL)} but you are running it from ${_showOnlyHostname(domain)}. Please update your bookmarks, ${_showOnlyHostname(process.env.CANVAS_API_URL)} is the URL that should be used!`
+      const msg = `This app is configured for ${_showOnlyHostname(
+        process.env.CANVAS_API_URL
+      )} but you are running it from ${_showOnlyHostname(
+        domain
+      )}. Please update your bookmarks, ${_showOnlyHostname(
+        process.env.CANVAS_API_URL
+      )} is the URL that should be used!`;
       log.warn(msg);
 
-      return res
-        .status(400)
-        .send(msg);
+      return res.status(400).send(msg);
     }
 
     req.session.userId = null;

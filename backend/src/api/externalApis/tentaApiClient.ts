@@ -20,7 +20,7 @@ async function getVersion() {
 async function examListByLadokId(ladokId) {
   log.debug(`Getting exams for Ladok ID ${ladokId}`);
 
-  const { body } = await client("windream/search/documents/false", {
+  const { body } = (await client("windream/search/documents/false", {
     method: "POST",
     json: {
       searchIndiceses: [
@@ -35,7 +35,7 @@ async function examListByLadokId(ladokId) {
       useDatesInSearch: false,
     },
     responseType: "json",
-  }).catch(tentaApiGenericErrorHandler) as any;
+  }).catch(tentaApiGenericErrorHandler)) as any;
 
   if (!body.documentSearchResults) {
     log.debug(`No exams found with the "new format" e_ladokid=${ladokId}`);
@@ -71,9 +71,9 @@ async function examListByLadokId(ladokId) {
 /** Download the exam with ID "fileId". Returns its content as a ReadableStream */
 async function downloadExam(fileId) {
   log.info(`Downloading file ${fileId}...`);
-  const { body } = await client(`windream/file/${fileId}/true`, {
+  const { body } = (await client(`windream/file/${fileId}/true`, {
     responseType: "json",
-  }) as any;
+  })) as any;
 
   const getValue = (index) =>
     body.wdFile.objectIndiceses.find((di) => di.index === index)?.value;
@@ -103,8 +103,4 @@ async function downloadExam(fileId) {
   };
 }
 
-export {
-  examListByLadokId,
-  downloadExam,
-  getVersion,
-};
+export { examListByLadokId, downloadExam, getVersion };

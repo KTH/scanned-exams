@@ -1,7 +1,5 @@
 import { describe, expect, it, jest } from "@jest/globals";
-import {
-  _throwIfNotExactlyOneLadokId,
-} from "../src/api/endpointHandlers/setupCourse";
+import { _throwIfNotExactlyOneLadokId } from "../src/api/endpointHandlers/setupCourse";
 import { EndpointError } from "../src/api/error";
 
 jest.mock("../src/api/externalApis/canvasApiClient");

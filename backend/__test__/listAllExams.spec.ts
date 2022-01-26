@@ -1,7 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import {
-  _throwIfNotExactlyOneLadokId,
-} from "../src/api/endpointHandlers/listAllExams";
+import { _throwIfNotExactlyOneLadokId } from "../src/api/endpointHandlers/listAllExams";
 import { EndpointError } from "../src/api/error";
 
 describe("listAllExams", () => {

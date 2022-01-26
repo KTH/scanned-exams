@@ -8,7 +8,7 @@ import { CanvasApiError, EndpointError } from "../error";
  * has no valid ladok IDs
  */
 function throwIfNotExactlyOneLadokId(ladokIds, courseId) {
-    if (!Array.isArray(ladokIds) || ladokIds.length !== 1) {  
+  if (!Array.isArray(ladokIds) || ladokIds.length !== 1) {
     throw new EndpointError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource

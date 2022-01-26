@@ -27,8 +27,9 @@ export default class CanvasUserApiClient {
 
   /** Get which roles have the current user in a given course */
   async getRoles(courseId: string) {
-    const { body: course } = await this.client
-      .get<ICourse>(`courses/${courseId}`);
+    const { body: course } = await this.client.get<ICourse>(
+      `courses/${courseId}`
+    );
 
     return course.enrollments?.map((r) => r.role_id);
   }

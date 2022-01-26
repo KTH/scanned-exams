@@ -15,8 +15,6 @@ interface IRecoverableError {
   err: object;
 }
 
-
-
 class OperationalError extends Error implements IOperationalError {
   name: string;
   statusCode: number;
@@ -92,7 +90,13 @@ class EndpointError extends OperationalError {
    * @param {object=} param0.details Additional error details for used by programmer
    * @param {Error=} param0.err The original error that caused this error
    */
-  constructor({ type, statusCode, message, details = undefined, err = undefined }) {
+  constructor({
+    type,
+    statusCode,
+    message,
+    details = undefined,
+    err = undefined,
+  }) {
     super("EndpointError", statusCode, type, message, details, err);
   }
 }
@@ -108,7 +112,13 @@ class CanvasApiError extends OperationalError {
    * @param {object=} param0.details Additional error details for used by programmer
    * @param {Error=} param0.err The original error that caused this error
    */
-  constructor({ type, statusCode = 503, message, details = undefined, err = undefined }) {
+  constructor({
+    type,
+    statusCode = 503,
+    message,
+    details = undefined,
+    err = undefined,
+  }) {
     super("CanvasApiError", statusCode, type, message, details, err);
   }
 }
@@ -124,7 +134,13 @@ class LadokApiError extends OperationalError {
    * @param {object=} param0.details Additional error details for used by programmer
    * @param {Error=} param0.err The original error that caused this error
    */
-  constructor({ type, statusCode = 503, message, details = undefined, err = undefined }) {
+  constructor({
+    type,
+    statusCode = 503,
+    message,
+    details = undefined,
+    err = undefined,
+  }) {
     super("LadokApiError", statusCode, type, message, details, err);
   }
 }
