@@ -1,5 +1,8 @@
 import { describe, expect, it } from "@jest/globals";
-import { _throwIfNotExactlyOneLadokId } from "../src/api/endpointHandlers/listAllExams";
+import {
+  _throwIfNotExactlyOneLadokId,
+  isLastScanned,
+} from "../src/api/endpointHandlers/listAllExams";
 import { EndpointError } from "../src/api/error";
 
 describe("listAllExams", () => {
@@ -39,5 +42,85 @@ describe("listAllExams", () => {
 
       expect(err).toBeUndefined();
     });
+  });
+});
+
+describe("isLastScanned", () => {
+  it("should keep only the 'latest' file for each student", () => {
+    const file1 = {
+      fileId: 1,
+      student: {
+        id: "1",
+      },
+    };
+    const file2 = {
+      fileId: 2,
+      student: {
+        id: "1",
+      },
+    };
+    const file3 = {
+      fileId: 3,
+      student: {
+        id: "2",
+      },
+    };
+    const file4 = {
+      fileId: 4,
+      student: {
+        id: "1",
+      },
+    };
+    const file5 = {
+      fileId: 5,
+      student: {
+        id: "2",
+      },
+    };
+
+    const input = [file1, file2, file3, file4, file5];
+    const output = input.filter(isLastScanned);
+
+    expect(output).toEqual([file4, file5]);
+  });
+
+  it("should keep the file with the highest 'fileId' regardless of order in the array", () => {
+    const file1 = {
+      fileId: 1,
+      student: {
+        id: "1",
+      },
+    };
+    const file2 = {
+      fileId: 2,
+      student: {
+        id: "1",
+      },
+    };
+
+    const input1 = [file1, file2];
+    const output1 = input1.filter(isLastScanned);
+
+    expect(output1).toEqual([file2]);
+
+    const input2 = [file2, file1];
+    const output2 = input2.filter(isLastScanned);
+    expect(output2).toEqual([file2]);
+  });
+
+  it("should not filter out any file with non defined student ID", () => {
+    const file1 = {
+      fileId: 1,
+      student: {},
+    };
+    const file2 = {
+      fileId: 2,
+      student: {},
+    };
+
+    const input = [file1, file2];
+    const output = input.filter(isLastScanned);
+
+    expect(output).toEqual([file1, file2]);
   });
 });
