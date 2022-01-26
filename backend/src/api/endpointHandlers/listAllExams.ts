@@ -1,7 +1,7 @@
 /** Functions that handle the "import exams" part of the app */
 import log from "skog";
 import * as canvasApi from "../externalApis/canvasApiClient";
-import * as tentaApi from "../externalApis/tentaApiClient";
+import { ScannedExam, examListByLadokId } from "../externalApis/tentaApiClient";
 import { getEntriesFromQueue } from "../importQueue";
 import { CanvasApiError, EndpointError } from "../error";
 
@@ -25,9 +25,25 @@ function throwIfNotExactlyOneLadokId(ladokIds, courseId) {
   }
 }
 
+/**
+ * Returns true if the `current` exam is the "last scanned" one in the array.
+ *
+ * This function is meant to be passed as predicate to "filter" an array of `tentaApi.ScannedExam`
+ */
+export function isLastScanned(
+  current: ScannedExam,
+  index: number,
+  array: ScannedExam[]
+) {
+  const allIds = array.map((exam) => exam.fileId);
+
+  // We are assuming that the "last scanned" will have a "higher" ID
+  return Math.max(...allIds) === current.fileId;
+}
+
 /** Returns a list of scanned exams (i.e. in Windream) given its ladokId */
 async function listScannedExams(courseId, ladokId) {
-  const allScannedExams = await tentaApi.examListByLadokId(ladokId);
+  const allScannedExams = await examListByLadokId(ladokId);
 
   log.info(
     `Obtained exams for course [${courseId}] ladokId [${ladokId}]: ${allScannedExams.length}`
