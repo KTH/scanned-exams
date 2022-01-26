@@ -317,7 +317,7 @@ function errorHandler(err, req, res, next) {
   });
 }
 
-function tentaApiGenericErrorHandler(err) {
+function tentaApiGenericErrorHandler(err): never {
   Error.captureStackTrace(err, tentaApiGenericErrorHandler);
   const error = new TentaApiError({
     err, // Pass the original error

@@ -4,6 +4,24 @@ import { Readable } from "stream";
 
 import { tentaApiGenericErrorHandler } from "../error";
 
+/** An exam that exists in "Tenta API" */
+interface ScannedExam {
+  /** Unique ID for the exam */
+  fileId: number;
+
+  /** Student data */
+  student: {
+    /** Student KTH ID */
+    id?: string;
+
+    /** Student first name */
+    firstName?: string;
+
+    /** Student last name */
+    lastName?: string;
+  };
+}
+
 const client = got.extend({
   prefixUrl: process.env.TENTA_API_URL,
   headers: {
@@ -17,10 +35,10 @@ async function getVersion() {
   return body;
 }
 
-async function examListByLadokId(ladokId) {
+async function examListByLadokId(ladokId): Promise<ScannedExam[]> {
   log.debug(`Getting exams for Ladok ID ${ladokId}`);
 
-  const { body } = (await client("windream/search/documents/false", {
+  const { body } = await client<any>("windream/search/documents/false", {
     method: "POST",
     json: {
       searchIndiceses: [
@@ -35,14 +53,14 @@ async function examListByLadokId(ladokId) {
       useDatesInSearch: false,
     },
     responseType: "json",
-  }).catch(tentaApiGenericErrorHandler)) as any;
+  }).catch(tentaApiGenericErrorHandler);
 
   if (!body.documentSearchResults) {
     log.debug(`No exams found with the "new format" e_ladokid=${ladokId}`);
     return [];
   }
 
-  const list = [];
+  const list: ScannedExam[] = [];
 
   for (const result of body.documentSearchResults) {
     // Helper function to get the value of the attribute called "index"
