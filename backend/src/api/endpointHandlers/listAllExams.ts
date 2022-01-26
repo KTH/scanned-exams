@@ -26,7 +26,8 @@ function throwIfNotExactlyOneLadokId(ladokIds, courseId) {
 }
 
 /**
- * Returns true if the `current` exam is the "last scanned" one in the array.
+ * Returns true if the `current` exam is the "last scanned" one in the array for
+ * the same student.
  *
  * This function is meant to be passed as predicate to "filter" an array of `tentaApi.ScannedExam`
  */
@@ -35,7 +36,13 @@ export function isLastScanned(
   index: number,
   array: ScannedExam[]
 ) {
-  const allIds = array.map((exam) => exam.fileId);
+  if (!current.student.id) {
+    return true;
+  }
+
+  const allIds = array
+    .filter((exam) => exam.student.id === current.student.id)
+    .map((exam) => exam.fileId);
 
   // We are assuming that the "last scanned" will have a "higher" ID
   return Math.max(...allIds) === current.fileId;
@@ -184,48 +191,50 @@ async function listAllExams(req, res, next) {
       errorsByType: {},
     };
 
-    const listOfExamsToHandle = allScannedExams.map((exam) => {
-      const foundInCanvas = studentsWithExamsInCanvas.find(
-        (s) => s === exam.student?.id
-      );
+    const listOfExamsToHandle = allScannedExams
+      .filter(isLastScanned)
+      .map((exam) => {
+        const foundInCanvas = studentsWithExamsInCanvas.find(
+          (s) => s === exam.student?.id
+        );
 
-      const foundInQueue = examsInImportQueue.find(
-        (examInQueue) => examInQueue.fileId === exam.fileId
-      );
+        const foundInQueue = examsInImportQueue.find(
+          (examInQueue) => examInQueue.fileId === exam.fileId
+        );
 
-      let status = "new";
-      let errorDetails;
-      if (foundInCanvas) {
-        status = "imported";
-      } else if (foundInQueue) {
-        switch (foundInQueue.status) {
-          case "pending":
-            status = "pending";
-            break;
-          case "error":
-            status = "error";
-            errorDetails = foundInQueue.error;
-            break;
-          case "imported":
-            // It was marked imported but not found in Canvas
-            // Allow user to retry import
-            status = "new";
-            break;
-          default:
-            status = foundInQueue.status;
-            errorDetails = foundInQueue.error;
+        let status = "new";
+        let errorDetails;
+        if (foundInCanvas) {
+          status = "imported";
+        } else if (foundInQueue) {
+          switch (foundInQueue.status) {
+            case "pending":
+              status = "pending";
+              break;
+            case "error":
+              status = "error";
+              errorDetails = foundInQueue.error;
+              break;
+            case "imported":
+              // It was marked imported but not found in Canvas
+              // Allow user to retry import
+              status = "new";
+              break;
+            default:
+              status = foundInQueue.status;
+              errorDetails = foundInQueue.error;
+          }
         }
-      }
 
-      summary = calcNewSummary(summary, status, errorDetails);
+        summary = calcNewSummary(summary, status, errorDetails);
 
-      return {
-        id: exam.fileId,
-        student: exam.student,
-        status,
-        error: errorDetails,
-      };
-    });
+        return {
+          id: exam.fileId,
+          student: exam.student,
+          status,
+          error: errorDetails,
+        };
+      });
 
     res.send({
       result: listOfExamsToHandle,
