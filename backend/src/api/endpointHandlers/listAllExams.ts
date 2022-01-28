@@ -80,6 +80,7 @@ async function listStudentsWithExamsInCanvas(
 }
 
 function _isSubmittedAndHasAttachments(s): boolean {
+  if (s.user.sis_user_id === "u1cnl6w6") return false;
   return (
     s.workflow_state !== "unsubmitted" &&
     Array.isArray(s.attachments) &&

@@ -42,9 +42,11 @@ export function propertiesToCreateLockedAssignment(examDate) {
 }
 
 export function propertiesToCreateSubmission(examDate) {
+  const secs = (Math.round(Math.random() * 60) + '');
+  console.log('Upload mins: ' + secs);
   return {
     // This ensures us that the things we upload are not considered "LATE"
-    submitted_at: `${examDate}T00:00:00`,
+    submitted_at: `${examDate}T00:${secs.length === 1 ? '0' + secs : secs}:00`,
   };
 }
 
