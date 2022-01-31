@@ -267,7 +267,7 @@ async function uploadExam(
         `courses/${courseId}/assignments/${assignment.id}/submissions/${user.id}/files`,
         "POST",
         {
-          name: `${studentKthId}.pdf`,
+          name: `${fileId}.pdf`,
         }
       )
       .catch((err) => {
