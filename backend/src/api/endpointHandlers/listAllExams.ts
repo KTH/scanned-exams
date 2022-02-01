@@ -4,7 +4,6 @@ import * as canvasApi from "../externalApis/canvasApiClient";
 import * as tentaApi from "../externalApis/tentaApiClient";
 import { getEntriesFromQueue } from "../importQueue";
 import { CanvasApiError, EndpointError } from "../error";
-import { totalmem } from "os";
 
 /**
  * Get the "ladokId" that is associated with a given course. It throws in case
@@ -40,10 +39,10 @@ async function listScannedExams(courseId, ladokId) {
 /**
  * Returns a list of students (KTH IDs) that has an exam in Canvas
  */
-async function listStudentsWithExamsInCanvas(
+async function listStudentSubmissionsInCanvas(
   courseId,
   ladokId
-): Promise<String[]> {
+): Promise<{submission_history}[]> {
   const assignment = await canvasApi
     .getValidAssignment(courseId, ladokId)
     .then((result) => {
@@ -67,40 +66,7 @@ async function listStudentsWithExamsInCanvas(
     assignment.id
   );
 
-  // Filter-out submissions without exams
-  return (
-    submissions
-      .filter(_isSubmittedAndHasAttachments)
-      // Remove submissions with only deleted files
-      .filter(_hasRealFilesAsAttachment)
-      // Remove submissions witout KTH ID
-      .filter(_hasSisUserId)
-      .map((s) => s.user.sis_user_id)
-  );
-}
-
-function _isSubmittedAndHasAttachments(s): boolean {
-  return (
-    s.workflow_state !== "unsubmitted" &&
-    Array.isArray(s.attachments) &&
-    s.attachments.length > 0
-  );
-}
-
-function _hasRealFilesAsAttachment(s): boolean {
-  if (!Array.isArray(s.attachments)) {
-    return false;
-  }
-  // Deleted files are marked with { filename: 'file_removed.pdf' } by SpeedGrader/Canvas
-  const nrofActiveFiles = s.attachments.reduce(
-    (val, next) => (next.filename !== "file_removed.pdf" ? val + 1 : val),
-    0
-  );
-  return nrofActiveFiles > 0;
-}
-
-function _hasSisUserId(s): boolean {
-  return s.user?.sis_user_id ? true : false;
+  return submissions;
 }
 
 function calcNewSummary(
@@ -148,16 +114,16 @@ async function listAllExams(req, res, next) {
     throwIfNotExactlyOneLadokId(ladokIds, courseId);
     const ladokId = ladokIds[0];
 
-    let [allScannedExams, studentsWithExamsInCanvas, examsInImportQueue] =
+    let [allScannedExams, studentsWithSubmissionsInCanvas, examsInImportQueue] =
       await Promise.all([
         listScannedExams(courseId, ladokId),
-        listStudentsWithExamsInCanvas(courseId, ladokId),
+        listStudentSubmissionsInCanvas(courseId, ladokId),
         getEntriesFromQueue(courseId),
       ]);
 
     // Make sure these are arrays
     allScannedExams = allScannedExams || [];
-    studentsWithExamsInCanvas = studentsWithExamsInCanvas || [];
+    studentsWithSubmissionsInCanvas = studentsWithSubmissionsInCanvas || [];
     examsInImportQueue = examsInImportQueue || [];
 
     let summary: TErrorSummary = {
@@ -179,10 +145,22 @@ async function listAllExams(req, res, next) {
         return 0;
       }
     })
+
+    // Store all attachments in lookup dict for performance.
+    // The key is a string and the object contains at least a filename.
+    const attachmentsInCanvas: { [key: string]: { filename: string }} = {};
+    studentsWithSubmissionsInCanvas.forEach(
+      (s) => s.submission_history?.forEach((submission) => {
+        submission.attachments?.forEach((attachment) => {
+          // QUESTION: Should we warn if we have a duplicate upload?
+          // NOTE: file_removed.pdf has the same name everywhere
+          attachmentsInCanvas[attachment.filename] = attachment;
+        })
+      })
+    );
+
     const listOfExamsToHandle = allScannedExams.map((exam) => {
-      const foundInCanvas = studentsWithExamsInCanvas.find(
-        (s) => s === exam.student?.id
-      );
+      const foundInCanvas = attachmentsInCanvas[`${exam.fileId}.pdf`];
 
       const foundInQueue = examsInImportQueue.find(
         (examInQueue) => examInQueue.fileId === exam.fileId
