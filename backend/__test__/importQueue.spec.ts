@@ -51,6 +51,7 @@ describe("Import queue", () => {
   it("should add one entry to queue", async () => {
     const entry = {
       fileId: stringToInt("file1"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "mainTestCourse",
       userKthId: "u23z456",
     };
@@ -64,6 +65,7 @@ describe("Import queue", () => {
   it("should add one entry to queue with numeric fileId", async () => {
     const entry = {
       fileId: 1234,
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "mainTestCourse",
       userKthId: "u23z456",
     };
@@ -77,11 +79,13 @@ describe("Import queue", () => {
   it("should not add entry with same fileId twice", async () => {
     const entry1 = {
       fileId: stringToInt("twice1"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "mainTestCourse",
       userKthId: "u23z456",
     };
     const entry2 = {
       fileId: stringToInt("twice1"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "mainTestCourse",
       userKthId: "u23z456",
     };
@@ -101,6 +105,7 @@ describe("Import queue", () => {
   it("should list only entries with correct courseId", async () => {
     const entry1 = {
       fileId: stringToInt("filter1"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "mainTestCourse",
       userKthId: "u23z456",
     };
@@ -108,6 +113,7 @@ describe("Import queue", () => {
 
     const entry2 = {
       fileId: stringToInt("filter2"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "mainTestCourse",
       userKthId: "u23z456",
     };
@@ -115,6 +121,7 @@ describe("Import queue", () => {
 
     const entry = {
       fileId: stringToInt("filter3"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "listTest123",
       userKthId: "u23z456",
     };
@@ -134,6 +141,7 @@ describe("Import queue", () => {
   it("should allow updating status of entry in queue to 'pending'", async () => {
     const entry = {
       fileId: stringToInt("pendingFile1"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "mainTestCourse",
       userKthId: "u233z456",
     };
@@ -153,6 +161,7 @@ describe("Import queue", () => {
   it("should allow updating status of entry in queue to 'imported'", async () => {
     const entry = {
       fileId: stringToInt("importedFile1"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "mainTestCourse",
       userKthId: "u133z456",
     };
@@ -171,6 +180,7 @@ describe("Import queue", () => {
   it("should allow updating status of entry in queue to 'error' w/o details", async () => {
     const entry = {
       fileId: stringToInt("errorFile1"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "mainTestCourse",
       userKthId: "u333z456",
     };
@@ -190,6 +200,7 @@ describe("Import queue", () => {
   it("should allow updating status of entry in queue to 'error' with details", async () => {
     const entry = {
       fileId: stringToInt("errorFile2"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "mainTestCourse",
       userKthId: "u3433z456",
     };
@@ -212,6 +223,7 @@ describe("Import queue", () => {
   it("should provide status summary of queue ('working')", async () => {
     const entry = {
       fileId: stringToInt("errorFile2"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "mainTestCourse",
       userKthId: "u3433z456",
       status: "pending",
@@ -229,6 +241,7 @@ describe("Import queue", () => {
     let statusSummary;
     const entry = {
       fileId: stringToInt("statusFile1"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "statusTestCourse",
       userKthId: "u3433z456",
     };
@@ -264,6 +277,7 @@ describe("Get first element from queue", () => {
   it("should return null if there is no `pending` element", async () => {
     const entry1 = {
       fileId: stringToInt("statusFile1"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "statusTestCourse",
       userKthId: "u3433z456",
       status: "success",
@@ -277,6 +291,7 @@ describe("Get first element from queue", () => {
   it("should return the first element if something is enqueued", async () => {
     const entry1 = {
       fileId: stringToInt("statusFile1"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "statusTestCourse",
       userKthId: "u3433z456",
       status: "pending",
@@ -292,6 +307,7 @@ describe("Get first element from queue", () => {
   it("should return the first `pending` element", async () => {
     const entry1 = {
       fileId: stringToInt("statusFile1"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "statusTestCourse",
       userKthId: "u3433z456",
       status: "pending",
@@ -299,6 +315,7 @@ describe("Get first element from queue", () => {
 
     const entry2 = {
       fileId: stringToInt("statusFile2"),
+      fileCreateDate: "2022-01-01T00:01:01",
       courseId: "statusTestCourse",
       userKthId: "u3433z456",
       status: "pending",
@@ -327,6 +344,7 @@ describe("Resetting a queue", () => {
       await addEntryToQueue(
         new QueueEntry({
           fileId: i,
+          fileCreateDate: "2022-01-01T00:01:01",
           courseId,
           student: undefined,
           status: i < 8 ? "imported" : "error",
