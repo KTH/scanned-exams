@@ -248,7 +248,10 @@ async function resetQueueForImport(courseId) {
 
 async function addEntryToQueue(entry) {
   assert(entry.fileId !== undefined, "Param entry is missing fileId");
-  assert(entry.fileCreateDate !== undefined, "Param entry is missing fileCreateDate");
+  assert(
+    entry.fileCreateDate !== undefined,
+    "Param entry is missing fileCreateDate"
+  );
   assert(entry.courseId !== undefined, "Param entry is missing courseId");
 
   // Type object to get defaults
@@ -458,7 +461,10 @@ async function updateStatusOfEntryInQueue(
 async function getFirstPendingFromQueue() {
   try {
     const collImportQueue = await getImportQueueCollection();
-    const doc = await collImportQueue.findOne({ status: "pending" }, { sort: { "fileCreateDate": 1 }, },);
+    const doc = await collImportQueue.findOne(
+      { status: "pending" },
+      { sort: { fileCreateDate: 1 } }
+    );
 
     if (!doc) {
       return null;
