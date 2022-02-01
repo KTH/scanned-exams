@@ -130,7 +130,7 @@ async function getAssignmentSubmissions(courseId, assignmentId) {
   return canvas
     .listItems(
       `courses/${courseId}/assignments/${assignmentId}/submissions`,
-      { include: "user" } // include user obj with kth id
+      { include: ["user", "submission_history"] } // include user obj with kth id
     )
     .toArray() as any;
 }
@@ -305,18 +305,36 @@ async function uploadExam(
     // TODO: move the following statement outside of this function
     // Reason: this module (canvasApiClient) should not contain "business rules"
     await unlockAssignment(courseId, assignment.id);
+
+    // Get existing submission history for this student and assignment to figure out
+    // timestamp offset. If we submit on the same timestamp (submitted_at), the old
+    // submission gets overwritten.
+    const { body: submission } = await getAssignmentSubmissionForStudent({
+      courseId,
+      assignmentId: assignment.id,
+      userId: user.id,
+    });
+
+    // There is always a submission to start with in the history with status "unsubmitted"
+    // so we need to filter that out when getting nrof actual submissions
+    const nrofSubmissions = submission.submission_history?.filter(s => s.workflow_state !== "unsubmitted").length ?? 0;
+    const submissionProps = propertiesToCreateSubmission(examDate, nrofSubmissions);
+    const { submitted_at } = submissionProps;
+
     await canvas.request(
       `courses/${courseId}/assignments/${assignment.id}/submissions/`,
       "POST",
       {
         submission: {
-          ...propertiesToCreateSubmission(examDate),
+          ...submissionProps,
           submission_type: "online_upload",
           user_id: user.id,
           file_ids: [uploadedFile.id],
         },
       }
     );
+
+    return submitted_at;
   } catch (err) {
     if (err.type === "missing_student") {
       log.warn(`User ${studentKthId} is missing in Canvas course ${courseId}`);
@@ -360,6 +378,17 @@ async function getRoles(courseId, userId) {
   return enrollments
     .filter((enr) => enr.user_id === userId)
     .map((enr) => enr.role_id);
+}
+
+async function getAssignmentSubmissionForStudent({
+  courseId,
+  assignmentId,
+  userId,
+}) {
+  return canvas.get<{ submission_history: { workflow_state: String }[] }>(
+    `courses/${courseId}/assignments/${assignmentId}/submissions/${userId}`,
+    { include: ["submission_history"] }
+  );
 }
 
 async function enrollStudent(courseId, userId) {

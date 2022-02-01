@@ -41,10 +41,18 @@ export function propertiesToCreateLockedAssignment(examDate) {
   };
 }
 
-export function propertiesToCreateSubmission(examDate) {
+function _generateTimeWithOffset(offset: number) {
+  const secs = offset % 60;
+  const mins = Math.floor(offset / 60) % 60;
+  const hours = Math.floor(offset / (60 * 60)) % 24;
+  return `${hours > 9 ? hours : '0' + hours}:${mins > 9 ? mins : '0' + mins}:${secs > 9 ? secs : '0' + secs}`;
+}
+
+export function propertiesToCreateSubmission(examDate, nrofSubmissions) {
+  // TODO: If we submit on the same timestamp, the old submission gets overwritten
   return {
     // This ensures us that the things we upload are not considered "LATE"
-    submitted_at: `${examDate}T00:00:00`,
+    submitted_at: `${examDate}T${_generateTimeWithOffset(nrofSubmissions)}`,
   };
 }
 
