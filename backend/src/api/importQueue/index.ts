@@ -56,6 +56,7 @@ export type TQueueEntryError = {
 
 class QueueEntry {
   fileId: number;
+  fileCreateDate: string;
   courseId: number;
   student: TStudent;
   status: string;
@@ -67,6 +68,7 @@ class QueueEntry {
 
   constructor({
     fileId,
+    fileCreateDate,
     courseId,
     student,
     status = "new",
@@ -77,6 +79,7 @@ class QueueEntry {
     error,
   }) {
     this.fileId = fileId;
+    this.fileCreateDate = fileCreateDate;
     this.courseId = courseId;
     this.student = {
       kthId: student?.kthId,
@@ -94,6 +97,7 @@ class QueueEntry {
   toJSON() {
     return {
       fileId: this.fileId,
+      fileCreateDate: this.fileCreateDate,
       courseId: this.courseId,
       student: {
         kthId: this.student?.kthId,
@@ -244,6 +248,7 @@ async function resetQueueForImport(courseId) {
 
 async function addEntryToQueue(entry) {
   assert(entry.fileId !== undefined, "Param entry is missing fileId");
+  assert(entry.fileCreateDate !== undefined, "Param entry is missing fileCreateDate");
   assert(entry.courseId !== undefined, "Param entry is missing courseId");
 
   // Type object to get defaults
@@ -453,7 +458,7 @@ async function updateStatusOfEntryInQueue(
 async function getFirstPendingFromQueue() {
   try {
     const collImportQueue = await getImportQueueCollection();
-    const doc = await collImportQueue.findOne({ status: "pending" });
+    const doc = await collImportQueue.findOne({ status: "pending" }, { sort: { "fileCreateDate": 1 }, },);
 
     if (!doc) {
       return null;

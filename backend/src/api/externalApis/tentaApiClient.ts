@@ -17,7 +17,17 @@ async function getVersion() {
   return body;
 }
 
-async function examListByLadokId(ladokId) {
+interface WindreamsScannedExam {
+  createDate: String;
+  fileId: Number;
+  student: {
+    id: String;
+    firstName: String;
+    lastName: String;
+  }
+}
+
+async function examListByLadokId(ladokId): Promise<WindreamsScannedExam[]> {
   log.debug(`Getting exams for Ladok ID ${ladokId}`);
 
   const { body } = (await client("windream/search/documents/false", {
@@ -51,6 +61,7 @@ async function examListByLadokId(ladokId) {
       result.documentIndiceses.find((di) => di.index === index)?.value;
 
     list.push({
+      createDate: result.createDate,
       fileId: result.fileId,
       student: {
         id: getValue("s_uid"),

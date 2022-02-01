@@ -169,6 +169,16 @@ async function listAllExams(req, res, next) {
       errorsByType: {},
     };
 
+    // Sort exams on createDate in ascending order
+    allScannedExams.sort((a, b) => {
+      if (a.createDate < b.createDate) {
+        return -1;
+      } else if (a.createDate > b.createDate) {
+        return 1;
+      } else {
+        return 0;
+      }
+    })
     const listOfExamsToHandle = allScannedExams.map((exam) => {
       const foundInCanvas = studentsWithExamsInCanvas.find(
         (s) => s === exam.student?.id
@@ -206,6 +216,7 @@ async function listAllExams(req, res, next) {
 
       return {
         id: exam.fileId,
+        createDate: exam.createDate,
         student: exam.student,
         status,
         error: errorDetails,
