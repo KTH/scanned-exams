@@ -132,7 +132,13 @@ async function getAssignmentSubmissions(courseId, assignmentId) {
       `courses/${courseId}/assignments/${assignmentId}/submissions`,
       { include: ["user", "submission_history"] } // include user obj with kth id
     )
-    .toArray() as any;
+    .toArray() as Promise<{
+      submission_history: {
+        attachments: {
+          filename: string
+        }[]
+      }[]
+    }[]>;
 }
 
 async function createAssignment(courseId, ladokId, language = "en") {

@@ -42,7 +42,13 @@ async function listScannedExams(courseId, ladokId) {
 async function listStudentSubmissionsInCanvas(
   courseId,
   ladokId
-): Promise<{submission_history}[]> {
+): Promise<{
+    submission_history: {
+      attachments: {
+        filename: string
+      }[]
+    }[]
+  }[]> {
   const assignment = await canvasApi
     .getValidAssignment(courseId, ladokId)
     .then((result) => {
