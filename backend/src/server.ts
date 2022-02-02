@@ -75,7 +75,7 @@ server.use(cookieParser());
 //               like CSS files)
 // - /auth       routes for the authorization process
 // - /_monitor   just the monitor page
-function _showOnlyHostname(inp: String): String {
+function _showOnlyHostname(inp: string): string {
   const tmpIn = inp.startsWith("http") ? inp : `https://${inp}`;
   const tmpOut = tmpIn.match(/https?:\/\/[^\/]*/m);
   if (tmpOut != null) {

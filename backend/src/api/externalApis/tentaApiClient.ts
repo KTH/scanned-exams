@@ -18,12 +18,12 @@ async function getVersion() {
 }
 
 interface WindreamsScannedExam {
-  createDate: String;
-  fileId: Number;
+  createDate: string;
+  fileId: number;
   student: {
-    id: String;
-    firstName: String;
-    lastName: String;
+    id: string;
+    firstName: string;
+    lastName: string;
   }
 }
 

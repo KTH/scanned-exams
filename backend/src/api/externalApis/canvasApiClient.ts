@@ -83,7 +83,7 @@ async function getAktivitetstillfalleUIDs(courseId) {
   // the same Ladok ID)
   const uniqueIds = Array.from(new Set(sisIds));
 
-  return uniqueIds as String[];
+  return uniqueIds as string[];
 }
 
 // TODO: this function is kept only for backwards-compatibility reasons
@@ -108,7 +108,7 @@ async function getExaminationLadokId(courseId) {
       `Course ${courseId} not supported: it is connected to ${uniqueIds.length} different Ladok Ids`
     );
   } else {
-    return uniqueIds[0] as String;
+    return uniqueIds[0] as string;
   }
 }
 
@@ -385,7 +385,7 @@ async function getAssignmentSubmissionForStudent({
   assignmentId,
   userId,
 }) {
-  return canvas.get<{ submission_history: { workflow_state: String }[] }>(
+  return canvas.get<{ submission_history: { workflow_state: string }[] }>(
     `courses/${courseId}/assignments/${assignmentId}/submissions/${userId}`,
     { include: ["submission_history"] }
   );
