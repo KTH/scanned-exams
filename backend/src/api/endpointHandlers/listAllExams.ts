@@ -47,7 +47,10 @@ async function listStudentSubmissionsInCanvas(
       attachments: {
         filename: string
       }[]
-    }[]
+    }[],
+    user: {
+      sis_user_id: string
+    }
   }[]> {
   const assignment = await canvasApi
     .getValidAssignment(courseId, ladokId)
@@ -156,17 +159,17 @@ async function listAllExams(req, res, next) {
     // The key is a string and the object contains at least a filename.
     const attachmentsInCanvas: { [key: string]: { filename: string }} = {};
     studentsWithSubmissionsInCanvas.forEach(
-      (s) => s.submission_history?.forEach((submission) => {
-        submission.attachments?.forEach((attachment) => {
+      (submission) => submission.submission_history?.forEach((prevSubmission) => {
+        prevSubmission.attachments?.forEach((attachment) => {
           // QUESTION: Should we warn if we have a duplicate upload?
           // NOTE: file_removed.pdf has the same name everywhere
-          attachmentsInCanvas[attachment.filename] = attachment;
+          attachmentsInCanvas[`${submission.user?.sis_user_id}-${attachment.filename}`] = attachment;
         })
       })
     );
 
     const listOfExamsToHandle = allScannedExams.map((exam) => {
-      const foundInCanvas = attachmentsInCanvas[`${exam.fileId}.pdf`];
+      const foundInCanvas = attachmentsInCanvas[`${exam.student?.id}-${exam.fileId}.pdf`];
 
       const foundInQueue = examsInImportQueue.find(
         (examInQueue) => examInQueue.fileId === exam.fileId

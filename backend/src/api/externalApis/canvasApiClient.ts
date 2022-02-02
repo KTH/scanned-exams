@@ -137,7 +137,10 @@ async function getAssignmentSubmissions(courseId, assignmentId) {
         attachments: {
           filename: string
         }[]
-      }[]
+      }[],
+      user: {
+        sis_user_id: string
+      }
     }[]>;
 }
 
