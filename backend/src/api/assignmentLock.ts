@@ -42,10 +42,13 @@ export function propertiesToCreateLockedAssignment(examDate) {
 }
 
 function _generateTimeWithOffset(offset: number) {
-  const secs = offset % 60;
-  const mins = Math.floor(offset / 60) % 60;
-  const hours = Math.floor(offset / (60 * 60)) % 24;
-  return `${hours > 9 ? hours : '0' + hours}:${mins > 9 ? mins : '0' + mins}:${secs > 9 ? secs : '0' + secs}`;
+  const secs = (offset % 60)
+    .toString().padStart(2, '0');
+  const mins = (Math.floor(offset / 60) % 60)
+    .toString().padStart(2, '0');
+  const hours = (Math.floor(offset / (60 * 60)) % 24)
+    .toString().padStart(2, '0');
+  return `${hours}:${mins}:${secs}`;
 }
 
 export function propertiesToCreateSubmission(examDate, nrofSubmissions) {
