@@ -17,7 +17,19 @@ async function getVersion() {
   return body;
 }
 
-async function examListByLadokId(ladokId) {
+interface WindreamsScannedExam {
+  createDate: string;
+  fileId: number;
+  student: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  }
+}
+
+async function examListByLadokId(ladokId): Promise<WindreamsScannedExam[]> {
+  const outp = <WindreamsScannedExam[]>[];
+
   log.debug(`Getting exams for Ladok ID ${ladokId}`);
 
   const { body } = (await client("windream/search/documents/false", {
@@ -42,15 +54,14 @@ async function examListByLadokId(ladokId) {
     return [];
   }
 
-  const list = [];
-
   for (const result of body.documentSearchResults) {
     // Helper function to get the value of the attribute called "index"
     // we have written it because they are in an array instead of an object
     const getValue = (index) =>
       result.documentIndiceses.find((di) => di.index === index)?.value;
 
-    list.push({
+    outp.push({
+      createDate: result.createDate,
       fileId: result.fileId,
       student: {
         id: getValue("s_uid"),
@@ -65,7 +76,7 @@ async function examListByLadokId(ladokId) {
     return [];
   }
 
-  return list;
+  return outp;
 }
 
 /** Download the exam with ID "fileId". Returns its content as a ReadableStream */

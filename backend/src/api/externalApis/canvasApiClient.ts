@@ -3,7 +3,7 @@ import FormData from "formdata-node";
 import got from "got";
 import log from "skog";
 import { getAktivitetstillfalle } from "./ladokApiClient";
-import { EndpointError, ImportError } from "../error";
+import { EndpointError, FileUploadError, ImportError } from "../error";
 import {
   propertiesToCreateLockedAssignment,
   propertiesToUnlockAssignment,
@@ -83,7 +83,7 @@ async function getAktivitetstillfalleUIDs(courseId) {
   // the same Ladok ID)
   const uniqueIds = Array.from(new Set(sisIds));
 
-  return uniqueIds as String[];
+  return uniqueIds as string[];
 }
 
 // TODO: this function is kept only for backwards-compatibility reasons
@@ -108,7 +108,7 @@ async function getExaminationLadokId(courseId) {
       `Course ${courseId} not supported: it is connected to ${uniqueIds.length} different Ladok Ids`
     );
   } else {
-    return uniqueIds[0] as String;
+    return uniqueIds[0] as string;
   }
 }
 
@@ -130,9 +130,18 @@ async function getAssignmentSubmissions(courseId, assignmentId) {
   return canvas
     .listItems(
       `courses/${courseId}/assignments/${assignmentId}/submissions`,
-      { include: "user" } // include user obj with kth id
+      { include: ["user", "submission_history"] } // include user obj with kth id
     )
-    .toArray() as any;
+    .toArray() as Promise<{
+      submission_history: {
+        attachments: {
+          filename: string
+        }[]
+      }[],
+      user: {
+        sis_user_id: string
+      }
+    }[]>;
 }
 
 async function createAssignment(courseId, ladokId, language = "en") {
@@ -204,6 +213,16 @@ async function lockAssignment(courseId, assignmentId) {
   );
 }
 
+function uploadFileErrorHandler(err): never {
+  Error.captureStackTrace(err, uploadFileErrorHandler);
+
+  throw new FileUploadError({
+    type: "unhandled_error",
+    message: "Error uploading file to storage",
+    err,
+  });
+}
+
 // eslint-disable-next-line camelcase
 async function sendFile({ upload_url, upload_params }, content) {
   const form = new FormData();
@@ -217,12 +236,14 @@ async function sendFile({ upload_url, upload_params }, content) {
 
   form.append("attachment", content, upload_params.filename);
 
-  return got.post({
-    url: upload_url,
-    body: form.stream,
-    headers: form.headers,
-    responseType: "json",
-  });
+  return got
+    .post({
+      url: upload_url,
+      body: form.stream,
+      headers: form.headers,
+      responseType: "json",
+    })
+    .catch(uploadFileErrorHandler);
 }
 
 // TODO: Refactor this function and uploadExam to avoid requesting the endpoint
@@ -267,7 +288,7 @@ async function uploadExam(
         `courses/${courseId}/assignments/${assignment.id}/submissions/${user.id}/files`,
         "POST",
         {
-          name: `${studentKthId}.pdf`,
+          name: `${fileId}.pdf`,
         }
       )
       .catch((err) => {
@@ -305,18 +326,36 @@ async function uploadExam(
     // TODO: move the following statement outside of this function
     // Reason: this module (canvasApiClient) should not contain "business rules"
     await unlockAssignment(courseId, assignment.id);
+
+    // Get existing submission history for this student and assignment to figure out
+    // timestamp offset. If we submit on the same timestamp (submitted_at), the old
+    // submission gets overwritten.
+    const { body: submission } = await getAssignmentSubmissionForStudent({
+      courseId,
+      assignmentId: assignment.id,
+      userId: user.id,
+    });
+
+    // There is always a submission to start with in the history with status "unsubmitted"
+    // so we need to filter that out when getting nrof actual submissions
+    const nrofSubmissions = submission.submission_history?.filter(s => s.workflow_state !== "unsubmitted").length ?? 0;
+    const submissionProps = propertiesToCreateSubmission(examDate, nrofSubmissions);
+    const { submitted_at } = submissionProps;
+
     await canvas.request(
       `courses/${courseId}/assignments/${assignment.id}/submissions/`,
       "POST",
       {
         submission: {
-          ...propertiesToCreateSubmission(examDate),
+          ...submissionProps,
           submission_type: "online_upload",
           user_id: user.id,
           file_ids: [uploadedFile.id],
         },
       }
     );
+
+    return submitted_at;
   } catch (err) {
     if (err.type === "missing_student") {
       log.warn(`User ${studentKthId} is missing in Canvas course ${courseId}`);
@@ -360,6 +399,17 @@ async function getRoles(courseId, userId) {
   return enrollments
     .filter((enr) => enr.user_id === userId)
     .map((enr) => enr.role_id);
+}
+
+async function getAssignmentSubmissionForStudent({
+  courseId,
+  assignmentId,
+  userId,
+}) {
+  return canvas.get<{ submission_history: { workflow_state: string }[] }>(
+    `courses/${courseId}/assignments/${assignmentId}/submissions/${userId}`,
+    { include: ["submission_history"] }
+  );
 }
 
 async function enrollStudent(courseId, userId) {

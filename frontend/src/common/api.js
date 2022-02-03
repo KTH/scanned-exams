@@ -171,7 +171,12 @@ export function useMutateImportStart(courseId, examsToImport, options = {}) {
     () =>
       apiClient(`courses/${courseId}/import-queue`, {
         method: "POST",
-        body: examsToImport.map((exam) => exam.id),
+        body: examsToImport.map((exam) => {
+          return {
+            id: exam.id,
+            createDate: exam.createDate,
+          };
+        }),
       }),
     {
       ...options,

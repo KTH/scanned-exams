@@ -58,7 +58,7 @@ async function uploadOneExam({ fileId, courseId }) {
     `Course ${courseId} / File ${fileId}, ${fileName} / User ${student.kthId}. Uploading`
   );
   const uploadExamStart = Date.now();
-  await canvasApi.uploadExam(content, {
+  const submissionTimestamp = await canvasApi.uploadExam(content, {
     courseId,
     studentKthId: student.kthId,
     examDate,
@@ -67,7 +67,7 @@ async function uploadOneExam({ fileId, courseId }) {
   log.debug("Time to upload exam: " + (Date.now() - uploadExamStart) + "ms");
 
   log.info(
-    `Course ${courseId} / File ${fileId}, ${fileName} / User ${student.kthId}. Uploaded!`
+    `Course ${courseId} / File ${fileId}, ${fileName} / User ${student.kthId}. Uploaded! Timestamp @ ${submissionTimestamp}`
   );
 }
 

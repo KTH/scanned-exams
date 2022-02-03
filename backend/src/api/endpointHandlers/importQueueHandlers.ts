@@ -24,14 +24,14 @@ async function getStatusFromQueueHandler(req, res, next) {
 async function addEntriesToQueue(req, res, next) {
   try {
     const courseId = req.params.id;
-    const fileIds = req.body;
+    const files = req.body;
 
     const { status } = await getStatusFromQueue(courseId);
 
-    if (!Array.isArray(fileIds)) {
+    if (!Array.isArray(files)) {
       throw new EndpointError({
         type: "missing_body",
-        message: "This endpoint expects to get a list of fileIds to import",
+        message: "This endpoint expects to get a list of files to import",
         statusCode: 400, // Bad Request
       });
     }
@@ -45,17 +45,19 @@ async function addEntriesToQueue(req, res, next) {
       });
     }
 
-    for (const fileId of fileIds) {
+    for (const file of files) {
+      const { id, createDate } = file;
       // eslint-disable-next-line no-await-in-loop
       await addEntryToQueue({
         courseId,
-        fileId,
+        fileId: id,
+        fileCreateDate: createDate,
         status: "pending",
       }).catch((err) => {
         if (err?.type === "entry_exists") {
           return updateStatusOfEntryInQueue(
             {
-              fileId,
+              id,
             },
             "pending"
           );
@@ -67,7 +69,7 @@ async function addEntriesToQueue(req, res, next) {
     }
 
     res.send({
-      status: fileIds.length > 0 ? "working" : "idle",
+      status: files.length > 0 ? "working" : "idle",
     });
   } catch (err) {
     next(err);
