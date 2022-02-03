@@ -189,6 +189,28 @@ class ImportError extends OperationalError {
   }
 }
 
+class FileUploadError extends OperationalError {
+  /**
+   * FileUploadError – all errors that can occur when trying to upload files to storage.
+   * This should be thrown at the integration layer.
+   * @param {object} param0 Error params
+   * @param {String} param0.type Subtype of error
+   * @param {Number=} param0.statusCode HTTP status code of response
+   * @param {String} param0.message Error message for programmer
+   * @param {object=} param0.details Additional error details for used by programmer
+   * @param {Error=} param0.err The original error that caused this error
+   */
+  constructor({
+    type,
+    statusCode = 503,
+    message,
+    details = undefined,
+    err = undefined,
+  }) {
+    super("FileUploadError", statusCode, type, message, details, err);
+  }
+}
+
 /**
  * Helper method for catch block
  * @param {object} err Error object passed to catch block
@@ -336,6 +358,7 @@ export {
   AuthError,
   EndpointError,
   ImportError,
+  FileUploadError,
   CanvasApiError,
   LadokApiError,
   TentaApiError,

@@ -3,7 +3,7 @@ import FormData from "formdata-node";
 import got from "got";
 import log from "skog";
 import { getAktivitetstillfalle } from "./ladokApiClient";
-import { EndpointError, ImportError } from "../error";
+import { EndpointError, FileUploadError, ImportError } from "../error";
 import {
   propertiesToCreateLockedAssignment,
   propertiesToUnlockAssignment,
@@ -213,6 +213,16 @@ async function lockAssignment(courseId, assignmentId) {
   );
 }
 
+function uploadFileErrorHandler(err): never {
+  Error.captureStackTrace(err, uploadFileErrorHandler);
+
+  throw new FileUploadError({
+    type: "unhandled_error",
+    message: "Error uploading file to storage",
+    err,
+  });
+}
+
 // eslint-disable-next-line camelcase
 async function sendFile({ upload_url, upload_params }, content) {
   const form = new FormData();
@@ -226,12 +236,14 @@ async function sendFile({ upload_url, upload_params }, content) {
 
   form.append("attachment", content, upload_params.filename);
 
-  return got.post({
-    url: upload_url,
-    body: form.stream,
-    headers: form.headers,
-    responseType: "json",
-  });
+  return got
+    .post({
+      url: upload_url,
+      body: form.stream,
+      headers: form.headers,
+      responseType: "json",
+    })
+    .catch(uploadFileErrorHandler);
 }
 
 // TODO: Refactor this function and uploadExam to avoid requesting the endpoint
