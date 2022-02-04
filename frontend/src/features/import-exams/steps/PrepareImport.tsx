@@ -1,10 +1,10 @@
 import React from "react";
 import { useCourseExams, useMutateImportStart } from "../../../common/api";
-import { H2, LoadingPage, PrimaryButton, P } from "../../widgets";
+import { H2, LoadingPage, PrimaryButton, P, cssErrorBox } from "../../widgets";
 
 export default function PrepareImport({ courseId }: any) {
   // Get exams available to import
-  const { data = {}, isFetching: examsLoading } = useCourseExams(courseId);
+  const { data = {}, error: examsError, isFetching: examsLoading, isError: isExamsError } = useCourseExams(courseId);
   const { result: exams = [] } = data;
 
   const examsToImport = exams.filter((exam: any) => exam.status === "new") || [];
@@ -20,6 +20,8 @@ export default function PrepareImport({ courseId }: any) {
 
   if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;
+  } else if (isExamsError) {
+    throw examsError;
   }
 
   return (
