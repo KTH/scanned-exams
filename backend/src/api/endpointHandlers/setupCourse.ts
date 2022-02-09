@@ -1,39 +1,76 @@
 /** Endpoints to setup a Canvas course */
-
 import * as canvasApi from "../externalApis/canvasApiClient";
-import * as canvasAdminApi from "../externalApis/canvasAdminApiClient";
+import {
+  Assignment,
+  getAssignments,
+  getCourse as getCanvasCourse,
+  getSections as getCanvasSections,
+  Section as CanvasSection,
+} from "../externalApis/canvasAdminApiClient";
 import { CanvasApiError, EndpointError } from "../error";
 
 /**
- * Get the "ladokId" of a given course. It throws in case the course
- * has no valid ladok IDs
+ * Given a list of canvas sections, return the "aktivitetstillfälle" associated
+ * to them.
+ *
+ * This function will throw if there is no valid
  */
-function throwIfNotExactlyOneLadokId(ladokIds, courseId) {
-  if (!Array.isArray(ladokIds) || ladokIds.length !== 1) {
+function getLadokId(sections: CanvasSection[]): string {
+  const REGEX = /^AKT\.([\w-]+)/;
+  const sisIds = sections
+    .map((section) => section.sis_section_id?.match(REGEX)?.[1])
+    .filter((sisId) => sisId /* Filter out null and undefined */);
+
+  const uniqueIds = Array.from(new Set(sisIds));
+
+  if (uniqueIds.length > 1) {
     throw new EndpointError({
       type: "invalid_course",
       statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
-      message: "Examrooms with more than one examination are not supported",
+      message: "Examrooms with more than one section are not supported",
       details: {
-        courseId,
-        ladokIds,
+        ladokIds: uniqueIds,
       },
     });
   }
+
+  if (uniqueIds.length === 0) {
+    throw new EndpointError({
+      type: "invalid_course",
+      statusCode: 409, // Conflict - Indicates that the request could not be processed because of conflict in the current state of the resource
+      message:
+        "Examrooms must contain at least one section with a valid SIS ID",
+      details: {
+        ladokIds: uniqueIds,
+      },
+    });
+  }
+
+  return uniqueIds[0];
+}
+
+/**
+ * Find the assignment created specifically to submit scanned exams
+ */
+function getValidAssignment(assignments: Assignment[], ladokId: string) {
+  return assignments.find(
+    (assignment) => assignment.integration_data?.ladokId === ladokId
+  );
 }
 
 /** Get setup status of a Canvas course given its ID */
 async function getSetupStatus(req, res, next) {
   try {
     const courseId = req.params.id;
-
-    const ladokIds = await canvasApi.getAktivitetstillfalleUIDs(courseId);
-    throwIfNotExactlyOneLadokId(ladokIds, courseId);
-    const ladokId = ladokIds[0];
+    const ladokId = await getCanvasSections(courseId).then((sections) =>
+      getLadokId(sections)
+    );
 
     const [course, assignment] = await Promise.all([
-      canvasAdminApi.getCourse(courseId),
-      canvasApi.getValidAssignment(courseId, ladokId),
+      getCanvasCourse(courseId),
+      getAssignments(courseId).then((assignments) =>
+        getValidAssignment(assignments, ladokId)
+      ),
     ]);
 
     res.send({
@@ -77,14 +114,12 @@ async function publishCourse(req, res, next) {
 async function createSpecialAssignment(req, res, next) {
   try {
     const courseId = req.params.id;
+    const ladokId = await getCanvasSections(courseId).then((sections) =>
+      getLadokId(sections)
+    );
 
-    const ladokIds = await canvasApi.getAktivitetstillfalleUIDs(courseId);
-    throwIfNotExactlyOneLadokId(ladokIds, courseId);
-    const ladokId = ladokIds[0];
-
-    const existingAssignment = await canvasApi.getValidAssignment(
-      courseId,
-      ladokId
+    const existingAssignment = await getAssignments(courseId).then(
+      (assignments) => getValidAssignment(assignments, ladokId)
     );
 
     if (existingAssignment) {
@@ -108,12 +143,13 @@ async function createSpecialAssignment(req, res, next) {
 async function publishSpecialAssignment(req, res, next) {
   try {
     const courseId = req.params.id;
+    const ladokId = await getCanvasSections(courseId).then((sections) =>
+      getLadokId(sections)
+    );
 
-    const ladokIds = await canvasApi.getAktivitetstillfalleUIDs(courseId);
-    throwIfNotExactlyOneLadokId(ladokIds, courseId);
-    const ladokId = ladokIds[0];
-
-    const assignment = await canvasApi.getValidAssignment(courseId, ladokId);
+    const assignment = await getAssignments(courseId).then((assignments) =>
+      getValidAssignment(assignments, ladokId)
+    );
 
     if (!assignment) {
       throw new CanvasApiError({
@@ -134,7 +170,6 @@ async function publishSpecialAssignment(req, res, next) {
 }
 
 export {
-  throwIfNotExactlyOneLadokId as _throwIfNotExactlyOneLadokId,
   getSetupStatus,
   createSpecialHomepage,
   publishCourse,

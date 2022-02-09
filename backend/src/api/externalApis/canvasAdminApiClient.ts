@@ -13,12 +13,23 @@ const canvas = new Canvas(
   process.env.CANVAS_API_ADMIN_TOKEN
 );
 
-interface Course {
+export interface Course {
   workflow_state: string;
 }
-interface Section {}
-interface Assignment {}
-interface Submission {}
+
+export interface Section {
+  sis_section_id?: string;
+}
+
+export interface Assignment {
+  id: number;
+  integration_data?: {
+    ladokId?: string;
+  };
+  published: boolean;
+}
+
+export interface Submission {}
 
 interface ModifyAssignmentOptions {}
 
