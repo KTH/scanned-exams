@@ -1,6 +1,7 @@
 /** Endpoints to setup a Canvas course */
 
 import * as canvasApi from "../externalApis/canvasApiClient";
+import * as canvasAdminApi from "../externalApis/canvasAdminApiClient";
 import { CanvasApiError, EndpointError } from "../error";
 
 /**
@@ -31,7 +32,7 @@ async function getSetupStatus(req, res, next) {
     const ladokId = ladokIds[0];
 
     const [course, assignment] = await Promise.all([
-      canvasApi.getCourse(courseId),
+      canvasAdminApi.getCourse(courseId),
       canvasApi.getValidAssignment(courseId, ladokId),
     ]);
 
