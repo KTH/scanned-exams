@@ -4,7 +4,7 @@ import { H2, LoadingPage, PrimaryButton, P } from "../../widgets";
 
 export default function PrepareImport({ courseId }: any) {
   // Get exams available to import
-  const { data = {}, isFetching: examsLoading } = useCourseExams(courseId);
+  const { data = {}, isFetching: examsLoading, error: examsError } = useCourseExams(courseId);
   const { result: exams = [] } = data;
 
   const examsToImport = exams.filter((exam: any) => exam.status === "new") || [];
@@ -17,6 +17,12 @@ export default function PrepareImport({ courseId }: any) {
     isLoading: startImportLoading,
     isSuccess: startImportSuccess,
   } = useMutateImportStart(courseId, examsToImport);
+
+  if (examsError) {
+    throw new Error(
+      (examsError as Error).message
+    );
+  }
 
   if (examsLoading) {
     return <LoadingPage>Loading...</LoadingPage>;

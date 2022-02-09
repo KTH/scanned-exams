@@ -34,18 +34,18 @@ async function examListByLadokId(ladokId): Promise<WindreamsScannedExam[]> {
 
   const { body } = (await client("windream/search/documents/false", {
     method: "POST",
-    json: {
-      searchIndiceses: [
-        {
-          index: "e_ladokid",
-          value: ladokId,
-          useWildcard: false,
-        },
-      ],
-      includeDocumentIndicesesInResponse: true,
-      includeSystemIndicesesInResponse: false,
-      useDatesInSearch: false,
-    },
+    // json: {
+    //   searchIndiceses: [
+    //     {
+    //       index: "e_ladokid",
+    //       value: ladokId,
+    //       useWildcard: false,
+    //     },
+    //   ],
+    //   includeDocumentIndicesesInResponse: true,
+    //   includeSystemIndicesesInResponse: false,
+    //   useDatesInSearch: false,
+    // },
     responseType: "json",
   }).catch(tentaApiGenericErrorHandler)) as any;
 
