@@ -82,14 +82,10 @@ async function publishCourse(courseId) {
 
 /** Get the Ladok UID of the examination linked with a canvas course */
 async function getAktivitetstillfalleUIDs(courseId) {
-  // const sections = await canvas
-  //   .listItems<any>(`courses/${courseId}/sections`)
-  //   .toArray()
-  //   .catch(canvasApiGenericErrorHandler);
-
-  // Run the following command from terminal: docker run -p 8000:80 kennethreitz/httpbin
-  // Starts a server that answers with 504
-  const { body: sections } = await got.get<any[]>("http://127.0.0.1:8000/status/504").catch(canvasApiGenericErrorHandler);
+  const sections = await canvas
+    .listItems<any>(`courses/${courseId}/sections`)
+    .toArray()
+    .catch(canvasApiGenericErrorHandler);
 
   // For SIS IDs with format "AKT.<ladok id>.<suffix>", take the "<ladok id>"
   const REGEX = /^AKT\.([\w-]+)/;
