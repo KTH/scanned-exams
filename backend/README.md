@@ -33,7 +33,7 @@
 
  ```sh
  npm install
- npm start
+ npm run dev
 ````
 
 1. Now you can go to https://localdev.kth.se/scanned-exams

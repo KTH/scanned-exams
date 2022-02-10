@@ -42,16 +42,18 @@ async function listScannedExams(courseId, ladokId) {
 async function listStudentSubmissionsInCanvas(
   courseId,
   ladokId
-): Promise<{
+): Promise<
+  {
     submission_history: {
       attachments: {
-        filename: string
-      }[]
-    }[],
+        filename: string;
+      }[];
+    }[];
     user: {
-      sis_user_id: string
-    }
-  }[]> {
+      sis_user_id: string;
+    };
+  }[]
+> {
   const assignment = await canvasApi
     .getValidAssignment(courseId, ladokId)
     .then((result) => {
@@ -153,23 +155,26 @@ async function listAllExams(req, res, next) {
       } else {
         return 0;
       }
-    })
+    });
 
     // Store all attachments in lookup dict for performance.
     // The key is a string and the object contains at least a filename.
-    const attachmentsInCanvas: { [key: string]: { filename: string }} = {};
-    studentsWithSubmissionsInCanvas.forEach(
-      (submission) => submission.submission_history?.forEach((prevSubmission) => {
+    const attachmentsInCanvas: { [key: string]: { filename: string } } = {};
+    studentsWithSubmissionsInCanvas.forEach((submission) =>
+      submission.submission_history?.forEach((prevSubmission) => {
         prevSubmission.attachments?.forEach((attachment) => {
           // QUESTION: Should we warn if we have a duplicate upload?
           // NOTE: file_removed.pdf has the same name everywhere
-          attachmentsInCanvas[`${submission.user?.sis_user_id}-${attachment.filename}`] = attachment;
-        })
+          attachmentsInCanvas[
+            `${submission.user?.sis_user_id}-${attachment.filename}`
+          ] = attachment;
+        });
       })
     );
 
     const listOfExamsToHandle = allScannedExams.map((exam) => {
-      const foundInCanvas = attachmentsInCanvas[`${exam.student?.id}-${exam.fileId}.pdf`];
+      const foundInCanvas =
+        attachmentsInCanvas[`${exam.student?.id}-${exam.fileId}.pdf`];
 
       const foundInQueue = examsInImportQueue.find(
         (examInQueue) => examInQueue.fileId === exam.fileId
