@@ -1,4 +1,4 @@
-import Canvas from "@kth/canvas-api";
+import CanvasApi from "@kth/canvas-api";
 import FormData from "formdata-node";
 import got from "got";
 import log from "skog";
@@ -16,10 +16,15 @@ import {
   propertiesToCreateSubmission,
 } from "../assignmentLock";
 
-const canvas = new Canvas(
-  process.env.CANVAS_API_URL,
-  process.env.CANVAS_API_ADMIN_TOKEN
-);
+let canvas: CanvasApi;
+if (process.env.NODE_ENV === "test") {
+  log.info("NOTE: Not instantiating canvas api since this is a test!");
+} else {
+  canvas = new CanvasApi(
+    process.env.CANVAS_API_URL,
+    process.env.CANVAS_API_ADMIN_TOKEN
+  );
+}
 
 /**
  * These endpoints have the content used as a template when creating the
