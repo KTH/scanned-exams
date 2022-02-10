@@ -113,9 +113,9 @@ class CanvasApiError extends OperationalError {
    * @param {Error=} param0.err The original error that caused this error
    */
   constructor({
-    type,
+    type = "unhandled_error",
     statusCode = 503,
-    message,
+    message = "There was an error when accessing Canvas",
     details = undefined,
     err = undefined,
   }) {
@@ -339,7 +339,26 @@ function errorHandler(err, req, res, next) {
   });
 }
 
-function tentaApiGenericErrorHandler(err) {
+function canvasApiGenericErrorHandler(err): never {
+  Error.captureStackTrace(err, canvasApiGenericErrorHandler);
+
+  if (err.name === "CanvasApiError" || err.name === "HTTPError") {
+    // Errors from @kth/canvas-api are called CanvasApiError too
+    const error = new CanvasApiError({
+      type: "http_error",
+      message:
+        "Looks like a temporary problem accessing Canvas. You can retry now or a bit later",
+    });
+    throw error;
+  }
+
+  const error = new CanvasApiError({
+    err, // Pass the original error
+  });
+  throw error;
+}
+
+function tentaApiGenericErrorHandler(err): never {
   Error.captureStackTrace(err, tentaApiGenericErrorHandler);
   const error = new TentaApiError({
     err, // Pass the original error
@@ -349,6 +368,7 @@ function tentaApiGenericErrorHandler(err) {
 
 export {
   errorHandler,
+  canvasApiGenericErrorHandler,
   tentaApiGenericErrorHandler,
   getMostSignificantError,
   getOrigProgrammerError,

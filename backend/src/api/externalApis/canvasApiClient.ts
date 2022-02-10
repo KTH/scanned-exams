@@ -3,7 +3,12 @@ import FormData from "formdata-node";
 import got from "got";
 import log from "skog";
 import { getAktivitetstillfalle } from "./ladokApiClient";
-import { EndpointError, FileUploadError, ImportError } from "../error";
+import {
+  EndpointError,
+  FileUploadError,
+  ImportError,
+  canvasApiGenericErrorHandler,
+} from "../error";
 import {
   propertiesToCreateLockedAssignment,
   propertiesToUnlockAssignment,
@@ -33,45 +38,58 @@ const TEMPLATES = {
 
 /** Get data from one canvas course */
 async function getCourse(courseId) {
-  const { body } = await canvas.get(`courses/${courseId}`);
+  const { body } = await canvas
+    .get<any>(`courses/${courseId}`)
+    .catch(canvasApiGenericErrorHandler);
 
-  return body as any;
+  return body;
 }
 
 /** Creates a "good-looking" homepage in Canvas */
 async function createHomepage(courseId, language = "en") {
-  const { body: template } = (await canvas.get(
-    TEMPLATES.homepage[language]
-  )) as any;
+  const { body: template } = await canvas
+    .get<any>(TEMPLATES.homepage[language])
+    .catch(canvasApiGenericErrorHandler);
 
-  await canvas.request(`courses/${courseId}/front_page`, "PUT", {
-    wiki_page: {
-      // To make this page, use the Rich Content Editor in Canvas (https://kth.test.instructure.com/courses/30347/pages/welcome-to-the-exam/edit)
-      body: template.body,
-      title: template.title,
-    },
-  });
-  return canvas.request(`courses/${courseId}`, "PUT", {
-    course: {
-      default_view: "wiki",
-    },
-  });
+  await canvas
+    .request(`courses/${courseId}/front_page`, "PUT", {
+      wiki_page: {
+        // To make this page, use the Rich Content Editor in Canvas (https://kth.test.instructure.com/courses/30347/pages/welcome-to-the-exam/edit)
+        body: template.body,
+        title: template.title,
+      },
+    })
+    .catch(canvasApiGenericErrorHandler);
+  return canvas
+    .request(`courses/${courseId}`, "PUT", {
+      course: {
+        default_view: "wiki",
+      },
+    })
+    .catch(canvasApiGenericErrorHandler);
 }
 
 /** Publish a course */
 async function publishCourse(courseId) {
-  return canvas.request(`courses/${courseId}`, "PUT", {
-    course: {
-      event: "offer",
-    },
-  });
+  return canvas
+    .request(`courses/${courseId}`, "PUT", {
+      course: {
+        event: "offer",
+      },
+    })
+    .catch(canvasApiGenericErrorHandler);
 }
 
 /** Get the Ladok UID of the examination linked with a canvas course */
 async function getAktivitetstillfalleUIDs(courseId) {
-  const sections = (await canvas
-    .listItems(`courses/${courseId}/sections`)
-    .toArray()) as any;
+  // const sections = await canvas
+  //   .listItems<any>(`courses/${courseId}/sections`)
+  //   .toArray()
+  //   .catch(canvasApiGenericErrorHandler);
+
+  // Run the following command from terminal: docker run -p 8000:80 kennethreitz/httpbin
+  // Starts a server that answers with 504
+  const { body: sections } = await got.get<any[]>("http://127.0.0.1:8000/status/504").catch(canvasApiGenericErrorHandler);
 
   // For SIS IDs with format "AKT.<ladok id>.<suffix>", take the "<ladok id>"
   const REGEX = /^AKT\.([\w-]+)/;
@@ -88,9 +106,10 @@ async function getAktivitetstillfalleUIDs(courseId) {
 
 // TODO: this function is kept only for backwards-compatibility reasons
 async function getExaminationLadokId(courseId) {
-  const sections = (await canvas
-    .listItems(`courses/${courseId}/sections`)
-    .toArray()) as any;
+  const sections = await canvas
+    .listItems<any>(`courses/${courseId}/sections`)
+    .toArray()
+    .catch(canvasApiGenericErrorHandler);
 
   // For SIS IDs with format "AKT.<ladok id>.<suffix>", take the "<ladok id>"
   const REGEX = /^AKT\.([\w-]+)/;
@@ -113,9 +132,10 @@ async function getExaminationLadokId(courseId) {
 }
 
 async function getValidAssignment(courseId, ladokId) {
-  const assignments = (await canvas
-    .listItems(`courses/${courseId}/assignments`)
-    .toArray()) as any;
+  const assignments = await canvas
+    .listItems<any>(`courses/${courseId}/assignments`)
+    .toArray()
+    .catch(canvasApiGenericErrorHandler);
 
   // TODO: Filter more strictly?
   return (
@@ -123,34 +143,35 @@ async function getValidAssignment(courseId, ladokId) {
   );
 }
 
+type TSubmissionWithHistory = {
+  submission_history: {
+    attachments: {
+      filename: string;
+    }[];
+  }[];
+  user: {
+    sis_user_id: string;
+  };
+}
+
 async function getAssignmentSubmissions(courseId, assignmentId) {
   // API docs https://canvas.instructure.com/doc/api/submissions.html
   // GET /api/v1/courses/:course_id/assignments/:assignment_id/submissions
   // ?include=user (to get user obj wth kth id)
   return canvas
-    .listItems(
+    .listItems<TSubmissionWithHistory>(
       `courses/${courseId}/assignments/${assignmentId}/submissions`,
       { include: ["user", "submission_history"] } // include user obj with kth id
     )
-    .toArray() as Promise<
-    {
-      submission_history: {
-        attachments: {
-          filename: string;
-        }[];
-      }[];
-      user: {
-        sis_user_id: string;
-      };
-    }[]
-  >;
+    .toArray()
+    .catch(canvasApiGenericErrorHandler);
 }
 
 async function createAssignment(courseId, ladokId, language = "en") {
   const examination = await getAktivitetstillfalle(ladokId);
-  const { body: template } = (await canvas.get(
-    TEMPLATES.assignment[language]
-  )) as any;
+  const { body: template } = await canvas
+    .get<any>(TEMPLATES.assignment[language])
+    .catch(canvasApiGenericErrorHandler);
 
   return canvas
     .request(`courses/${courseId}/assignments`, "POST", {
@@ -168,51 +189,46 @@ async function createAssignment(courseId, ladokId, language = "en") {
         //       grading_standard_id: 1,
       },
     })
-    .then((r) => r.body as any);
+    .then((r) => r.body as any)
+    .catch(canvasApiGenericErrorHandler);
 }
 
 /** Publish an assignment */
 async function publishAssignment(courseId, assignmentId) {
-  return canvas.request(
-    `courses/${courseId}/assignments/${assignmentId}`,
-    "PUT",
-    {
+  return canvas
+    .request(`courses/${courseId}/assignments/${assignmentId}`, "PUT", {
       assignment: {
         published: true,
       },
-    }
-  );
+    })
+    .catch(canvasApiGenericErrorHandler);
 }
 
 /**
  * Allows the app to upload exams.
  */
 async function unlockAssignment(courseId, assignmentId) {
-  return canvas.request(
-    `courses/${courseId}/assignments/${assignmentId}`,
-    "PUT",
-    {
+  return canvas
+    .request(`courses/${courseId}/assignments/${assignmentId}`, "PUT", {
       assignment: {
         ...propertiesToUnlockAssignment(),
         published: true,
       },
-    }
-  );
+    })
+    .catch(canvasApiGenericErrorHandler);
 }
 
 /**
  * Prevents students to upload things by accident.
  */
 async function lockAssignment(courseId, assignmentId) {
-  return canvas.request(
-    `courses/${courseId}/assignments/${assignmentId}`,
-    "PUT",
-    {
+  return canvas
+    .request(`courses/${courseId}/assignments/${assignmentId}`, "PUT", {
       assignment: {
         ...propertiesToLockAssignment(),
       },
-    }
-  );
+    })
+    .catch(canvasApiGenericErrorHandler);
 }
 
 function uploadFileErrorHandler(err): never {
@@ -239,7 +255,7 @@ async function sendFile({ upload_url, upload_params }, content) {
   form.append("attachment", content, upload_params.filename);
 
   return got
-    .post({
+    .post<any>({
       url: upload_url,
       body: form.stream,
       headers: form.headers,
@@ -252,12 +268,14 @@ async function sendFile({ upload_url, upload_params }, content) {
 //       "GET users/sis_user_id:${userId}" twice
 async function hasSubmission({ courseId, assignmentId, userId }) {
   try {
-    const { body: user } = (await canvas.get(
-      `users/sis_user_id:${userId}`
-    )) as any;
-    const { body: submission } = (await canvas.get(
-      `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}`
-    )) as any;
+    const { body: user } = await canvas
+      .get<any>(`users/sis_user_id:${userId}`)
+      .catch(canvasApiGenericErrorHandler);
+    const { body: submission } = await canvas
+      .get<any>(
+        `courses/${courseId}/assignments/${assignmentId}/submissions/${user.id}`
+      )
+      .catch(canvasApiGenericErrorHandler);
 
     return !submission.missing;
   } catch (err) {
@@ -273,9 +291,9 @@ async function uploadExam(
   { courseId, studentKthId, examDate, fileId }
 ) {
   try {
-    const { body: user } = (await canvas.get(
-      `users/sis_user_id:${studentKthId}`
-    )) as any;
+    const { body: user } = await canvas
+      .get<any>(`users/sis_user_id:${studentKthId}`)
+      .catch(canvasApiGenericErrorHandler);
 
     const ladokId = await getExaminationLadokId(courseId);
     const assignment = await getValidAssignment(courseId, ladokId);
@@ -285,15 +303,15 @@ async function uploadExam(
 
     const reqTokenStart = Date.now();
     // TODO: will return a 400 if the course is unpublished
-    const { body: slot } = (await canvas
-      .request(
+    const { body: slot } = await canvas
+      .request<any>(
         `courses/${courseId}/assignments/${assignment.id}/submissions/${user.id}/files`,
         "POST",
         {
           name: `${fileId}.pdf`,
         }
       )
-      .catch((err) => {
+      .catch((err): never => {
         if (err.response?.statusCode === 404) {
           // Student is missing in Canvas, we can fix this
           throw new ImportError({
@@ -314,14 +332,14 @@ async function uploadExam(
             },
           });
         }
-      })) as any;
+      });
 
     log.debug(
       "Time to generate upload token: " + (Date.now() - reqTokenStart) + "ms"
     );
 
     const uploadFileStart = Date.now();
-    const { body: uploadedFile } = (await sendFile(slot, content)) as any;
+    const { body: uploadedFile } = await sendFile(slot, content);
 
     log.debug("Time to upload file: " + (Date.now() - uploadFileStart) + "ms");
 
@@ -350,18 +368,20 @@ async function uploadExam(
     );
     const { submitted_at } = submissionProps;
 
-    await canvas.request(
-      `courses/${courseId}/assignments/${assignment.id}/submissions/`,
-      "POST",
-      {
-        submission: {
-          ...submissionProps,
-          submission_type: "online_upload",
-          user_id: user.id,
-          file_ids: [uploadedFile.id],
-        },
-      }
-    );
+    await canvas
+      .request(
+        `courses/${courseId}/assignments/${assignment.id}/submissions/`,
+        "POST",
+        {
+          submission: {
+            ...submissionProps,
+            submission_type: "online_upload",
+            user_id: user.id,
+            file_ids: [uploadedFile.id],
+          },
+        }
+      )
+      .catch(canvasApiGenericErrorHandler);
 
     return submitted_at;
   } catch (err) {
@@ -400,9 +420,10 @@ async function getRoles(courseId, userId) {
   }
 
   // TODO: error handling for non-existent courseId or userId
-  const enrollments = (await canvas
-    .list(`courses/${courseId}/enrollments`, { per_page: 100 })
-    .toArray()) as any;
+  const enrollments = await canvas
+    .listItems<any>(`courses/${courseId}/enrollments`, { per_page: 100 })
+    .toArray()
+    .catch(canvasApiGenericErrorHandler);
 
   return enrollments
     .filter((enr) => enr.user_id === userId)
@@ -414,21 +435,25 @@ async function getAssignmentSubmissionForStudent({
   assignmentId,
   userId,
 }) {
-  return canvas.get<{ submission_history: { workflow_state: string }[] }>(
-    `courses/${courseId}/assignments/${assignmentId}/submissions/${userId}`,
-    { include: ["submission_history"] }
-  );
+  return canvas
+    .get<{ submission_history: { workflow_state: string }[] }>(
+      `courses/${courseId}/assignments/${assignmentId}/submissions/${userId}`,
+      { include: ["submission_history"] }
+    )
+    .catch(canvasApiGenericErrorHandler);
 }
 
 async function enrollStudent(courseId, userId) {
-  return canvas.request(`courses/${courseId}/enrollments`, "POST", {
-    enrollment: {
-      user_id: `sis_user_id:${userId}`,
-      role_id: 3,
-      enrollment_state: "active",
-      notify: false,
-    },
-  });
+  return canvas
+    .request(`courses/${courseId}/enrollments`, "POST", {
+      enrollment: {
+        user_id: `sis_user_id:${userId}`,
+        role_id: 3,
+        enrollment_state: "active",
+        notify: false,
+      },
+    })
+    .catch(canvasApiGenericErrorHandler);
 }
 
 export {
