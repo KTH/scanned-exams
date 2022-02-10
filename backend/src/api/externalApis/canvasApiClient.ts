@@ -132,16 +132,18 @@ async function getAssignmentSubmissions(courseId, assignmentId) {
       `courses/${courseId}/assignments/${assignmentId}/submissions`,
       { include: ["user", "submission_history"] } // include user obj with kth id
     )
-    .toArray() as Promise<{
+    .toArray() as Promise<
+    {
       submission_history: {
         attachments: {
-          filename: string
-        }[]
-      }[],
+          filename: string;
+        }[];
+      }[];
       user: {
-        sis_user_id: string
-      }
-    }[]>;
+        sis_user_id: string;
+      };
+    }[]
+  >;
 }
 
 async function createAssignment(courseId, ladokId, language = "en") {
@@ -338,8 +340,14 @@ async function uploadExam(
 
     // There is always a submission to start with in the history with status "unsubmitted"
     // so we need to filter that out when getting nrof actual submissions
-    const nrofSubmissions = submission.submission_history?.filter(s => s.workflow_state !== "unsubmitted").length ?? 0;
-    const submissionProps = propertiesToCreateSubmission(examDate, nrofSubmissions);
+    const nrofSubmissions =
+      submission.submission_history?.filter(
+        (s) => s.workflow_state !== "unsubmitted"
+      ).length ?? 0;
+    const submissionProps = propertiesToCreateSubmission(
+      examDate,
+      nrofSubmissions
+    );
     const { submitted_at } = submissionProps;
 
     await canvas.request(

@@ -24,7 +24,7 @@ interface WindreamsScannedExam {
     id: string;
     firstName: string;
     lastName: string;
-  }
+  };
 }
 
 async function examListByLadokId(ladokId): Promise<WindreamsScannedExam[]> {

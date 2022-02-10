@@ -6,7 +6,9 @@
 1. Open the newly created `.env` and add the relevant environmental variables
 1. Create a directory called `certs`.
 
-## Mac
+## Create ssl certificates
+
+### Mac
 
 1. Install [mkcert](https://github.com/FiloSottile/mkcert)
 1. Run
@@ -15,7 +17,7 @@
    mkcert -key-file ./certs/key.pem -cert-file ./certs/cert.pem localdev.kth.se localhost
    ```
 
-## Linux
+### Linux
 
 1. Run
 
@@ -33,7 +35,7 @@
 
  ```sh
  npm install
- npm start
+ npm run dev
 ````
 
 1. Now you can go to https://localdev.kth.se/scanned-exams
