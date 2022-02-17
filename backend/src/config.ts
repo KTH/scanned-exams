@@ -18,4 +18,4 @@ process.on("unhandledRejection", (reason) => {
 });
 
 require("@kth/reqvars").check();
-appInsights.setup();
+appInsights.setup().start();
