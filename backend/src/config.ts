@@ -1,5 +1,5 @@
 import log from "skog";
-import appInsights from "applicationinsights";
+import * as appInsights from "applicationinsights";
 
 require("dotenv").config();
 
