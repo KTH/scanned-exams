@@ -6,7 +6,7 @@ async function start() {
     'This is the "button-account" script.\n\n' +
       "Here you will create or edit a button for the Scanned Exams app\n" +
       "as top-level account-level button. It means that the button is visible\n" +
-      "for all courses in Canvas\n\n" +
+      "for all courses in a given account in Canvas\n\n" +
       'Use "create-button/course.js" for creating or editing course-level buttons'
   );
 
@@ -51,8 +51,19 @@ async function start() {
   });
 
   const canvas = new Canvas(`${canvasRoot}api/v1`, canvasApiToken);
+  const { accountId } = await inquirer.prompt({
+    name: "accountId",
+    message: "Write the account number",
+    default: "1",
+  });
+
+  const { body: account } = await canvas.get(`accounts/${accountId}`);
+
+  console.log(`Account: ${account.name} (${account.id})`);
+  console.log();
+
   const tools = (
-    await canvas.get("accounts/1/external_tools?per_page=100")
+    await canvas.get(`accounts/${accountId}/external_tools?per_page=100`)
   ).body.map((tool) => ({
     short: tool.id,
     name: `Edit the button "${tool.name}" (${tool.url})`,
