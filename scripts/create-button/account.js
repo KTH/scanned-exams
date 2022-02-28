@@ -141,27 +141,7 @@ async function start() {
     console.log(JSON.stringify(body, null, 2));
     console.log();
     console.log("You are going to make a POST request");
-    console.log(`to ${canvasRoot}api/v1/accounts/1/external_tools`);
-    console.log("with the body printed above");
-    const { proceed } = await inquirer.prompt({
-      type: "confirm",
-      name: "proceed",
-      message: `Is it correct?`,
-    });
-
-    if (!proceed) return;
-
-    await canvas.requestUrl("accounts/1/external_tools", "POST", body);
-
-    console.log(
-      `New button created. You can see it in any course at ${canvasRoot}accounts/1`
-    );
-  } else {
-    console.log();
-    console.log(JSON.stringify(body, null, 2));
-    console.log();
-    console.log("You are going to make a PUT request");
-    console.log(`to ${canvasRoot}api/v1/accounts/1/external_tools/${buttonId}`);
+    console.log(`to ${canvasRoot}api/v1/accounts/${accountId}/external_tools`);
     console.log("with the body printed above");
     const { proceed } = await inquirer.prompt({
       type: "confirm",
@@ -172,13 +152,39 @@ async function start() {
     if (!proceed) return;
 
     await canvas.requestUrl(
-      `accounts/1/external_tools/${buttonId}`,
+      `accounts/${accountId}/external_tools`,
+      "POST",
+      body
+    );
+
+    console.log(
+      `New button created. You can see it in any course at ${canvasRoot}accounts/${accountId}`
+    );
+  } else {
+    console.log();
+    console.log(JSON.stringify(body, null, 2));
+    console.log();
+    console.log("You are going to make a PUT request");
+    console.log(
+      `to ${canvasRoot}api/v1/accounts/${accountId}/external_tools/${buttonId}`
+    );
+    console.log("with the body printed above");
+    const { proceed } = await inquirer.prompt({
+      type: "confirm",
+      name: "proceed",
+      message: `Is it correct?`,
+    });
+
+    if (!proceed) return;
+
+    await canvas.requestUrl(
+      `accounts/${accountId}/external_tools/${buttonId}`,
       "PUT",
       body
     );
 
     console.log(
-      `Button edited. You can see it in any course at ${canvasRoot}accounts/1`
+      `Button edited. You can see it in any course at ${canvasRoot}accounts/${accountId}`
     );
   }
 }
