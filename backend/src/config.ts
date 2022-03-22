@@ -1,11 +1,17 @@
 import log from "skog";
+import pino from "pino";
 
 require("dotenv").config();
 require("@kth/reqvars").check();
 
-log.init.pino({
-  app: "scanned-exams",
-});
+log.init.pino(
+  {
+    app: "scanned-exams",
+  },
+  {
+    timestamp: pino.stdTimeFunctions.isoTime,
+  }
+);
 
 process.on("uncaughtException", (err) => {
   log.fatal(err, `Reject: ${err}`);
