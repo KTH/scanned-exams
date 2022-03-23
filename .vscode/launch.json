@@ -8,7 +8,7 @@
       "type": "node",
       "request": "launch",
       "name": "Dev Backend (NPM)",
-      "runtimeVersion": "14.17.0",
+      // "runtimeVersion": "14.17.0",
       "cwd": "${workspaceFolder}/backend",
       "outputCapture": "std",
       "env": {
