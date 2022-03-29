@@ -8,8 +8,8 @@ export default function UnauthenticatedApp({ courseId }: any) {
       </div>
       <p className="my-6 text-xl">
       If you have conducted a written exam on paper and want to use SpeedGrader for the assessment,
-      you can import the scanned exams to Canvas by using this app. Read more about 
-      <a href="https://intra.kth.se/en/utbildning/examination/salskrivning/skannade/tentor-till-canvas-1.1085000">KTH Import Exams
+      you can import the scanned exams to Canvas by using this app. Read more 
+      about <a target="_blank" className="text-blue-500 no-underline hover:text-blue-700 hover:underline" href="https://intra.kth.se/en/utbildning/examination/salskrivning/skannade/tentor-till-canvas-1.1085000">KTH Import Exams
       on the KTH Intranet</a>.
       </p>
       <p className="my-6">
@@ -18,7 +18,7 @@ export default function UnauthenticatedApp({ courseId }: any) {
       <p className="my-6">
       Please make sure that the exam administration is made aware well in advance of the exams being 
       assessed in Canvas and not on paper, since this impacts the administrative process. If you have 
-      any questions, please contact <a href="mailto:it-support@kth.se">it-support@kth.se</a>!
+      any questions, please contact <a className="text-blue-500 no-underline hover:text-blue-700 hover:underline" href="mailto:it-support@kth.se">it-support@kth.se</a>!
       </p>
       <div className="bg-blue-100 p-6 my-12 flex flex-row items-center justify-center">
         <form method="post" action="/scanned-exams/auth">
