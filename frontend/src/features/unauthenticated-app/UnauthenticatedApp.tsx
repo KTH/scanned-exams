@@ -7,12 +7,18 @@ export default function UnauthenticatedApp({ courseId }: any) {
         KTH Import Exams
       </div>
       <p className="my-6 text-xl">
-        <b>KTH Import Exams</b> imports scanned paper exams to Canvas allowing you
-        to grade them using SpeedGrader. The application is maintained by the E-learning
-        team at KTH. Please read more about <a href="https://intra.kth.se/en/utbildning/examination/salskrivning/skannade/tentor-till-canvas-1.1085000">the application here</a>.
+      If you have conducted a written exam on paper and want to use SpeedGrader for the assessment,
+      you can import the scanned exams to Canvas by using this app. Read more 
+      about <a target="_blank" className="text-blue-500 no-underline hover:text-blue-700 hover:underline" href="https://intra.kth.se/en/utbildning/examination/salskrivning/skannade/tentor-till-canvas-1.1085000">KTH Import Exams
+      on the KTH Intranet</a>.
       </p>
       <p className="my-6">
         This app requires you to have a <b>teacher role</b> in this exam room.
+      </p>
+      <p className="my-6">
+      Please make sure that the exam administration is made aware well in advance of the exams being 
+      assessed in Canvas and not on paper, since this impacts the administrative process. If you have 
+      any questions, please contact <a className="text-blue-500 no-underline hover:text-blue-700 hover:underline" href="mailto:it-support@kth.se">it-support@kth.se</a>!
       </p>
       <div className="bg-blue-100 p-6 my-12 flex flex-row items-center justify-center">
         <form method="post" action="/scanned-exams/auth">

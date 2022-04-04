@@ -46,10 +46,10 @@ Pre-requirements
 5. Start backend and then frontend
 
    ```sh
-   (cd backend; npm run start)
+   (cd backend; npm run dev)
    ```
    ```sh
-   (cd frontend; npm run dev)
+   (cd frontend; npm run start)
    ```
 
 ---
