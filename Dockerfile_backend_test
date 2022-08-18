@@ -1,4 +1,4 @@
-FROM node:14 AS backend
+FROM node:18 AS backend
 WORKDIR /root
 
 # First cache the node_modules
