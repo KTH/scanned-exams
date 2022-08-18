@@ -52,7 +52,7 @@ async function uploadOneExam({ fileId, courseId }) {
     studentPersNr: student.personNumber,
   });
 
-  updateStudentOfEntryInQueue({ fileId }, student);
+  await updateStudentOfEntryInQueue({ fileId }, student);
 
   log.debug(
     `Course ${courseId} / File ${fileId}, ${fileName} / User ${student.kthId}. Uploading`
