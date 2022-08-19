@@ -1,4 +1,7 @@
-FROM node:14 AS backend
+# Ubuntu is required to run image on ARM64 processor such as Apple M1 chips
+# This limitation is due to available binaries of Mongodb.
+#FROM sitespeedio/node:ubuntu-20.04-nodejs-16.16.0 AS backend
+FROM node:16-stretch AS backend
 WORKDIR /root
 
 # First cache the node_modules
