@@ -25,7 +25,7 @@ Pre-requirements
 1. Install OpenSSL:
 - [macOS X](https://formulae.brew.sh/formula/openssl@3#default)
 
-2. Add a DNS override in `/etc/hosts`:
+2. Add a DNS override in `/etc/hosts`: 
 
     ```
     127.0.0.1   localdev.kth.se
