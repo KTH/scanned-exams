@@ -231,9 +231,11 @@ function isOperationalOrRecoverableError(err) {
 function getOrigProgrammerError(error) {
   const { err } = error;
 
-  if(!err) return error // This is a leaf, with no wrapped errors. Return it.
   let result;
-  if (isOperationalOrRecoverableError(err)) {
+  if(! err){
+    // This is a leaf, with no wrapped errors. 
+    result = error 
+  } else if (isOperationalOrRecoverableError(err)) {
     // .err is an OperationalError so need to check if
     // that in turn constains a wrapped error
     result = getOrigProgrammerError(err);
