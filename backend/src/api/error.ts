@@ -230,8 +230,12 @@ function isOperationalOrRecoverableError(err) {
 // Find a wrapped programmer error
 function getOrigProgrammerError(error) {
   const { err } = error;
+
   let result;
-  if (isOperationalOrRecoverableError(err)) {
+  if(! err){
+    // This is a leaf, with no wrapped errors. 
+    result = error 
+  } else if (isOperationalOrRecoverableError(err)) {
     // .err is an OperationalError so need to check if
     // that in turn constains a wrapped error
     result = getOrigProgrammerError(err);
@@ -311,7 +315,6 @@ function errorHandler(err, req, res, next) {
     log.warn(
       "This error should be wrapped in an EndpointError for consistency"
     );
-
     log.error(
       getOrigProgrammerError(err), // this provides a stack trace for the original error that needs to be fixed
       _formatErrorMsg(err.name, err.type, err.message)

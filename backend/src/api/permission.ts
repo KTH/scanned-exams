@@ -30,8 +30,9 @@ async function checkPermissions(courseId, { accessToken, userId }) {
 
   const TEACHER_ROLE = 4;
   const EXAMINER_ROLE = 10;
+  const COURSE_RESPONSIBLE_ROLE = 9;
 
-  if (!roles.includes(TEACHER_ROLE) && !roles.includes(EXAMINER_ROLE)) {
+  if (!roles.includes(TEACHER_ROLE) && !roles.includes(EXAMINER_ROLE) && !roles.includes(COURSE_RESPONSIBLE_ROLE)) {
     throw new AuthError({
       type: "permission_denied",
       message: "You must be a teacher or examiner to use this app",
