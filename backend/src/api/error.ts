@@ -297,8 +297,9 @@ function errorHandler(err, req, res, next) {
     const logErr = getMostSignificantError(err);
     const progErr = getOrigProgrammerError(err);
 
-    if (progErr === undefined) {
-      // If the EndpointError wasn't caused by a programmer error we only need to inform about it.
+    if (err.err === undefined) {
+      // Endpoint errors without .err property set wasn't triggered by a programmer error
+      // and shouldn't be logged as errors
       log.info(logErr);
     } else {
       // If it was a programmer error it needs to be logged and fixed.
