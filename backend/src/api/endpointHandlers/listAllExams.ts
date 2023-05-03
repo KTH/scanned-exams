@@ -164,6 +164,9 @@ async function listAllExams(req, res, next) {
       submission.submission_history?.forEach((prevSubmission) => {
         prevSubmission.attachments?.forEach((attachment) => {
           // QUESTION: Should we warn if we have a duplicate upload?
+          // IMPORTANT: Today only the first upload is imported, and we have
+          // discussed warning if there are more than one upload to allow user
+          // to resolve this if the exam was re-scanned.
           // NOTE: file_removed.pdf has the same name everywhere
           attachmentsInCanvas[
             `${submission.user?.sis_user_id}-${attachment.filename}`
