@@ -9,7 +9,7 @@ export default function UnauthenticatedApp({ courseId }: any) {
       <p className="my-6 text-xl">
       If you have conducted a written exam on paper and want to use SpeedGrader for the assessment,
       you can import the scanned exams to Canvas by using this app. Read more 
-      about <a target="_blank" className="text-blue-500 no-underline hover:text-blue-700 hover:underline" href="https://intra.kth.se/en/utbildning/examination/salskrivning/skannade/tentor-till-canvas-1.1085000">KTH Import Exams
+      about <a target="_blank" className="text-blue-500 no-underline hover:text-blue-700 hover:underline" href="https://intra.kth.se/utbildning/systemstod/examination/import-exams">KTH Import Exams
       on the KTH Intranet</a>.
       </p>
       <p className="my-6">
