@@ -81,6 +81,8 @@ async function examListByLadokId(ladokId): Promise<WindreamsScannedExam[]> {
 
 /** Download the exam with ID "fileId". Returns its content as a ReadableStream */
 async function downloadExam(fileId) {
+  /* 
+    IMPORTANT! This log messages is used to get stats on downloads, do not change it https://confluence.sys.kth.se/confluence/x/_KZFCg */
   log.info(`Downloading file ${fileId}...`);
   const { body } = (await client(`windream/file/${fileId}/true`, {
     responseType: "json",
