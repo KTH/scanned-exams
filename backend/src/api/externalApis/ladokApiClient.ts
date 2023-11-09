@@ -2,6 +2,11 @@ import log from "skog";
 import got from "got";
 import { LadokApiError } from "../error";
 
+/** Represents "ourself" in Ladok */
+export interface AutentiseradAnvandare {
+  Anvandarnamn: string;
+}
+
 let ladokGot;
 function getLadokGot() {
   ladokGot =
@@ -18,6 +23,20 @@ function getLadokGot() {
     });
   return ladokGot;
 }
+
+// This got client is used to call the "Kataloginformation API".
+// Note that it requires a specific `Accept` header
+const gotClientKatalog = got.extend({
+  prefixUrl: process.env.LADOK_API_BASEURL,
+  headers: {
+    Accept: "application/vnd.ladok-kataloginformation+json",
+  },
+  responseType: "json",
+  https: {
+    pfx: Buffer.from(process.env.LADOK_API_PFX_BASE64 as string, "base64"),
+    passphrase: process.env.LADOK_API_PFX_PASSPHRASE,
+  },
+});
 
 function ladokErrorHandler(err) {
   // First our handled errors (these are operatinal errors that are expected)
@@ -49,4 +68,13 @@ export async function getAktivitetstillfalle(ladokId) {
     })),
     examDate: body.Datumperiod.Startdatum,
   };
+}
+
+/**
+ * Get information of "ourselves"
+ */
+export async function getAutentiserad() {
+  return gotClientKatalog
+    .get<AutentiseradAnvandare>(`kataloginformation/anvandare/autentiserad`)
+    .then((response) => response.body);
 }

@@ -1,5 +1,7 @@
 import log from "skog";
+import { Request, Response } from "express";
 import * as tentaApi from "./api/externalApis/tentaApiClient";
+import { getAutentiserad } from "./api/externalApis/ladokApiClient";
 
 async function checkTentaApi() {
   try {
@@ -33,7 +35,7 @@ async function checkTentaApi() {
   }
 }
 
-export default async function monitor(req, res) {
+export async function monitor(req, res) {
   const tentaApiCheck = await checkTentaApi();
   res.setHeader("Content-Type", "text/plain");
   res.send(`APPLICATION_STATUS: OK - Note: this "OK" value is hardcoded
@@ -41,4 +43,17 @@ export default async function monitor(req, res) {
 TentaAPI: ${tentaApiCheck.status}
 - ${tentaApiCheck.data}
 `);
+}
+
+export async function about(req: Request, res: Response<string>) {
+  const Anvandarnamn = await getAutentiserad()
+    .then((body) => body.Anvandarnamn)
+    .catch(() => "error getting user name from Ladok");
+
+  res.set("Content-type", "text/plain");
+  res.send(`
+    Scanned exams
+    -------------
+    - Ladok user: ${Anvandarnamn}
+    `);
 }
