@@ -48,7 +48,10 @@ TentaAPI: ${tentaApiCheck.status}
 export async function about(req: Request, res: Response<string>) {
   const Anvandarnamn = await getAutentiserad()
     .then((body) => body.Anvandarnamn)
-    .catch(() => "error getting user name from Ladok");
+    .catch((err) => {
+      log.error(err);
+      return "error getting user name from Ladok";
+    });
 
   res.set("Content-type", "text/plain");
   res.send(`
