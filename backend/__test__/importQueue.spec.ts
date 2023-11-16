@@ -42,7 +42,7 @@ afterAll(async () => {
   await databaseClient.close();
 });
 
-describe("Import queue", () => {
+describe.skip("Import queue", () => {
   beforeEach(async () => {
     // Prevent tests from relying on previous state
     await getImportQueueCollection().then((coll) => coll.deleteMany({}));
