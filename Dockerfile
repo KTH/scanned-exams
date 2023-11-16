@@ -1,7 +1,7 @@
 # This Dockerfile uses multi-stage builds as recommended in
 # https://github.com/nodejs/docker-node/blob/master/docs/BestPractices.md
 #
-FROM node:14 AS frontend
+FROM node:20 AS frontend
 WORKDIR /usr/src/app/frontend
 
 COPY ["frontend/package.json", "package.json"]
@@ -12,7 +12,7 @@ RUN npm ci --unsafe-perm
 COPY frontend .
 RUN npm run build
 
-FROM node:14 AS backend
+FROM node:20 AS backend
 WORKDIR /usr/src/app/backend
 
 COPY ["backend/package.json", "package.json"]
@@ -20,7 +20,7 @@ COPY ["backend/package-lock.json", "package-lock.json"]
 
 RUN npm ci --production --unsafe-perm
 
-FROM node:14-alpine AS production
+FROM node:20-alpine AS production
 WORKDIR /usr/src/app
 COPY --from=frontend /usr/src/app/frontend/build frontend/build
 COPY --from=backend /usr/src/app/backend/node_modules backend/node_modules
