@@ -8,7 +8,7 @@ import connectMongodbSession from "connect-mongodb-session";
 
 import apiRouter from "./api/router";
 import authRouter from "./auth/router";
-import monitor from "./monitor";
+import { monitor, about } from "./system";
 
 const MongoDBStore = connectMongodbSession(session);
 const server = express();
@@ -146,5 +146,6 @@ server.use(
 );
 
 server.get("/scanned-exams/_monitor", monitor);
+server.get("/scanned-exams/_about", about);
 
 export default server;
