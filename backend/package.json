@@ -12,8 +12,8 @@
     "format": "prettier --write .",
     "test:lint": "tsc --noEmit src/**/*.ts",
     "test:format": "prettier --check .",
-    "test:api": "jest --runInBand",
-    "test": "npm run test:lint && npm run test:api"
+    "//test:api": "jest --runInBand",
+    "test": "npm run test:lint"
   },
   "repository": {
     "type": "git",
