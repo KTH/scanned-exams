@@ -1,7 +1,7 @@
 # This Dockerfile uses multi-stage builds as recommended in
 # https://github.com/nodejs/docker-node/blob/master/docs/BestPractices.md
 #
-FROM node:20 AS frontend
+FROM node:14 AS frontend
 WORKDIR /usr/src/app/frontend
 
 COPY ["frontend/package.json", "package.json"]
