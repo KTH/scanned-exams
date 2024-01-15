@@ -31,14 +31,13 @@ server.set("trust proxy", 1);
 server.use(
   session({
     name: "scanned-exams.sid",
+    proxy: true,
     cookie: {
-      domain: "kth.se",
+      domain: new URL(process.env.SERVER_HOST_URL || "").hostname,
       maxAge: COOKIE_MAX_AGE_SECONDS * 1000,
       httpOnly: true,
-      secure: true,
-      sameSite: process.env.CANVAS_API_URL.endsWith("kth.se")
-        ? "strict"
-        : "none",
+      secure: "auto",
+      sameSite: "none",
     },
     // MongoDB does not update TTL when reading but when writing
     resave: true,
