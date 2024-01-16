@@ -1,3 +1,7 @@
+@use "@kth/style/scss/utils/reset";
+@use "@kth/style/scss/components/button";
+@use "@kth/style/scss/components/details";
+
 #root {
   max-width: 60rem;
   margin: 0 auto;
