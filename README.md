@@ -5,6 +5,7 @@ Application that downloads exams from the "Windream/AlcomREST tenta API" and upl
 ---
 
 ## Vocabulary
+
 These are common words and phrases that should be used in the app for UX consistency.
 
 - KTH Import Exams? -- name of app (don't use: scanned exams?)
@@ -20,37 +21,27 @@ These are common words and phrases that should be used in the app for UX consist
 
 ## Getting started
 
-Pre-requirements
+Pre-requirements:
 
-1. Install OpenSSL:
-- [macOS X](https://formulae.brew.sh/formula/openssl@3#default)
+- Route `localdev.kth.se` to `127.0.0.1` (usually in the `etc/hosts` file)
 
-2. Add a DNS override in `/etc/hosts`: 
+  ```
+  127.0.0.1   localdev.kth.se
+  ```
 
-    ```
-    127.0.0.1   localdev.kth.se
-    ```
-
-3. Install npm packages
+1. Install npm packages
 
    ```sh
-   (cd backend; npm i) && (cd frontend; npm i)
+   npm install
    ```
 
-4. Setup env vars in backen `.env.in` to `.env`
-
-   ```sh
-   (cd backend; cp .env.in .env) && code backend/.env
-   ```
-
-5. Start backend and then frontend
+2. Setup env vars
 
    ```sh
-   (cd backend; npm run dev)
+   cp backend/.env.in backend/.env
    ```
-   ```sh
-   (cd frontend; npm run start)
-   ```
+
+3. Run `npm run dev`
 
 ---
 
@@ -60,10 +51,3 @@ Scanned exams is divided into 2 applications, each of them in one directory:
 
 - `/backend`. An Express server containing the logic for the app
 - `/frontend`. A React application with a small development server
-
-This repository also contains two more projects:
-
-- `/tentaapi-mock`. An Express server that simulates the "Tenta API". Contains information about a fake examination and instructions on how to have it in Canvas.
-- `/pnummer-masker`. A project to test the "personnummer masking".
-
----

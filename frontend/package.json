@@ -16,7 +16,7 @@
     "web-vitals": "^1.1.1"
   },
   "scripts": {
-    "dev": "parcel --https --port 4443 --public-url /scanned-exams",
+    "dev": "parcel --https --port 4443 --public-url /scanned-exams --host localdev.kth.se",
     "build": "parcel build --public-url /scanned-exams --no-cache",
     "format": "prettier --write .",
     "test:lint": "eslint src/**/*.js",
