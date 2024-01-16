@@ -1,0 +1,16 @@
+.Stepper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 0;
+  margin-block: 1rem;
+  gap: 2rem;
+  list-style-position: inside;
+
+  li {
+    padding-block: 0.25rem;
+  }
+
+  li[aria-current="true"] {
+    border-block-end: 0.25rem var(--color-primary) solid;
+  }
+}
