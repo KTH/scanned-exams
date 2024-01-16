@@ -3,6 +3,17 @@
   "version": "1.1.0",
   "description": "Scanned exams mono repos",
   "scripts": {
+    "dev": "FORCE_COLOR=1 lerna run dev --parallel --stream",
     "test-unit-in-docker": "ID=$(docker build .) && WORKSPACE=$(pwd) LOCAL_IMAGE_ID=$ID docker-compose -f docker-compose-unit-tests.yml up --force-recreate --abort-on-container-exit --always-recreate-deps --no-log-prefix --quiet-pull --build"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.11.0",
+    "http-proxy-middleware": "^2.0.6",
+    "lerna": "^8.0.2",
+    "process": "^0.11.10"
   }
 }
