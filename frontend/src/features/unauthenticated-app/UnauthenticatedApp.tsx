@@ -1,9 +1,8 @@
 import React from "react";
-import "./UnauthenticatedApp.scss";
 
 export default function UnauthenticatedApp({ courseId }: any) {
   return (
-    <div className="container">
+    <main>
       <h1>KTH Import Exams</h1>
       <p>
         If you have conducted a written exam on paper and want to use
@@ -34,6 +33,6 @@ export default function UnauthenticatedApp({ courseId }: any) {
           </button>
         </form>
       </div>
-    </div>
+    </main>
   );
 }

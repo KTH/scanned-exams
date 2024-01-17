@@ -16,16 +16,14 @@ export default function CreateHomePage({ onDone, courseId }: any) {
   }
 
   return (
-    <div className="max-w-2xl">
-      <H2>Prepare the homepage</H2>
-      <P>
+    <main>
+      <h2>Prepare the homepage</h2>
+      <p>
         The exam room will be visible for your students, it is important that
         they can see its purpose from the homepage. You can use our recommended
         homepage or setup the exam room by yourself
-      </P>
-      <P>
-        <em>The examroom will not be published yet</em>
-      </P>
+      </p>
+      <em>The examroom will not be published yet</em>
       <div className="mt-8">
         <PrimaryButton
           className="sm:w-96"
@@ -39,6 +37,6 @@ export default function CreateHomePage({ onDone, courseId }: any) {
           Skip this step
         </SecondaryButton>
       </div>
-    </div>
+    </main>
   );
 }
