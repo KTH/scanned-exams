@@ -9,6 +9,8 @@
 }
 
 main {
-  max-width: 60rem;
   @include prose.prose;
+}
+
+.button-with-spinner {
 }
