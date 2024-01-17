@@ -12,7 +12,7 @@ export default function CreateAssignment({ courseId }: any) {
   }
 
   return (
-    <div className="max-w-2xl">
+    <main>
       <H2>Create Assignment</H2>
       <P>
         We need to create an assignment. This is where the scanned exams will be
@@ -29,6 +29,6 @@ export default function CreateAssignment({ courseId }: any) {
           Create Assignment
         </PrimaryButton>
       </P>
-    </div>
+    </main>
   );
 }
