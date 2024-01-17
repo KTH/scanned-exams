@@ -1,13 +1,18 @@
 import React from "react";
 import { useCourseExams, useMutateImportStart } from "../../../common/api";
-import { H2, LoadingPage, PrimaryButton, P } from "../../widgets";
+import { LoadingPage, PrimaryButton2 } from "../../widgets";
 
 export default function PrepareImport({ courseId }: any) {
   // Get exams available to import
-  const { data = {}, isFetching: examsLoading, error: examsError } = useCourseExams(courseId);
+  const {
+    data = {},
+    isFetching: examsLoading,
+    error: examsError,
+  } = useCourseExams(courseId);
   const { result: exams = [] } = data;
 
-  const examsToImport = exams.filter((exam: any) => exam.status === "new") || [];
+  const examsToImport =
+    exams.filter((exam: any) => exam.status === "new") || [];
   const numberOfExamsToImport = examsToImport.length;
 
   // Hoook to start import
@@ -19,9 +24,7 @@ export default function PrepareImport({ courseId }: any) {
   } = useMutateImportStart(courseId, examsToImport);
 
   if (examsError) {
-    throw new Error(
-      (examsError as Error).message
-    );
+    throw new Error((examsError as Error).message);
   }
 
   if (examsLoading) {
@@ -29,23 +32,22 @@ export default function PrepareImport({ courseId }: any) {
   }
 
   return (
-    <div className="max-w-2xl">
-      <H2>Prepare Import</H2>
-      <P>
+    <main>
+      <h2>Prepare Import</h2>
+      <p>
         There are <b>{numberOfExamsToImport} exams</b> available to import.{" "}
-      </P>
-      <div className="mt-8">
+      </p>
+      <div className="button-bar">
         {numberOfExamsToImport > 0 && (
-          <PrimaryButton
-            className="sm:w-96"
-            waiting={startImportLoading}
-            success={startImportSuccess}
+          <PrimaryButton2
+            width="10rem"
+            waiting={startImportSuccess || startImportLoading}
             onClick={doStartImport}
           >
-            Start import!
-          </PrimaryButton>
+            Start import
+          </PrimaryButton2>
         )}
       </div>
-    </div>
+    </main>
   );
 }
