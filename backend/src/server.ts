@@ -124,27 +124,12 @@ server.post("/scanned-exams", async (req, res) => {
 });
 server.use("/scanned-exams/auth", authRouter);
 server.use("/scanned-exams/api", apiRouter); // NOTE: If you change this route mapping, please update the logging middleware
-server.get("/scanned-exams/app", async (req, res) => {
-  try {
-    const html = await fs.promises.readFile(
-      path.join(__dirname, "..", "..", "frontend", "build", "index.html"),
-      { encoding: "utf-8" }
-    );
-
-    return res.send(html);
-  } catch (err) {
-    log.error(err);
-    return res.status(500).send("Unknown error. Please contact IT support");
-  }
-});
-server.use(
-  "/scanned-exams/app/static",
-  express.static(
-    path.join(__dirname, "..", "..", "frontend", "build", "static")
-  )
-);
-
 server.get("/scanned-exams/_monitor", monitor);
 server.get("/scanned-exams/_about", about);
+
+server.use(
+  "/scanned-exams",
+  express.static(path.join(__dirname, "../frontend/dist"))
+);
 
 export default server;

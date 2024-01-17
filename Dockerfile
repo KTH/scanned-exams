@@ -1,31 +1,43 @@
 # This Dockerfile uses multi-stage builds as recommended in
 # https://github.com/nodejs/docker-node/blob/master/docs/BestPractices.md
 #
-FROM node:14 AS frontend
-WORKDIR /usr/src/app/frontend
 
-COPY ["frontend/package.json", "package.json"]
-COPY ["frontend/package-lock.json", "package-lock.json"]
+#
+# First, we build the frontend in /usr/src/app/frontend
+FROM node:20 AS frontend
 
-# See: https://stackoverflow.com/questions/18136746/npm-install-failed-with-cannot-run-in-wd
+# Install dependencies
+# 1. Copy only package.json so dependencies can be cached
+# 2. Move to /frontend before running npm ci
+COPY ["package.json", "package.json"]
+COPY ["package-lock.json", "package-lock.json"]
+COPY ["frontend/package.json", "frontend/package.json"]
+WORKDIR /frontend
 RUN npm ci --unsafe-perm
-COPY frontend .
-RUN npm run build
 
-FROM node:20 AS backend
-WORKDIR /usr/src/app/backend
-
-COPY ["backend/package.json", "package.json"]
-COPY ["backend/package-lock.json", "package-lock.json"]
-
-RUN npm ci --production --unsafe-perm
-
-FROM node:20-alpine AS production
-WORKDIR /usr/src/app
-COPY --from=frontend /usr/src/app/frontend/build frontend/build
-COPY --from=backend /usr/src/app/backend/node_modules backend/node_modules
+WORKDIR /
 COPY . .
 
-EXPOSE 4000
+WORKDIR /frontend
+RUN npm run build
 
-CMD cd backend && npm run start
+#
+# Second, we install backend dependencies
+FROM node:20 AS backend
+COPY ["package.json", "package.json"]
+COPY ["package-lock.json", "package-lock.json"]
+COPY ["backend/package.json", "backend/package.json"]
+WORKDIR /backend
+RUN npm ci --omit=dev --unsafe-perm
+
+#
+# Third, build the production image with a minimal node (alpine)
+FROM node:20-alpine AS production
+COPY --from=backend node_modules node_modules
+COPY --from=frontend frontend/dist frontend/dist
+COPY --from=backend backend/node_modules backend/node_modules
+COPY . .
+
+EXPOSE 3000
+WORKDIR /backend
+CMD npm start
