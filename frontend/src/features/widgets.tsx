@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React from "react";
-import { Spinner } from "./icons";
+import classes from "./widgets.module.scss";
 
 export const PrimaryButton = ({ width, waiting, children, onClick }: any) => (
   <button
@@ -31,16 +31,9 @@ export const SecondaryButton = ({ width, waiting, children, onClick }: any) => (
 );
 
 export const LoadingPage = ({ className, children, ...props }: any) => (
-  <div
-    className={[
-      className,
-      "flex flex-col flex-auto justify-center items-center h-72",
-    ].join(" ")}
-    {...props}
-  >
-    <Spinner className="w-8 h-8 animate-spin m-8" />
-    {children}
-  </div>
+  <main className={classes.LoadingPage}>
+    <div className={classes.WithSpinner}>{children}</div>
+  </main>
 );
 
 export const ExamErrorTable = ({ exams }: any) => (
