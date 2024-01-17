@@ -1,5 +1,5 @@
 import React from "react";
-import { PrimaryButton2 } from "../../widgets";
+import { PrimaryButton } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
 export default function PublishCourse({ courseId }: any) {
@@ -16,13 +16,13 @@ export default function PublishCourse({ courseId }: any) {
       <h2>Publish the exam room</h2>
       <p>Now the exam room is ready to be published.</p>
       <div className="button-bar">
-        <PrimaryButton2
+        <PrimaryButton
           width="14rem"
           onClick={mutate}
           waiting={isLoading || isSuccess}
         >
           Publish exam room
-        </PrimaryButton2>
+        </PrimaryButton>
       </div>
     </main>
   );

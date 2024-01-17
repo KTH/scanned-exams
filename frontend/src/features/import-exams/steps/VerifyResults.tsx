@@ -3,7 +3,7 @@ import {
   useImportQueueErrors,
   useMutateResetImportQueue,
 } from "../../../common/api";
-import { ExamErrorTable, H2, SecondaryButton } from "../../widgets";
+import { ExamErrorTable, SecondaryButton } from "../../widgets";
 
 // TODO: do something with `ignored` (errors that are not fixed)
 export default function VerifyResults({ courseId, imported, ignored }: any) {
@@ -17,24 +17,21 @@ export default function VerifyResults({ courseId, imported, ignored }: any) {
   const ignoredExams = exams.filter((exam: any) => exam.status === "ignored");
 
   return (
-    <div className="max-w-2xl">
-      <H2>Verify Results</H2>
-      <div className="mt-8">{imported} exams have been imported to Canvas</div>
-      <details className="mt-8">
+    <main>
+      <h2>Verify Results</h2>
+      <p>{imported} exams have been imported to Canvas</p>
+      <details className="kth-details">
         <summary>{ignoredExams.length} exams could not be imported</summary>
         <ExamErrorTable exams={ignoredExams} />
       </details>
-      <div className="mt-8">
+      <div className="button-bar">
         <SecondaryButton
-          className="sm:w-auto"
-          waiting={resettingQueue}
-          success={queueResetted}
+          waiting={resettingQueue || queueResetted}
           onClick={() => doResetImportQueue()}
         >
-          Import more...
+          Import more
         </SecondaryButton>
-        {/* <PrimaryButton className="sm:w-auto">Log out</PrimaryButton> */}
       </div>
-    </div>
+    </main>
   );
 }

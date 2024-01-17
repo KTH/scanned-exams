@@ -1,56 +1,8 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React from "react";
-import { Check, Spinner } from "./icons";
+import { Spinner } from "./icons";
 
-export const cssInfoBox =
-  "bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-6";
-
-export const cssSuccessBox =
-  "bg-green-50 border-l-4 border-green-600 text-green-800 p-4 mt-6";
-
-export function P(props: any) {
-  return <p className="mt-6" {...props} />;
-}
-
-export function H2(props: any) {
-  // eslint-disable-next-line jsx-a11y/heading-has-content
-  return <h2 className="font-semibold mt-4 mb-8 text-2xl" {...props} />;
-}
-
-export function BaseButton({ className, ...props }: any) {
-  return (
-    <button
-      type="button"
-      className={`${className} flex w-full sm:inline-flex justify-center items-center rounded-md font-semibold py-2 text-base px-6 transition-colors`}
-      {...props}
-    />
-  );
-}
-
-/** A button with "waiting" and "success" states */
-export const ButtonWithLabel = ({
-  className,
-  disabled,
-  waiting,
-  success,
-  children,
-  onClick,
-}: any) => {
-  // Don't allow clicks when any of these states are true
-  const _blockClick = !!(disabled || waiting || success);
-
-  return (
-    <div>
-      <button className={className} onClick={(e) => !_blockClick && onClick(e)}>
-        {children}
-        {waiting && "Spinner"}
-        {!waiting && success && "Done"}
-      </button>
-    </div>
-  );
-};
-
-export const PrimaryButton2 = ({ width, waiting, children, onClick }: any) => (
+export const PrimaryButton = ({ width, waiting, children, onClick }: any) => (
   <button
     className={["kth-button", "primary", waiting && "waiting"].join(" ")}
     style={{ width }}
@@ -64,12 +16,7 @@ export const PrimaryButton2 = ({ width, waiting, children, onClick }: any) => (
   </button>
 );
 
-export const SecondaryButton2 = ({
-  width,
-  waiting,
-  children,
-  onClick,
-}: any) => (
+export const SecondaryButton = ({ width, waiting, children, onClick }: any) => (
   <button
     className={["kth-button", "secondary", waiting && "waiting"].join(" ")}
     style={{ width }}
@@ -81,25 +28,6 @@ export const SecondaryButton2 = ({
   >
     {children}
   </button>
-);
-
-export const PrimaryButton = ({ className, disabled, ...props }: any) => (
-  <ButtonWithLabel
-    className={[
-      className,
-      !disabled && "hover:bg-blue-700",
-      "border border-transparent text-white bg-blue-500  mr-8",
-    ].join(" ")}
-    disabled={disabled}
-    {...props}
-  />
-);
-
-export const SecondaryButton = ({ className, ...props }: any) => (
-  <BaseButton
-    className={`${className} mt-2 sm:mt-0 text-black border border-black hover:bg-gray-200  mr-8`}
-    {...props}
-  />
 );
 
 export const LoadingPage = ({ className, children, ...props }: any) => (

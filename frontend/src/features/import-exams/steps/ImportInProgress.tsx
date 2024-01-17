@@ -1,11 +1,11 @@
-import { H2 } from "../../widgets";
+import React from "react";
 
 export default function ImportInProgress({ progress, total }: any) {
   const perc = Math.round((progress / total) * 100);
 
   return (
-    <div className="max-w-2xl">
-      <H2>Import in progress</H2>
+    <main>
+      <h2>Import in progress</h2>
       <div className="mt-8 mb-8">
         <div className="relative pt-1 mb-1">
           <div className="overflow-hidden h-4 text-xs flex rounded bg-blue-200">
@@ -19,6 +19,6 @@ export default function ImportInProgress({ progress, total }: any) {
           <span>{`${progress} of ${total}`}</span>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

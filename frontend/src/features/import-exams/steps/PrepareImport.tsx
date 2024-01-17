@@ -1,6 +1,6 @@
 import React from "react";
 import { useCourseExams, useMutateImportStart } from "../../../common/api";
-import { LoadingPage, PrimaryButton2 } from "../../widgets";
+import { LoadingPage, PrimaryButton } from "../../widgets";
 
 export default function PrepareImport({ courseId }: any) {
   // Get exams available to import
@@ -39,13 +39,13 @@ export default function PrepareImport({ courseId }: any) {
       </p>
       <div className="button-bar">
         {numberOfExamsToImport > 0 && (
-          <PrimaryButton2
+          <PrimaryButton
             width="10rem"
             waiting={startImportSuccess || startImportLoading}
             onClick={doStartImport}
           >
             Start import
-          </PrimaryButton2>
+          </PrimaryButton>
         )}
       </div>
     </main>

@@ -1,5 +1,5 @@
 import React from "react";
-import { PrimaryButton2 } from "../../widgets";
+import { PrimaryButton } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
 export default function CreateAssignment({ courseId }: any) {
@@ -20,13 +20,13 @@ export default function CreateAssignment({ courseId }: any) {
         once it has been created.
       </p>
       <div className="button-bar">
-        <PrimaryButton2
+        <PrimaryButton
           width="14rem"
           onClick={mutate}
           waiting={isLoading || isSuccess}
         >
           Create Assignment
-        </PrimaryButton2>
+        </PrimaryButton>
       </div>
     </main>
   );
