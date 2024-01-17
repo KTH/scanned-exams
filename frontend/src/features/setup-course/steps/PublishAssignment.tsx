@@ -1,5 +1,5 @@
 import React from "react";
-import { H2, PrimaryButton, P } from "../../widgets";
+import { PrimaryButton2 } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
 export default function CreateAssignment({ courseId }: any) {
@@ -13,22 +13,21 @@ export default function CreateAssignment({ courseId }: any) {
 
   return (
     <main>
-      <H2>Publish Assignment</H2>
-      <P>
+      <h2>Publish Assignment</h2>
+      <p>
         You have created the assignment. You can edit the assignment and return
         to the setup process later to publish the assignment or you can now
         publish it now.
-      </P>
-      <P>
-        <PrimaryButton
-          className="sm:w-96"
+      </p>
+      <div className="button-bar">
+        <PrimaryButton2
+          width="16rem"
           onClick={mutate}
-          waiting={isLoading}
-          success={isSuccess}
+          waiting={isLoading || isSuccess}
         >
           Publish Assignment
-        </PrimaryButton>
-      </P>
+        </PrimaryButton2>
+      </div>
     </main>
   );
 }

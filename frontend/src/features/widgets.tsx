@@ -27,7 +27,8 @@ export function BaseButton({ className, ...props }: any) {
   );
 }
 
-export const BaseActionButton = ({
+/** A button with "waiting" and "success" states */
+export const ButtonWithLabel = ({
   className,
   disabled,
   waiting,
@@ -39,25 +40,51 @@ export const BaseActionButton = ({
   const _blockClick = !!(disabled || waiting || success);
 
   return (
-    <BaseButton
-      className={[
-        className,
-        disabled && "opacity-75",
-        !disabled && "hover:bg-blue-700",
-        "border border-transparent text-white bg-blue-500  mr-8",
-      ].join(" ")}
-      disabled={disabled}
-      onClick={(e: MouseEvent) => !_blockClick && onClick(e)}
-    >
-      {children}
-      {waiting && <Spinner className="h-5 w-5 animate-spin ml-3" />}
-      {!waiting && success && <Check className="h-5 w-5 ml-3" />}
-    </BaseButton>
+    <div>
+      <button className={className} onClick={(e) => !_blockClick && onClick(e)}>
+        {children}
+        {waiting && "Spinner"}
+        {!waiting && success && "Done"}
+      </button>
+    </div>
   );
 };
 
+export const PrimaryButton2 = ({ width, waiting, children, onClick }: any) => (
+  <button
+    className={["kth-button", "primary", waiting && "waiting"].join(" ")}
+    style={{ width }}
+    onClick={(e) => {
+      if (!waiting) {
+        onClick(e);
+      }
+    }}
+  >
+    {children}
+  </button>
+);
+
+export const SecondaryButton2 = ({
+  width,
+  waiting,
+  children,
+  onClick,
+}: any) => (
+  <button
+    className={["kth-button", "secondary", waiting && "waiting"].join(" ")}
+    style={{ width }}
+    onClick={(e) => {
+      if (!waiting) {
+        onClick(e);
+      }
+    }}
+  >
+    {children}
+  </button>
+);
+
 export const PrimaryButton = ({ className, disabled, ...props }: any) => (
-  <BaseActionButton
+  <ButtonWithLabel
     className={[
       className,
       !disabled && "hover:bg-blue-700",

@@ -1,5 +1,5 @@
 import React from "react";
-import { H2, PrimaryButton, SecondaryButton, P } from "../../widgets";
+import { PrimaryButton2, SecondaryButton2 } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
 export default function CreateHomePage({ onDone, courseId }: any) {
@@ -24,18 +24,15 @@ export default function CreateHomePage({ onDone, courseId }: any) {
         homepage or setup the exam room by yourself
       </p>
       <em>The examroom will not be published yet</em>
-      <div className="mt-8">
-        <PrimaryButton
-          className="sm:w-96"
+      <div className="button-bar">
+        <PrimaryButton2
           onClick={mutate}
-          waiting={isLoading}
-          success={isSuccess}
+          waiting={isLoading || isSuccess}
+          width="20rem"
         >
           Use the recommended homepage
-        </PrimaryButton>
-        <SecondaryButton className="sm:w-auto" onClick={onDone}>
-          Skip this step
-        </SecondaryButton>
+        </PrimaryButton2>
+        <SecondaryButton2 onClick={onDone}>Skip this step</SecondaryButton2>
       </div>
     </main>
   );
