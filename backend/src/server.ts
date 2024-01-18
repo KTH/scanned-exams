@@ -116,7 +116,7 @@ server.post("/scanned-exams", async (req, res) => {
 
     req.session.userId = null;
 
-    return res.redirect(`/scanned-exams/app?courseId=${courseId}`);
+    return res.redirect(`/scanned-exams/?courseId=${courseId}`);
   } catch (err) {
     log.error({ err });
     return res.status(500).send("Unknown error. Please contact IT support");
@@ -129,7 +129,7 @@ server.get("/scanned-exams/_about", about);
 
 server.use(
   "/scanned-exams",
-  express.static(path.join(__dirname, "../frontend/dist"))
+  express.static(path.join(__dirname, "../../frontend/dist"))
 );
 
 export default server;

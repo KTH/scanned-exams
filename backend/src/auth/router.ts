@@ -72,7 +72,7 @@ router.get("/callback", async (req, res) => {
     const courseId = req.session.temporalCourseId;
     req.session.temporalCourseId = undefined;
 
-    res.redirect(`/scanned-exams/app?courseId=${courseId}`);
+    res.redirect(`/scanned-exams/?courseId=${courseId}`);
   } catch (err) {
     log.error({ err });
     res
