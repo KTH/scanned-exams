@@ -3,6 +3,8 @@
 @use "@kth/style/scss/tokens/spacing" as s;
 @use "@kth/style/scss/components/button";
 @use "@kth/style/scss/components/details";
+@import url("./assets/fonts.css");
+// @import url("@kth/style/assets/fonts.css");
 
 @keyframes spin {
   to {
