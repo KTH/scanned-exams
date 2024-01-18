@@ -94,7 +94,7 @@ server.post("/scanned-exams", async (req, res) => {
 
     if (req.session.userId) {
       log.debug("POST /scanned-exams: user has a session. Redirecting to /app");
-      return res.redirect(`/scanned-exams/app?courseId=${courseId}`);
+      return res.redirect(`/scanned-exams/?courseId=${courseId}`);
     }
 
     log.debug(
