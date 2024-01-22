@@ -1,0 +1,55 @@
+@use "@kth/style/scss/utils/reset";
+@use "@kth/style/scss/utils/prose";
+@use "@kth/style/scss/tokens/spacing" as s;
+@use "@kth/style/scss/components/button";
+@use "@kth/style/scss/components/details";
+@import url("./assets/fonts.css");
+// @import url("@kth/style/assets/fonts.css");
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+#root {
+  max-width: 60rem;
+  margin: 0 auto;
+}
+
+main {
+  @include prose.prose;
+}
+
+.button-bar {
+  margin-top: s.$space-32;
+  gap: s.$space-8;
+  display: flex;
+}
+
+.kth-button.waiting::before {
+  content: "";
+  width: 1rem;
+  padding: 0.125rem;
+  margin-right: s.$space-8;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  // background: var(--color-on-primary);
+
+  --_m: conic-gradient(transparent 10%, #000),
+    linear-gradient(#000 0 0) content-box;
+  -webkit-mask: var(--_m);
+  mask: var(--_m);
+  -webkit-mask-composite: source-out;
+  mask-composite: subtract;
+
+  animation: spin 750ms infinite linear;
+}
+
+.kth-button.primary.waiting::before {
+  background: var(--color-on-primary);
+}
+
+.kth-button.secondary.waiting::before {
+  background: var(--color-secondary);
+}

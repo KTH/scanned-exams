@@ -1,5 +1,5 @@
 import React from "react";
-import { H2, PrimaryButton, P } from "../../widgets";
+import { PrimaryButton } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
 export default function CreateAssignment({ courseId }: any) {
@@ -12,23 +12,22 @@ export default function CreateAssignment({ courseId }: any) {
   }
 
   return (
-    <div className="max-w-2xl">
-      <H2>Create Assignment</H2>
-      <P>
+    <main>
+      <h2>Create Assignment</h2>
+      <p>
         We need to create an assignment. This is where the scanned exams will be
         imported as submissions. You can leave the setup and edit the assignment
         once it has been created.
-      </P>
-      <P>
+      </p>
+      <div className="button-bar">
         <PrimaryButton
-          className="sm:w-96"
+          width="14rem"
           onClick={mutate}
-          waiting={isLoading}
-          success={isSuccess}
+          waiting={isLoading || isSuccess}
         >
           Create Assignment
         </PrimaryButton>
-      </P>
-    </div>
+      </div>
+    </main>
   );
 }

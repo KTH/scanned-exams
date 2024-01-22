@@ -5,12 +5,10 @@ import {
   useMutateIgnoreImportQueueErrors,
 } from "../../../common/api";
 import {
-  H2,
   LoadingPage,
+  ExamErrorTable,
   PrimaryButton,
   SecondaryButton,
-  P,
-  ExamErrorTable,
 } from "../../widgets";
 
 export default function ResolveIssues({ courseId }: any) {
@@ -60,35 +58,31 @@ function MissingStudents({ courseId, exams }: any) {
   } = useMutateIgnoreImportQueueErrors(courseId, exams);
 
   return (
-    <div className="max-w-2xl">
-      <h3 className="font-semibold text-lg">Missing students</h3>
-      <P>
+    <main>
+      <h2>Missing students</h2>
+      <p>
         There are {exams.length} exams where the student hasn&apos;t yet been
         added to your exam room. They are probably drop in students (people who
         are not registered to the exam but have written it)
-      </P>
-      <div className="mt-8">
+      </p>
+      <div>
         <ExamErrorTable exams={exams} />
       </div>
-      <div className="mt-8">
+      <div className="button-bar">
         <PrimaryButton
-          className="sm:w-auto"
-          working={addingMissingStudents}
-          success={missingStudentsAdded}
+          working={addingMissingStudents || missingStudentsAdded}
           onClick={() => doFixMissingStudents()}
         >
           Add students and import exams
         </PrimaryButton>
         <SecondaryButton
-          className="sm:w-auto"
-          working={ignoringMissingStudents}
-          success={missingStudentsIgnored}
+          working={ignoringMissingStudents || missingStudentsIgnored}
           onClick={() => doIgnoreMissingStudents()}
         >
           Do not add students
         </SecondaryButton>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -105,9 +99,9 @@ function OtherErrors({ courseId, exams }: any) {
   } = useMutateIgnoreImportQueueErrors(courseId, exams);
 
   return (
-    <div className="max-w-2xl">
-      <h3 className="font-semibold text-lg">Other errors</h3>
-      <P>
+    <main>
+      <h2>Other errors</h2>
+      <p>
         <b>
           There are {exams.length} exams that can&apos;t be imported at this
           time.
@@ -115,34 +109,33 @@ function OtherErrors({ courseId, exams }: any) {
         This is due to issues we can&apos;t automatically solve. Once the issues
         with these exams have been solved click &quot;Try to import again&quot;
         to retry importing these exams.
-      </P>
-      <P>
-        <b>If you don&apos;t know how to resolvera these issues:</b> please contact your
-        local exam administrator with the information below. The local exam administrator
-        in turn needs to contact it-support@kth.se since they sit on information that is
-        important to the troubleshooting process.
-      </P>
-      <div className="mt-8">
+      </p>
+      <p>
+        <b>If you don&apos;t know how to resolvera these issues:</b> please
+        contact your local exam administrator with the information below. The
+        local exam administrator in turn needs to contact it-support@kth.se
+        since they sit on information that is important to the troubleshooting
+        process.
+      </p>
+      <div>
         <ExamErrorTable exams={exams} />
       </div>
-      <div className="mt-8">
+      <div className="button-bar">
         <PrimaryButton
           className="sm:w-auto"
-          waiting={fixingOtherErrors}
-          success={otherErrorsFixed}
+          waiting={fixingOtherErrors || otherErrorsFixed}
           onClick={() => doFixOtherErrors()}
         >
           Try to import again
         </PrimaryButton>
         <SecondaryButton
           className="sm:w-auto"
-          waiting={ignoringOtherErrors}
-          success={otherErrorsIgnored}
+          waiting={ignoringOtherErrors || otherErrorsIgnored}
           onClick={() => doIgnoreOtherErrors()}
         >
           I have contacted IT support
         </SecondaryButton>
       </div>
-    </div>
+    </main>
   );
 }

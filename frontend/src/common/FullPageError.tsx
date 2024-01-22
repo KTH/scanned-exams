@@ -1,4 +1,5 @@
 import React from "react";
+import "./FullPageError.scss";
 
 const errorTitles: { [key: string]: string } = {
   permission_denied: "Apologies! Permission denied",
@@ -14,11 +15,13 @@ export default function FullPageError({ error }: any) {
   const body = errorMessage[error.type] || error.message;
 
   return (
-    <div className="flex flex-row items-center justify-center">
-      <div role="alert" className="bg-red-100 p-12 m-12 max-w-3xl">
-        <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-        <p className="my-6 text-lg">{body}</p>
-      </div>
+    <div className="FullPageError">
+      <header>
+        <h1>{title}</h1>
+      </header>
+      <main>
+        <p>{body}</p>
+      </main>
     </div>
   );
 }

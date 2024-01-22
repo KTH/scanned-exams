@@ -47,29 +47,10 @@ export default function ImportScreen({ courseId }: any) {
 
   // Determine current active step
   const showStep = statusLoading ? undefined : getImportQueueStep(data);
-  const showStepIndex = stepIndex[showStep!];
-
-  // Determine if steps are done
-  const importDone = showStepIndex > 0;
-  const issuesDone = showStepIndex > 1;
-  const verifyDone = showStepIndex > 2;
 
   return (
-    <div className="container mx-auto my-8">
-      <div className="">
-        <div className="mb-8">
-          <StepList currentStep={showStepIndex}>
-            <Step index={0} done={importDone}>
-              <StepText short="Step 1" long="1. Import" />
-            </Step>
-            <Step index={1} done={issuesDone}>
-              <StepText short="Step 2" long="2. Resolve Issues" />
-            </Step>
-            <Step index={2} done={verifyDone}>
-              <StepText short="Step 3" long="3. Verify Result" />
-            </Step>
-          </StepList>
-        </div>
+    <div>
+      <div>
         {_renderContent({
           courseId,
           showStep,

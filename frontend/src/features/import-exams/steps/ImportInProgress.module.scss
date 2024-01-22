@@ -1,0 +1,14 @@
+@use "@kth/style/scss/tokens/spacing" as s;
+.ProgressBar {
+  margin-top: s.$space-24;
+  margin-bottom: s.$space-8;
+  border: 1px solid var(--color-border);
+  height: 0.5rem;
+  border-radius: 0.5rem;
+  max-width: 32rem;
+
+  .Bar {
+    background: var(--color-primary);
+    height: 100%;
+  }
+}
