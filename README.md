@@ -1,4 +1,4 @@
-# Scanned exams
+# KTH Import exams aka Scanned exams
 
 Application that downloads exams from the "Windream/AlcomREST tenta API" and uploads them into a Canvas course.
 
