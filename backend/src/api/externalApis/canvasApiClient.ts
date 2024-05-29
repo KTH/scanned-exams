@@ -183,7 +183,7 @@ async function createAssignment(courseId, ladokId, language = "en") {
         integration_data: {
           ladokId,
         },
-        anonymous_grading: !!examination.anonymous,
+        anonymous_grading: !!examination.anonymous, // convert to boolean if undefined
         published: false,
         grading_type: "letter_grade",
         notify_of_update: false,
