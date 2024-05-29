@@ -2,6 +2,7 @@
 
 import * as canvasApi from "../externalApis/canvasApiClient";
 import { CanvasApiError, EndpointError } from "../error";
+import * as ladokApiClient from "../externalApis/ladokApiClient";
 
 /**
  * Get the "ladokId" of a given course. It throws in case the course
@@ -35,7 +36,10 @@ async function getSetupStatus(req, res, next) {
       canvasApi.getValidAssignment(courseId, ladokId),
     ]);
 
+    console.log(assignment);
+
     res.send({
+      assignmentAnonymousGraded: assignment?.anonymous_grading || false,
       coursePublished: course.workflow_state === "available",
       assignmentCreated: assignment != null,
       assignmentPublished: assignment?.published || false,
