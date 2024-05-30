@@ -31,13 +31,15 @@ async function getSetupStatus(req, res, next) {
     throwIfNotExactlyOneLadokId(ladokIds, courseId);
     const ladokId = ladokIds[0];
 
+    const akt = await ladokApiClient.getAktivitetstillfalle(ladokId);
+
     const [course, assignment] = await Promise.all([
       canvasApi.getCourse(courseId),
       canvasApi.getValidAssignment(courseId, ladokId),
     ]);
 
     res.send({
-      anonymouslyGraded: false, // TODO: set this value
+      anonymouslyGraded: akt.anonymous,
       coursePublished: course.workflow_state === "available",
       assignmentCreated: assignment != null,
       assignmentPublished: assignment?.published || false,
