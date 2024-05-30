@@ -2,7 +2,7 @@ import React from "react";
 import { PrimaryButton } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
-export default function CreateAssignment({ courseId }: any) {
+export default function CreateAssignment({ courseId, anonymouslyGraded }: any) {
   const mutation = useMutateCourseSetup(courseId, "create-assignment");
 
   const { mutate, isLoading, isSuccess, isError } = mutation;
@@ -19,6 +19,7 @@ export default function CreateAssignment({ courseId }: any) {
         imported as submissions. You can leave the setup and edit the assignment
         once it has been created.
       </p>
+      Anonymously graded:{anonymouslyGraded ? "Yes" : "No"}
       <div className="button-bar">
         <PrimaryButton
           width="14rem"

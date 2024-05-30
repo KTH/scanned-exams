@@ -36,10 +36,8 @@ async function getSetupStatus(req, res, next) {
       canvasApi.getValidAssignment(courseId, ladokId),
     ]);
 
-    console.log(assignment);
-
     res.send({
-      assignmentAnonymousGraded: assignment?.anonymous_grading || false,
+      anonymouslyGraded: false, // TODO: set this value
       coursePublished: course.workflow_state === "available",
       assignmentCreated: assignment != null,
       assignmentPublished: assignment?.published || false,
