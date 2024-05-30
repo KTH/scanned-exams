@@ -11,11 +11,6 @@ export default function CreateAssignment({ courseId, anonymouslyGraded }: any) {
     throw mutation.error;
   }
 
-  let anonymousInfo = "";
-  if (anonymouslyGraded) {
-    anonymousInfo =
-      "Since the examination has been conducted anonymously, the assignment will be created with anonymous grading.";
-  }
   return (
     <main>
       <h2>Create Assignment</h2>
@@ -23,7 +18,12 @@ export default function CreateAssignment({ courseId, anonymouslyGraded }: any) {
         We need to create an assignment. This is where the scanned exams will be
         imported as submissions.
       </p>
-      <p>{anonymousInfo}</p>
+      {anonymouslyGraded && (
+        <p>
+          Since the examination is conducted anonymously, the assignment will be
+          created with anonymous grading.
+        </p>
+      )}
       <p>
         You can leave the setup and edit the assignment once it has been
         created.
