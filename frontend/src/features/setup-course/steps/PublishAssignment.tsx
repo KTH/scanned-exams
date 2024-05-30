@@ -2,7 +2,7 @@ import React from "react";
 import { PrimaryButton } from "../../widgets";
 import { useMutateCourseSetup } from "../../../common/api";
 
-export default function CreateAssignment({ courseId }: any) {
+export default function PublishAssignment({ courseId }: any) {
   const mutation = useMutateCourseSetup(courseId, "publish-assignment");
 
   const { mutate, isLoading, isSuccess, isError } = mutation;

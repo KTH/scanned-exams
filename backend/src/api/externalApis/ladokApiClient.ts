@@ -68,6 +68,7 @@ export async function getAktivitetstillfalle(ladokId) {
   const body = JSON.parse(res.body);
 
   return {
+    anonymous: body.Anonymt,
     activities: body.Kopplingar.map((k) => ({
       examCode: k.Aktivitet.Utbildningskod,
       courseCode: k.Kursinstans.Utbildningskod,
