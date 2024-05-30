@@ -32,6 +32,7 @@ export default function AuthenticatedApp({ courseId }: any) {
         coursePublished={query.data.coursePublished}
         assignmentCreated={query.data.assignmentCreated}
         assignmentPublished={query.data.assignmentPublished}
+        anonymouslyGraded={query.data.anonymouslyGraded}
       />
     );
   }

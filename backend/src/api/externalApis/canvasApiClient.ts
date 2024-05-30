@@ -153,7 +153,7 @@ type TSubmissionWithHistory = {
   user: {
     sis_user_id: string;
   };
-}
+};
 
 async function getAssignmentSubmissions(courseId, assignmentId) {
   // API docs https://canvas.instructure.com/doc/api/submissions.html
@@ -183,6 +183,7 @@ async function createAssignment(courseId, ladokId, language = "en") {
         integration_data: {
           ladokId,
         },
+        anonymous_grading: !!examination.anonymous, // convert to boolean if undefined
         published: false,
         grading_type: "letter_grade",
         notify_of_update: false,

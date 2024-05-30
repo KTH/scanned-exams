@@ -19,6 +19,7 @@ export default function SetupScreen({
   assignmentCreated,
   assignmentPublished,
   courseId,
+  anonymouslyGraded,
 }: any) {
   const [homepageCreated, setHomepageCreated] = React.useState(coursePublished);
 
@@ -45,7 +46,12 @@ export default function SetupScreen({
         />
       )}
       {currentStep === 1 && <PublishCourse courseId={courseId} />}
-      {currentStep === 2 && <CreateAssignment courseId={courseId} />}
+      {currentStep === 2 && (
+        <CreateAssignment
+          courseId={courseId}
+          anonymouslyGraded={anonymouslyGraded}
+        />
+      )}
       {currentStep === 3 && <PublishAssignment courseId={courseId} />}
     </div>
   );

@@ -101,6 +101,11 @@ async function downloadExam(fileId) {
     lastName: getValue("s_lastname"),
   };
 
+  student.kthId = "121212121212";
+  student.personNumber = "121212121212";
+  student.firstName = "";
+  student.lastName = "";
+
   if (!student.kthId)
     throw new Error(
       `Could not get KTH ID (s_uid) from TentaAPI (windream) for file id "${fileId}".`
