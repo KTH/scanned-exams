@@ -52,7 +52,7 @@ async function uploadOneExam({ fileId, courseId }) {
     studentPersNr: student.personNumber,
   });
 
-  await updateStudentOfEntryInQueue({ fileId }, student);
+  await updateStudentOfEntryInQueue({ fileId }, courseId, student);
 
   log.debug(
     `Course ${courseId} / File ${fileId}, ${fileName} / User ${student.kthId}. Uploading`
@@ -111,8 +111,8 @@ function handleUploadErrors(err, exam) {
  * Find and process an entry from the global import queue and exit
  * @returns {bool} return true is entry was processed and false if queue was empty
  */
-export async function processQueueEntry() {
-  const examToBeImported = await getFirstPendingFromQueue();
+export async function processQueueEntry(courseId: number) {
+  const examToBeImported = await getFirstPendingFromQueue(courseId);
 
   if (examToBeImported) {
     // Log the courseId for this operation
@@ -136,13 +136,13 @@ export async function processQueueEntry() {
         });
 
       // Update status in import queue
-      await updateStatusOfEntryInQueue(examToBeImported, "imported");
+      await updateStatusOfEntryInQueue(examToBeImported, courseId, "imported");
 
       if (IS_DEV) log.debug("Imported file " + examToBeImported.fileId);
     } catch (err) {
       // TODO: Improve handling of errors, at least adding a more user
       // friendly message
-      await updateStatusOfEntryInQueue(examToBeImported, "error", {
+      await updateStatusOfEntryInQueue(examToBeImported, courseId, "error", {
         type: err.type || err.name,
         message: err.message,
         details: err.details || {},
