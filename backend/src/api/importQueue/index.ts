@@ -4,7 +4,7 @@ import { ImportError } from "../error";
 
 const { MONGODB_CONNECTION_STRING } = process.env;
 const DB_QUEUE_NAME = "import_queue";
-const DB_NAME = "import-exams";
+export const DB_NAME = "import-exams";
 
 const databaseClient = new MongoClient(MONGODB_CONNECTION_STRING, {
   maxPoolSize: 5,
@@ -15,6 +15,21 @@ let databaseConnection;
 function connectToDatabase() {
   databaseConnection = databaseConnection || databaseClient.connect();
   return databaseConnection;
+}
+
+export async function purgeEmptyQueues() {
+  const allQueues = await listAllQueues();
+  const emptyQueues = allQueues.filter(
+    async (c) =>
+      (await databaseClient.db(DB_NAME).collection(c.name).countDocuments()) ===
+      0
+  );
+  await Promise.all(
+    emptyQueues.map((c) => {
+      log.info(`Dropping empty queue ${c.name}`);
+      return databaseClient.db(DB_NAME).dropCollection(c.name);
+    })
+  );
 }
 
 export async function listAllQueues() {

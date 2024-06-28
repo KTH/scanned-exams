@@ -5,6 +5,7 @@ import session from "express-session";
 import path from "path";
 import fs from "fs";
 import connectMongodbSession from "connect-mongodb-session";
+import { DB_NAME } from "./api/importQueue/";
 
 import apiRouter from "./api/router";
 import authRouter from "./auth/router";
@@ -16,7 +17,7 @@ const server = express();
 const COOKIE_MAX_AGE_SECONDS = 3600;
 const store = new MongoDBStore({
   uri: process.env.MONGODB_CONNECTION_STRING,
-  databaseName: "import-exams",
+  databaseName: DB_NAME,
   collection: "sessions",
 
   // Session expiration time
