@@ -17,8 +17,10 @@ function connectToDatabase() {
   return databaseConnection;
 }
 
+/**
+ * Since the documents in the import queue are set to expire after a while, the queues will be empty after that time. This function is used to remove empty queues.
+ */
 export async function purgeEmptyQueues() {
-  // return;
   const allQueues = await listAllQueues();
   await Promise.all(
     allQueues.map(async (c) => {
