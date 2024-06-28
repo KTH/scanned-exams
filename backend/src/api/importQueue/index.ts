@@ -16,7 +16,7 @@ function connectToDatabase() {
   return databaseConnection;
 }
 
-export async function listAllCollections() {
+export async function listAllQueues() {
   await connectToDatabase();
   const collections = await databaseClient.db().listCollections().toArray();
   return collections.filter((c) => c.name.startsWith(DB_QUEUE_NAME));
@@ -32,8 +32,8 @@ async function getImportQueueCollection(courseId: number) {
   // Instansiate once, but not before it is used the first time
   await connectToDatabase();
 
-  const collectionName = `${DB_QUEUE_NAME}_${courseId}`;
-  return databaseClient.db().collection(DB_QUEUE_NAME);
+  const collectionName = `${DB_QUEUE_NAME}:${courseId}`;
+  return databaseClient.db().collection(collectionName);
 }
 
 /**
