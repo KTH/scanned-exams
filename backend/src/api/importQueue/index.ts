@@ -33,7 +33,13 @@ async function getImportQueueCollection(courseId: number) {
   await connectToDatabase();
 
   const collectionName = `${DB_QUEUE_NAME}:${courseId}`;
-  return databaseClient.db().collection(collectionName);
+  const collection = databaseClient.db().collection(collectionName);
+  const oneMonth = 60 * 60 * 24 * 30;
+  collection.createIndex(
+    { createdAt: 1 },
+    { expireAfterSeconds: oneMonth, background: true }
+  );
+  return collection;
 }
 
 /**
