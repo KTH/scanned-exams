@@ -59,6 +59,7 @@ async function addEntriesToQueue(req, res, next) {
             {
               id,
             },
+            courseId,
             "pending"
           );
         }
@@ -116,7 +117,7 @@ async function fixErrorsInQueue(req, res, next) {
 
     for (const fileId of fileIds) {
       // eslint-disable-next-line no-await-in-loop
-      const entry = await getEntryFromQueue(fileId);
+      const entry = await getEntryFromQueue(fileId, courseId);
 
       if (entry.error?.type === "missing_student") {
         // Add student to Canvas
@@ -131,7 +132,7 @@ async function fixErrorsInQueue(req, res, next) {
       }
 
       // eslint-disable-next-line no-await-in-loop
-      await updateStatusOfEntryInQueue(entry, "pending");
+      await updateStatusOfEntryInQueue(entry, courseId, "pending");
     }
 
     res.send({
@@ -167,7 +168,7 @@ async function ignoreErrorsInQueue(req, res, next) {
 
     for (const fileId of fileIds) {
       // eslint-disable-next-line no-await-in-loop
-      await updateStatusOfEntryInQueue({ fileId }, "ignored");
+      await updateStatusOfEntryInQueue({ fileId }, courseId, "ignored");
     }
 
     res.send({

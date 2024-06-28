@@ -4,6 +4,7 @@ import { ImportError } from "../error";
 
 const { MONGODB_CONNECTION_STRING } = process.env;
 const DB_QUEUE_NAME = "import_queue";
+export const DB_NAME = "import-exams";
 
 const databaseClient = new MongoClient(MONGODB_CONNECTION_STRING, {
   maxPoolSize: 5,
@@ -17,16 +18,53 @@ function connectToDatabase() {
 }
 
 /**
+ * Since the documents in the import queue are set to expire after a while, the queues will be empty after that time. This function is used to remove empty queues.
+ */
+export async function purgeEmptyQueues() {
+  const allQueues = await listAllQueues();
+  await Promise.all(
+    allQueues.map(async (c) => {
+      const count = await databaseClient
+        .db(DB_NAME)
+        .collection(c.name)
+        .countDocuments();
+      log.info(`Queue ${c.name} has ${count} entries`);
+      if (count === 0) {
+        log.info(`Dropping empty queue ${c.name}`);
+        return await databaseClient.db(DB_NAME).dropCollection(c.name);
+      }
+    })
+  );
+}
+
+export async function listAllQueues() {
+  await connectToDatabase();
+  const collections = await databaseClient
+    .db(DB_NAME)
+    .listCollections()
+    .toArray();
+
+  return collections.filter((c) => c.name.startsWith(DB_QUEUE_NAME));
+}
+
+/**
  * Return the Import Queue collection.
  *
  * It also connects to the database if it's not already connected
  */
-async function getImportQueueCollection() {
+async function getImportQueueCollection(courseId: number) {
   // Note: `databaseConnection` is a promise and must be awaited to be used
   // Instansiate once, but not before it is used the first time
   await connectToDatabase();
 
-  return databaseClient.db().collection(DB_QUEUE_NAME);
+  const collectionName = `${DB_QUEUE_NAME}:${courseId}`;
+  const collection = databaseClient.db(DB_NAME).collection(collectionName);
+  const oneMonth = 60 * 60 * 24 * 30;
+  collection.createIndex(
+    { createdAt: 1 },
+    { expireAfterSeconds: oneMonth, background: true }
+  );
+  return collection;
 }
 
 /**
@@ -180,7 +218,7 @@ class QueueStatus {
 async function getEntriesFromQueue(courseId) {
   try {
     // Open collection
-    const collImportQueue = await getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection(courseId);
     const cursor = collImportQueue.find({ courseId });
 
     const entries = await cursor.toArray();
@@ -197,10 +235,13 @@ async function getEntriesFromQueue(courseId) {
   }
 }
 
-async function getEntryFromQueue(fileId): Promise<QueueEntry> {
+async function getEntryFromQueue(
+  fileId,
+  courseId: number
+): Promise<QueueEntry> {
   try {
     // Open collection
-    const collImportQueue = await getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection(courseId);
     const doc = await collImportQueue.findOne({ fileId });
 
     return new QueueEntry(doc as any);
@@ -220,7 +261,7 @@ async function getEntryFromQueue(fileId): Promise<QueueEntry> {
  */
 async function resetQueueForImport(courseId) {
   try {
-    const collImportQueue = await getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection(courseId);
     await collImportQueue.deleteMany({
       courseId,
       status: {
@@ -259,7 +300,7 @@ async function addEntryToQueue(entry) {
     entry instanceof QueueEntry ? entry : new QueueEntry(entry);
 
   try {
-    const collImportQueue = await getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection(typedEntry.courseId);
 
     // Add entry
 
@@ -296,7 +337,7 @@ async function addEntryToQueue(entry) {
 
 async function getStatusFromQueue(courseId) {
   try {
-    const collImportQueue = await getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection(courseId);
     const cursor = collImportQueue.find({ courseId });
 
     let pending = 0;
@@ -345,10 +386,11 @@ async function getStatusFromQueue(courseId) {
 
 async function updateStudentOfEntryInQueue(
   entry,
+  courseId: number,
   { kthId, firstName, lastName }
 ) {
   try {
-    const collImportQueue = await getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection(courseId);
     const tmpOld = await collImportQueue.findOne({ fileId: entry.fileId });
 
     if (!tmpOld) {
@@ -390,11 +432,12 @@ async function updateStudentOfEntryInQueue(
 
 async function updateStatusOfEntryInQueue(
   entry,
+  courseId: number,
   status,
   errorDetails?: TQueueEntryError
 ) {
   try {
-    const collImportQueue = await getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection(courseId);
 
     // Perform update
     const tmpOld = await collImportQueue.findOne({ fileId: entry.fileId });
@@ -458,9 +501,9 @@ async function updateStatusOfEntryInQueue(
   }
 }
 
-async function getFirstPendingFromQueue() {
+async function getFirstPendingFromQueue(courseId: number) {
   try {
-    const collImportQueue = await getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection(courseId);
     const doc = await collImportQueue.findOne(
       { status: "pending" },
       { sort: { fileCreateDate: 1 } }
@@ -480,9 +523,9 @@ async function getFirstPendingFromQueue() {
   }
 }
 
-async function removeEntryFromQueue(entry) {
+async function removeEntryFromQueue(entry, courseId: number) {
   try {
-    const collImportQueue = await getImportQueueCollection();
+    const collImportQueue = await getImportQueueCollection(courseId);
     await collImportQueue.deleteOne({
       fileId: entry.fileId,
     });
