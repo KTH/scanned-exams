@@ -4,6 +4,7 @@ import { ImportError } from "../error";
 
 const { MONGODB_CONNECTION_STRING } = process.env;
 const DB_QUEUE_NAME = "import_queue";
+const DB_NAME = "import-exams";
 
 const databaseClient = new MongoClient(MONGODB_CONNECTION_STRING, {
   maxPoolSize: 5,
@@ -18,8 +19,10 @@ function connectToDatabase() {
 
 export async function listAllQueues() {
   await connectToDatabase();
-  const collections = await databaseClient.db().listCollections().toArray();
-  return collections.filter((c) => c.name.startsWith(DB_QUEUE_NAME));
+  const collections = await databaseClient
+    .db(DB_NAME)
+    .listCollections()
+    .toArray();
 }
 
 /**
@@ -33,7 +36,7 @@ async function getImportQueueCollection(courseId: number) {
   await connectToDatabase();
 
   const collectionName = `${DB_QUEUE_NAME}:${courseId}`;
-  const collection = databaseClient.db().collection(collectionName);
+  const collection = databaseClient.db(DB_NAME).collection(collectionName);
   const oneMonth = 60 * 60 * 24 * 30;
   collection.createIndex(
     { createdAt: 1 },

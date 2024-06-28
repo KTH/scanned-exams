@@ -30,7 +30,7 @@ interface WindreamsScannedExam {
 async function examListByLadokId(ladokId): Promise<WindreamsScannedExam[]> {
   const outp = <WindreamsScannedExam[]>[];
 
-  log.debug(`Getting exams for Ladok ID ${ladokId}`);
+  log.info(`Getting exams for Ladok ID ${ladokId}`);
 
   const { body } = (await client("windream/search/documents/false", {
     method: "POST",
