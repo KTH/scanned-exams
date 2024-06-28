@@ -18,16 +18,19 @@ function connectToDatabase() {
 }
 
 export async function purgeEmptyQueues() {
+  // return;
   const allQueues = await listAllQueues();
-  const emptyQueues = allQueues.filter(
-    async (c) =>
-      (await databaseClient.db(DB_NAME).collection(c.name).countDocuments()) ===
-      0
-  );
   await Promise.all(
-    emptyQueues.map((c) => {
-      log.info(`Dropping empty queue ${c.name}`);
-      return databaseClient.db(DB_NAME).dropCollection(c.name);
+    allQueues.map(async (c) => {
+      const count = await databaseClient
+        .db(DB_NAME)
+        .collection(c.name)
+        .countDocuments();
+      log.info(`Queue ${c.name} has ${count} entries`);
+      if (count === 0) {
+        log.info(`Dropping empty queue ${c.name}`);
+        return await databaseClient.db(DB_NAME).dropCollection(c.name);
+      }
     })
   );
 }
