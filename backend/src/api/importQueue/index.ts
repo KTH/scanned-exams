@@ -23,6 +23,8 @@ export async function listAllQueues() {
     .db(DB_NAME)
     .listCollections()
     .toArray();
+
+  return collections.filter((c) => c.name.startsWith(DB_QUEUE_NAME));
 }
 
 /**
