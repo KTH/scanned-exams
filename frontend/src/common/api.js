@@ -173,6 +173,8 @@ export function useMutateImportStart(courseId, examsToImport, options = {}) {
         method: "POST",
         body: examsToImport.map((exam) => {
           return {
+            batchNo: exam.batchNo,
+            fileName: exam.fileName,
             id: exam.id,
             createDate: exam.createDate,
           };
