@@ -18,7 +18,9 @@ async function getVersion() {
 }
 
 interface WindreamsScannedExam {
+  batchNo: number;
   createDate: string;
+  fileName: string;
   fileId: number;
   student: {
     id: string;
@@ -55,14 +57,17 @@ async function examListByLadokId(ladokId): Promise<WindreamsScannedExam[]> {
   }
 
   for (const result of body.documentSearchResults) {
+    console.log(result);
     // Helper function to get the value of the attribute called "index"
     // we have written it because they are in an array instead of an object
     const getValue = (index) =>
       result.documentIndiceses.find((di) => di.index === index)?.value;
 
     outp.push({
+      batchNo: getValue("batchno"),
       createDate: result.createDate,
       fileId: result.fileId,
+      fileName: result.fileName,
       student: {
         id: getValue("s_uid"),
         firstName: getValue("s_firstname"),
