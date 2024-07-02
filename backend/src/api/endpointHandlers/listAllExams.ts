@@ -210,6 +210,8 @@ async function listAllExams(req, res, next) {
       summary = calcNewSummary(summary, status, errorDetails);
 
       return {
+        batchNo: exam.batchNo,
+        fileName: exam.fileName,
         id: exam.fileId,
         createDate: exam.createDate,
         student: exam.student,

@@ -55,6 +55,8 @@ export type TQueueEntryError = {
 };
 
 class QueueEntry {
+  batchNo: number;
+  fileName: string;
   fileId: number;
   fileCreateDate: string;
   courseId: number;
@@ -70,6 +72,8 @@ class QueueEntry {
     fileId,
     fileCreateDate,
     courseId,
+    batchNo,
+    fileName,
     student,
     status = "new",
     createdAt = new Date(),
@@ -91,6 +95,8 @@ class QueueEntry {
     this.importStartedAt = importStartedAt;
     this.importSuccessAt = importSuccessAt;
     this.lastErrorAt = lastErrorAt;
+    this.batchNo = batchNo;
+    this.fileName = fileName;
     this.error = error;
   }
 
@@ -98,6 +104,8 @@ class QueueEntry {
     return {
       fileId: this.fileId,
       fileCreateDate: this.fileCreateDate,
+      batchNo: this.batchNo,
+      fileName: this.fileName,
       courseId: this.courseId,
       student: {
         kthId: this.student?.kthId,

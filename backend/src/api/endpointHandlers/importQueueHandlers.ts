@@ -46,12 +46,14 @@ async function addEntriesToQueue(req, res, next) {
     }
 
     for (const file of files) {
-      const { id, createDate } = file;
+      const { id, createDate, batchNo, fileName } = file;
       // eslint-disable-next-line no-await-in-loop
       await addEntryToQueue({
         courseId,
         fileId: id,
         fileCreateDate: createDate,
+        batchNo,
+        fileName,
         status: "pending",
       }).catch((err) => {
         if (err?.type === "entry_exists") {
