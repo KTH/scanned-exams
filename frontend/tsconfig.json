@@ -22,6 +22,10 @@
     /* Completeness */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
 
-    "jsx": "react"
+    "jsx": "react",
+
+    // Fix module resolution
+    "module": "node16",
+    "moduleResolution": "node16",
   }
 }
