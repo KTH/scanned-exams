@@ -17,7 +17,7 @@ const COOKIE_MAX_AGE_SECONDS = 3600;
 const store = new MongoDBStore({
   uri: process.env.MONGODB_CONNECTION_STRING,
   collection: "sessions",
-
+  databaseName: "import-exams",
   // Session expiration time
   expires: COOKIE_MAX_AGE_SECONDS * 1000,
 
