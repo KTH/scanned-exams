@@ -26,7 +26,7 @@ async function getImportQueueCollection() {
   // Instansiate once, but not before it is used the first time
   await connectToDatabase();
 
-  return databaseClient.db().collection(DB_QUEUE_NAME);
+  return databaseClient.db("import-exams").collection(DB_QUEUE_NAME);
 }
 
 /**
