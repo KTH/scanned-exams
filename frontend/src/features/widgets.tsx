@@ -54,7 +54,7 @@ export const ExamErrorTable = ({ exams }: any) => (
           <td className="text-left p-2">{exam.fileName}</td>
           <td className="text-left p-2">{exam.batchNo}</td>
           <td className="text-left p-2">
-            {`${exam.student.lastName}, ${exam.student.firstName} (${exam.student.kthId})`}
+            {`${exam.student.lastName}, ${exam.student.firstName} (kth id:${exam.student.kthId})`}
           </td>
           <td className="text-left p-2">{exam.error?.message}</td>
         </tr>
