@@ -22,8 +22,18 @@ export default function UnauthenticatedApp({ courseId }: any) {
       <p>
         Please make sure that the exam administration is made aware well in
         advance of the exams being assessed in Canvas and not on paper, since
-        this impacts the administrative process. If you have any questions,
-        please contact <a href="mailto:it-support@kth.se">it-support@kth.se</a>!
+        this impacts the administrative process.
+      </p>
+      <p>
+        Also please note that you might have to run the app multiple times,
+        since the exams are scanned in batches and not every exam might be
+        available at the same time. If you are uncertain about the batches,
+        please contact the local exam administration.
+      </p>
+
+      <p>
+        If you have any questions, please contact{" "}
+        <a href="mailto:it-support@kth.se">it-support@kth.se</a>!
       </p>
       <div className="">
         <form method="post" action="/scanned-exams/auth">
