@@ -107,10 +107,9 @@ function OtherErrors({ courseId, exams }: any) {
       </p>
       <p>
         <b>If you don&apos;t know how to resolve these issues:</b> please
-        contact your local exam administrator with the information below. The
-        local exam administrator in turn needs to contact it-support@kth.se
-        since they sit on information that is important to the troubleshooting
-        process.
+        contact your local exam administrator with the information below. 
+        The local exam administrator needs to verify the data in Windream is correct. 
+        When the data in Windream is correct, you can try to import again
       </p>
       <div>
         <ExamErrorTable exams={exams} />

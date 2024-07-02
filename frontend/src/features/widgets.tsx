@@ -41,6 +41,8 @@ export const ExamErrorTable = ({ exams }: any) => (
     <thead>
       <tr>
         <th className="text-left p-2">Exam ID</th>
+        <th className="text-left p-2">Exam Filename</th>
+        <th className="text-left p-2">Exam Batch Number</th>
         <th className="text-left p-2">Student</th>
         <th className="text-left p-2">Error</th>
       </tr>
@@ -49,7 +51,8 @@ export const ExamErrorTable = ({ exams }: any) => (
       {exams.map((exam: any) => (
         <tr key={exam.fileId}>
           <td className="text-left p-2">{exam.fileId}</td>
-          {/* TODO: file name */}
+          <td className="text-left p-2">{exam.fileName}</td>
+          <td className="text-left p-2">{exam.batchNo}</td>
           <td className="text-left p-2">
             {`${exam.student.lastName}, ${exam.student.firstName} (${exam.student.kthId})`}
           </td>
