@@ -24,6 +24,8 @@
 
     "jsx": "react",
 
-    "moduleResolution": "nodenext",
+    // Fix module resolution
+    "module": "node16",
+    "moduleResolution": "node16",
   }
 }
