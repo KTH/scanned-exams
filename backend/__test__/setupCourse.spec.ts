@@ -2,6 +2,7 @@ import { describe, expect, it, jest } from "@jest/globals";
 import { _throwIfNotExactlyOneLadokId } from "../src/api/endpointHandlers/setupCourse";
 import { EndpointError } from "../src/api/error";
 
+// TODO: this is now a class, should probably mock adminCanvasApiClient instead
 jest.mock("../src/api/externalApis/canvasApiClient");
 
 describe("setupCourse", () => {

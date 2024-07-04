@@ -1,5 +1,5 @@
 import log from "skog";
-import * as canvasApi from "../externalApis/canvasApiClient";
+import canvasApi from "../externalApis/adminCanvasApiClient";
 import * as tentaApi from "../externalApis/tentaApiClient";
 import {
   getFirstPendingFromQueue,
@@ -110,6 +110,12 @@ function handleUploadErrors(err, exam) {
 
 export async function processOneEntryPerExamRoom() {
   const firstExamPerRoom = await getFirstPendingPerCourseFromQueue();
+  Promise.all(
+    firstExamPerRoom.map((entry) => {
+      // TODO: how to construct a temporary canvasApi object?
+      const _canvasApi = canvasApi;
+    })
+  );
   console.log("pending:", firstExamPerRoom);
 }
 

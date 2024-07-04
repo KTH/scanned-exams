@@ -1,6 +1,6 @@
 /** Functions that handle the "import exams" part of the app */
 import log from "skog";
-import * as canvasApi from "../externalApis/canvasApiClient";
+import canvasApi from "../externalApis/adminCanvasApiClient";
 import * as tentaApi from "../externalApis/tentaApiClient";
 import { getEntriesFromQueue } from "../importQueue";
 import { CanvasApiError, EndpointError } from "../error";
