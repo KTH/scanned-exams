@@ -1,11 +1,13 @@
 import log from "skog";
 import canvasApi from "../externalApis/adminCanvasApiClient";
+import CanvasApi from "../externalApis/canvasApiClient";
 import * as tentaApi from "../externalApis/tentaApiClient";
 import {
   getFirstPendingFromQueue,
   updateStatusOfEntryInQueue,
   updateStudentOfEntryInQueue,
   getFirstPendingPerCourseFromQueue,
+  getSessionCollection,
 } from "./index";
 import { ImportError } from "../error";
 
@@ -111,12 +113,17 @@ function handleUploadErrors(err, exam) {
 export async function processOneEntryPerExamRoom() {
   const firstExamPerRoom = await getFirstPendingPerCourseFromQueue();
   Promise.all(
-    firstExamPerRoom.map((entry) => {
-      // TODO: how to construct a temporary canvasApi object?
-      const _canvasApi = canvasApi;
+    firstExamPerRoom.map(async (entry) => {
+      // Use one canvas instance per course, to avoid rate limiting
+      // TODO: find the accesstoken in the database used for session storage
+      const collection = await getSessionCollection();
+      const sessionDoc = await collection.findOne({
+        "session.userId": entry.importStartedByUser,
+      });
+      const accessToken = sessionDoc.session.accessToken;
+      const _canvasApi = new CanvasApi(process.env.CANVAS_API_URL, accessToken);
     })
   );
-  console.log("pending:", firstExamPerRoom);
 }
 
 /**
