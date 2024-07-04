@@ -5,6 +5,7 @@ import {
   getFirstPendingFromQueue,
   updateStatusOfEntryInQueue,
   updateStudentOfEntryInQueue,
+  getFirstPendingPerCourseFromQueue,
 } from "./index";
 import { ImportError } from "../error";
 
@@ -107,6 +108,11 @@ function handleUploadErrors(err, exam) {
   }
 }
 
+export async function processOneEntryPerExamRoom() {
+  const firstExamPerRoom = await getFirstPendingPerCourseFromQueue();
+  console.log("pending:", firstExamPerRoom);
+}
+
 /**
  * Find and process an entry from the global import queue and exit
  * @returns {bool} return true is entry was processed and false if queue was empty
@@ -117,12 +123,6 @@ export async function processQueueEntry() {
   if (examToBeImported) {
     // Log the courseId for this operation
     try {
-      // Force errors during development
-      if (IS_DEV && FORCE_RANDOM_ERRORS) {
-        if (Math.random() > 0.8)
-          throw Error("Forced error for testing during development");
-      }
-
       // Upload to Canvas
       await log
         .child({ courseId: examToBeImported?.courseId }, () =>

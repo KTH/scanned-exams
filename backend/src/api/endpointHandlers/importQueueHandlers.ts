@@ -54,6 +54,7 @@ async function addEntriesToQueue(req, res, next) {
         fileCreateDate: createDate,
         batchNo,
         fileName,
+        importStartedByUser: req.session.userId,
         status: "pending",
       }).catch((err) => {
         if (err?.type === "entry_exists") {
