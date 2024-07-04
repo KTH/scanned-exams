@@ -470,7 +470,9 @@ async function updateStatusOfEntryInQueue(
   }
 }
 
-export async function getFirstPendingPerCourseFromQueue() {
+export async function getFirstPendingPerCourseFromQueue(): Promise<
+  QueueEntry[]
+> {
   try {
     const collImportQueue = await getImportQueueCollection();
     const aggCursor = collImportQueue.aggregate([
@@ -487,8 +489,14 @@ export async function getFirstPendingPerCourseFromQueue() {
       },
     ]);
     const result = [];
-    for await (const doc of aggCursor) {
-      result.push(doc);
+    for await (const aggData of aggCursor) {
+      const entry = new QueueEntry({
+        courseId: aggData._id.courseId,
+        fileId: aggData.fileId,
+        status: aggData._id.status,
+        importStartedByUser: aggData._id.importStartedByUser,
+      } as any);
+      result.push(entry);
     }
     return result;
   } catch (err) {
