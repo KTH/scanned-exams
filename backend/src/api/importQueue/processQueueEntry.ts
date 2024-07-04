@@ -1,10 +1,13 @@
 import log from "skog";
-import * as canvasApi from "../externalApis/canvasApiClient";
+import canvasApi from "../externalApis/adminCanvasApiClient";
+import CanvasApi from "../externalApis/canvasApiClient";
 import * as tentaApi from "../externalApis/tentaApiClient";
 import {
   getFirstPendingFromQueue,
   updateStatusOfEntryInQueue,
   updateStudentOfEntryInQueue,
+  getFirstPendingPerCourseFromQueue,
+  getSessionCollection,
 } from "./index";
 import { ImportError } from "../error";
 
@@ -107,6 +110,22 @@ function handleUploadErrors(err, exam) {
   }
 }
 
+export async function processOneEntryPerExamRoom() {
+  const firstExamPerRoom = await getFirstPendingPerCourseFromQueue();
+  Promise.all(
+    firstExamPerRoom.map(async (entry) => {
+      // Use one canvas instance per course, to avoid rate limiting
+      // TODO: find the accesstoken in the database used for session storage
+      const collection = await getSessionCollection();
+      const sessionDoc = await collection.findOne({
+        "session.userId": entry.importStartedByUser,
+      });
+      const accessToken = sessionDoc.session.accessToken;
+      const _canvasApi = new CanvasApi(process.env.CANVAS_API_URL, accessToken);
+    })
+  );
+}
+
 /**
  * Find and process an entry from the global import queue and exit
  * @returns {bool} return true is entry was processed and false if queue was empty
@@ -117,12 +136,6 @@ export async function processQueueEntry() {
   if (examToBeImported) {
     // Log the courseId for this operation
     try {
-      // Force errors during development
-      if (IS_DEV && FORCE_RANDOM_ERRORS) {
-        if (Math.random() > 0.8)
-          throw Error("Forced error for testing during development");
-      }
-
       // Upload to Canvas
       await log
         .child({ courseId: examToBeImported?.courseId }, () =>

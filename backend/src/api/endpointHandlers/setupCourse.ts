@@ -1,6 +1,6 @@
 /** Endpoints to setup a Canvas course */
 
-import * as canvasApi from "../externalApis/canvasApiClient";
+import canvasApi from "../externalApis/adminCanvasApiClient";
 import { CanvasApiError, EndpointError } from "../error";
 import * as ladokApiClient from "../externalApis/ladokApiClient";
 

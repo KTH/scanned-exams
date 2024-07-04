@@ -29,6 +29,12 @@ async function getImportQueueCollection() {
   return databaseClient.db("import-exams").collection(DB_QUEUE_NAME);
 }
 
+export async function getSessionCollection() {
+  await connectToDatabase();
+
+  return databaseClient.db("import-exams").collection("sessions");
+}
+
 /**
  * For runtime input param testing
  * @param {bool|function} test Test case that should return true
@@ -65,6 +71,7 @@ class QueueEntry {
   createdAt?: Date;
   importStartedAt?: Date;
   importSuccessAt?: Date;
+  importStartedByUser?: number;
   lastErrorAt?: Date;
   error?: TQueueEntryError;
 
@@ -79,6 +86,7 @@ class QueueEntry {
     createdAt = new Date(),
     importStartedAt,
     importSuccessAt,
+    importStartedByUser,
     lastErrorAt,
     error,
   }) {
@@ -94,6 +102,7 @@ class QueueEntry {
     this.createdAt = createdAt;
     this.importStartedAt = importStartedAt;
     this.importSuccessAt = importSuccessAt;
+    this.importStartedByUser = importStartedByUser;
     this.lastErrorAt = lastErrorAt;
     this.batchNo = batchNo;
     this.fileName = fileName;
@@ -116,6 +125,7 @@ class QueueEntry {
       createdAt: this.createdAt,
       importStartedAt: this.importStartedAt || null,
       importSuccessAt: this.importSuccessAt || null,
+      importStartedByUser: this.importStartedByUser || null,
       lastErrorAt: this.lastErrorAt || null,
       error: this.error || null,
     };
@@ -457,6 +467,44 @@ async function updateStatusOfEntryInQueue(
     }
 
     return null;
+  } catch (err) {
+    if (err.name === "TypeError") throw err;
+
+    // TODO: Handle errors
+    log.error({ err });
+    throw err;
+  }
+}
+
+export async function getFirstPendingPerCourseFromQueue(): Promise<
+  QueueEntry[]
+> {
+  try {
+    const collImportQueue = await getImportQueueCollection();
+    const aggCursor = collImportQueue.aggregate([
+      { $match: { status: "pending" } },
+      {
+        $group: {
+          _id: {
+            courseId: "$courseId",
+            status: "$status",
+            importStartedByUser: "$importStartedByUser",
+          },
+          fileId: { $first: "$fileId" },
+        },
+      },
+    ]);
+    const result = [];
+    for await (const aggData of aggCursor) {
+      const entry = new QueueEntry({
+        courseId: aggData._id.courseId,
+        fileId: aggData.fileId,
+        status: aggData._id.status,
+        importStartedByUser: aggData._id.importStartedByUser,
+      } as any);
+      result.push(entry);
+    }
+    return result;
   } catch (err) {
     if (err.name === "TypeError") throw err;
 
